@@ -1,0 +1,22 @@
+.login-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 100%;
+  border: 2px solid black;
+  box-shadow: 15px 15px 15px black;
+  margin-left: 10%;
+  margin-top: 10%;
+  height: 25rem;
+  border-radius: 1rem;
+  padding: 0% 5% 0% 5%;
+}
+.login-header {
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+.login-wrapper input {
+  width: 50%;
+  margin-left: 25%;
+  height: 1.7rem;
+}

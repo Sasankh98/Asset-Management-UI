@@ -1,0 +1,25 @@
+.dashboard-container{
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+.dashboard-wrapper{
+    display: flex;
+    justify-content: space-around;
+}
+
+.dashboard-headers{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    margin: 0.4rem 1rem;
+    padding: 0rem 0.5rem 0.5rem 0.5rem;
+    background-color: antiquewhite;
+    border-radius: 0.5rem;
+}
+
+.dashboard-headers h4{
+    font-family: Georgia;
+    font-weight: bolder !important;
+}

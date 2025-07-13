@@ -1,0 +1,233 @@
+import {
+  Box,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Modal,
+  Select,
+  TextField,
+  ThemeProvider,
+} from "@mui/material";
+import { ConfigMethod, ConfigUrl } from "../../../../../config/ConfigAPI";
+import CustomButton from "../../../../../core/CustomButton/CustomButton";
+import { Theme } from "../../../../../core/MUI/Theme";
+import { useEffect, useState } from "react";
+import { callAPI } from "../../../../../services/apiServices";
+import "./createStocks.css";
+
+interface CreateStocksProps {
+  open: boolean;
+  handleClose: () => void;
+}
+const CreateStocks = (props:CreateStocksProps) => {
+  // const [loader,setLoader] = useState(false)
+  const [show, setShow] = useState(false);
+  const [stocksData, setStocksData] = useState({
+    stockName: "",
+    avg: "",
+    quantity: "",
+    // SellPrice: "",
+    // Dividends: "",
+    buyTax: "",
+    // SellingTax: "",
+    buyDate: "",
+    // SellDate: "",
+    user: "Sasankh",
+    status: "active",
+  });
+
+  const handleCreateStocks = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setStocksData({ ...stocksData, [name]: value });
+  };
+
+  useEffect(() => {
+    if (stocksData.status === "sold") {
+      setShow(true);
+    }
+  }, [stocksData.status]);
+  const handleSubmit = async () => {
+    props.handleClose();
+    // setLoader(true)
+    try {
+      const response = await callAPI(
+        ConfigUrl.Stocks,
+        ConfigMethod.postMethod,
+        stocksData
+      );
+      //   if (response) setLoader(false)
+      console.log(response);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  return (
+    <div>
+      <ThemeProvider theme={Theme}>
+        <Modal open={props.open} onClose={props.handleClose}>
+          <Box
+            sx={{
+              bgcolor: "background.paper",
+              width: 700,
+              boxShadow: 24,
+              p: 4,
+              position: "absolute",
+              borderRadius: "2%",
+              top: "20%",
+              left: "28%",
+              //   transform:"translate(-50%,-50%)"
+            }}
+          >
+            <h2>Create New Stocks</h2>
+
+            <Grid container item xs={12} spacing={2}>
+              <Grid item xs={6}>
+                <FormControl fullWidth sx={{ mb: 2 }}>
+                  <InputLabel
+                    id="customer-id-label"
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  >
+                    Stock Status
+                  </InputLabel>
+                  <Select
+                    labelId="demo-simple-select-standard-label"
+                    id="demo-simple-select-standard"
+                    value={stocksData.status}
+                    onChange={handleCreateStocks}
+                    label="Status"
+                    name="status"
+                  >
+                    <MenuItem value="active">Active</MenuItem>
+                    <MenuItem value="sold">Sold</MenuItem>
+                    <MenuItem value="archived">Archived</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  fullWidth
+                  placeholder="Enter Share Name"
+                  onChange={handleCreateStocks}
+                  name="stockName"
+                />
+              </Grid>
+            </Grid>
+            <Grid container item xs={12} spacing={2}>
+              <Grid item xs={4}>
+                <TextField
+                  placeholder="Enter Average Price"
+                  onChange={handleCreateStocks}
+                  name="avg"
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <TextField
+                  placeholder="Enter Stock Quantity"
+                  onChange={handleCreateStocks}
+                  name="quantity"
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <TextField
+                  placeholder="Enter Buying Tax"
+                  onChange={handleCreateStocks}
+                  name="buyTax"
+                />
+              </Grid>
+            </Grid>
+            <Grid container item xs={12} spacing={2} sx={{ marginTop: 0 }}>
+              <Grid item xs={6}>
+                <TextField
+                  fullWidth
+                  type="date"
+                  placeholder="Buy Date"
+                  onChange={handleCreateStocks}
+                  name="buyDate"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  fullWidth
+                  disabled
+                  value="sasankh"
+                  //   placeholder="Enter Stock Quantity"
+                  //   onChange={handleCreateStocks}
+                  name="user"
+                />
+              </Grid>
+            </Grid>
+
+            {show && (
+              <>
+                <Grid container item xs={12} spacing={2} sx={{ marginTop: 0 }}>
+                  <Grid item xs={4}>
+                    <TextField
+                      placeholder="Enter Sell Price"
+                      onChange={handleCreateStocks}
+                      name="SellPrice"
+                    />
+                  </Grid>
+
+                  <Grid item xs={4}>
+                    <TextField
+                      placeholder="Enter Selling Tax"
+                      onChange={handleCreateStocks}
+                      name="sellTax"
+                    />
+                  </Grid>
+                  <Grid item xs={4}>
+                    <TextField
+                      placeholder="Enter Dividends"
+                      onChange={handleCreateStocks}
+                      name="Dividends"
+                    />
+                  </Grid>
+                </Grid>
+                <Grid container item xs={12} spacing={2} sx={{ marginTop: 0 }}>
+                  <Grid item xs={6}>
+                    <TextField
+                      fullWidth
+                      type="date"
+                      onChange={handleCreateStocks}
+                      name="sellDate"
+                      placeholder="Sell Date"
+                    />
+                  </Grid>
+                </Grid>
+              </>
+            )}
+
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-around",
+                marginTop: 3,
+              }}
+            >
+              <div>
+                <CustomButton
+                  text={"Submit"}
+                  customClass={"submit-btn"}
+                  handleClick={handleSubmit}
+                />
+              </div>
+              <div>
+                <CustomButton
+                  text={"Close"}
+                  customClass={"close-btn"}
+                  handleClick={handleSubmit}
+                />
+              </div>
+            </Box>
+          </Box>
+        </Modal>
+      </ThemeProvider>
+    </div>
+  );
+};
+
+export default CreateStocks;
