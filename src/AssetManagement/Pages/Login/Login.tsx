@@ -27,7 +27,6 @@ const Login = () => {
 
   const handleSubmit = async () => {
     try {
-      console.log("Login Data:", loginData);
       const response = await loginService().login(loginData);
 
       if (response?.status === "success") {
@@ -39,7 +38,7 @@ const Login = () => {
     }
   };
   return (
-    <div className="login-wrapper">
+    <div className="login-wrapper" data-testid="login-wrapper">
       <div className="login-header">Asset Management Application</div>
       <input placeholder="Enter Email" onChange={handleLogin} name="email" />
       <input

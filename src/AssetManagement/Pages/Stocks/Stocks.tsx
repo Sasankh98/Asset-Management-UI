@@ -1,4 +1,4 @@
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import StocksTable from "./StocksTable/table";
 import { callAPI } from "../../../services/apiServices";
 import { ConfigMethod, ConfigUrl } from "../../../config/ConfigAPI";
@@ -25,9 +25,7 @@ const Stocks = () => {
 
   return (
     <div>
-
-      <Details/>
-
+      <Details />
       {addStocksOpen ? (
         <CreateStocks open={addStocksOpen} handleClose={handleAddStocksClose} />
       ) : null}
@@ -39,9 +37,7 @@ const Stocks = () => {
           handleClick={handleAddStocksOpen}
         />
       </div>
-
       <StocksTable stocksData={stocksData} />
-      
     </div>
   );
 };

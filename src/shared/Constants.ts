@@ -7,6 +7,7 @@ export const DisplayContentEnum = {
     mutualFunds: "mutualFunds",
     providentFund: "providentFund",
     calculator: "calculator",
+    goals: "goals",
 }
 
 export const IncomeTypesEnum = {

@@ -5,11 +5,12 @@ import MiniDrawer from "../../components/Sidebar/Sidebar";
 import Stocks from "./Stocks/Stocks";
 import Income from "./Income/Income";
 import Expenses from "./Expenses/Expenses";
+import Goals from "./Goals/Goals";
 
 const AssetManagement = () => {
   const { displayContent } = useParams();
   return (
-    <div>
+    <div data-testid="asset-management-container">
       <MiniDrawer>
         <div>
           {(() => {
@@ -29,7 +30,9 @@ const AssetManagement = () => {
               case DisplayContentEnum.lic:
                 return <Stocks />;
               case DisplayContentEnum.calculator:
-                return <Stocks />;
+                return <Dashboard />;
+              case DisplayContentEnum.goals:
+                return <Goals />;
               default:
                 return null;
             }

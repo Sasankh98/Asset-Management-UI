@@ -11,6 +11,7 @@ import {
   CurrencyExchange,
   ShowChart,
   WaterfallChart,
+  FlagCircle,
 } from "@mui/icons-material";
 import {
   AppProvider,
@@ -74,6 +75,10 @@ const NAVIGATION: Navigation = [
         icon: <MoneyOff />,
       },
     ],
+  },{
+    segment: "goals",
+    title: "Goals",
+    icon: <FlagCircle />,
   },
 ];
 

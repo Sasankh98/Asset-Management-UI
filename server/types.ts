@@ -77,3 +77,24 @@ export interface StockDTO {
   status: string;
   data: Stock[];
 }
+
+/**
+ * @Goals has the structure for user goals information.
+ * @GoalsDTO has the structure for the goals data response.
+ */
+export interface Goals {
+  id: number;
+  title: string;
+  description: string;
+  targetAmount: number;
+  savedAmount: number;
+  targetDate: string;
+  user: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GoalsDTO {
+  status: string;
+  data: Goals[];
+}
