@@ -1,3 +1,4 @@
+import { Income } from "../../../../../server/types";
 import { useEffect, useState } from "react";
 import { Headers } from "../../../../config/config";
 import {
@@ -12,28 +13,28 @@ import {
   TableSortLabel,
   IconButton,
 } from "@mui/material";
-import "./table.css";
 import PaginationBlock from "../../../../core/Pagination/Pagination";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import { EditStocks, InfoStocks } from "../StocksForms";
-import { Stock } from "../../../../../server/types";
+import { formatCurrency } from "../../../../utils/currencyConverter";
 
-export default function StocksTable(props: { stocksData: Stock[] }) {
+
+
+const IncomeTable = ({ incomeData }: { incomeData: Income[] }) => {
   // Pagination
   const [tableBody, setTableBody] = useState([] as any[]); //
   const [activePage, setActivePage] = useState<number>(1); //
-  const [stocksToDisplayPages, setStocksToDisplayPages] = useState([] as any[]); //
-
+  const [incomeTypesToDisplayPages, setIncomeTypesToDisplayPages] = useState(
+    [] as any[]
+  ); //
+  
   // Modals
-  const [infoOpen, setInfoOpen] = useState<boolean>(false);
-  const [infoData, setInfoData] = useState<any>();
-  const [editOpen, setEditOpen] = useState<boolean>(false);
+  const [editRow, setEditRow] = useState();
+  const [editOpen, setEditOpen] = useState(false);
 
   // Filtering
   // Sorting
   const [order, setOrder] = useState<"asc" | "desc">("asc");
-  const [orderBy, setOrderBy] = useState<number | undefined>(undefined);
+  const [orderBy, setOrderBy] = useState<number | undefined>(0);
 
   const handleSortRequest = (cellId: number | undefined) => {
     const isAsc = orderBy === cellId && order === "asc";
@@ -50,20 +51,13 @@ export default function StocksTable(props: { stocksData: Stock[] }) {
     return stabilizeThis.map((el) => el[0]);
   };
 
-  const getComparator = (
-    order: "asc" | "desc",
-    orderBy: number | undefined
-  ) => {
+  const getComparator = (order: "asc" | "desc", orderBy: number | undefined) => {
     return order === "desc"
       ? (a: any, b: any) => descendingComparator(a, b, orderBy)
       : (a: any, b: any) => -descendingComparator(a, b, orderBy);
   };
 
-  const descendingComparator = (
-    a: any,
-    b: any,
-    orderBy: number | undefined
-  ) => {
+  const descendingComparator = (a: any, b: any, orderBy: number | undefined) => {
     if (b[orderBy as number] < a[orderBy as number]) {
       return -1;
     }
@@ -74,20 +68,13 @@ export default function StocksTable(props: { stocksData: Stock[] }) {
   };
 
   const sortedData = stableSort(
-    stocksToDisplayPages,
+    incomeTypesToDisplayPages,
     getComparator(order, orderBy)
   );
 
-  const handleInfoClick = (row: any) => {
-    setInfoOpen(true);
-    setInfoData(row);
-  };
-  const handleInfoClose = () => {
-    setInfoOpen(false);
-  };
-  const handleEditClick = (row: any) => {
+  const handleEditClick = (row:any) => {
     setEditOpen(true);
-    setInfoData(row);
+    setEditRow(row);
   };
   const handleEditClose = () => {
     setEditOpen(false);
@@ -95,29 +82,32 @@ export default function StocksTable(props: { stocksData: Stock[] }) {
 
   useEffect(() => {
     const outerElement = [] as any[];
-    const key = Headers.dashboard.map((el) => el.colId);
+    let key = Headers.IncomeTable.map((el) => el.colId);
 
-    props.stocksData?.forEach((element) => {
+    incomeData?.forEach((element) => {
       const innerElement = [] as any[];
 
       key.forEach((elements) => {
-        innerElement.push(element[elements as keyof Stock]);
+        if (elements === "amount") {
+          innerElement.push(formatCurrency(element[elements] as number));
+        } else {
+          innerElement.push(element[elements as keyof Income]);
+        }
       });
       outerElement.push(innerElement);
     });
     setTableBody(outerElement);
-    setStocksToDisplayPages(outerElement.slice(0, 6));
-  }, [props.stocksData]);
+    setIncomeTypesToDisplayPages(outerElement.slice(0, 6));
+  }, [incomeData]);
 
-  const stocksToDisplay = tableBody;
+  const incomeTypesToDisplay = tableBody;
   const handlePageChange = (pageNumber: number) => {
     const startIdx = (pageNumber - 1) * 6;
     const endIdx = pageNumber * 6;
 
-    setStocksToDisplayPages(stocksToDisplay.slice(startIdx, endIdx));
+    setIncomeTypesToDisplayPages(incomeTypesToDisplay.slice(startIdx, endIdx));
     setActivePage(pageNumber);
   };
-
   return (
     <div
       style={{
@@ -127,20 +117,13 @@ export default function StocksTable(props: { stocksData: Stock[] }) {
         paddingTop: "2rem",
       }}
     >
-      {infoOpen && (
-        <InfoStocks
-          data={infoData}
-          open={infoOpen}
-          handleClose={handleInfoClose}
-        />
-      )}
-      {editOpen && (
+      {/* {editOpen && (
         <EditStocks
           data={infoData}
           open={editOpen}
           handleClose={handleEditClose}
         />
-      )}
+      )} */}
 
       <Grid justifyContent="center">
         <TableContainer
@@ -150,7 +133,7 @@ export default function StocksTable(props: { stocksData: Stock[] }) {
           <Table aria-label="simple table">
             <TableHead>
               <TableRow>
-                {Headers.dashboard.map((row) => (
+                {Headers.IncomeTable.map((row) => (
                   <TableCell
                     className="table-headers"
                     sx={{ color: "white" }}
@@ -159,11 +142,7 @@ export default function StocksTable(props: { stocksData: Stock[] }) {
                   >
                     <TableSortLabel
                       active={row.id !== undefined && orderBy === row.id}
-                      direction={
-                        row.id !== undefined && orderBy === row.id
-                          ? order
-                          : "asc"
-                      }
+                      direction={row.id !== undefined && orderBy === row.id ? order : "asc"}
                       onClick={() => handleSortRequest(row.id)}
                       sx={{
                         "&.Mui-active": {
@@ -186,57 +165,42 @@ export default function StocksTable(props: { stocksData: Stock[] }) {
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                   key={index}
                 >
-                  {rows.map((row: any, index: number) => {
-                    return (
-                      <>
-                        {index === 7 ? (
-                          <TableCell key={index}>
-                            <IconButton
-                              onClick={() => handleInfoClick(rows)}
-                              aria-label="info"
-                            >
-                              <InfoOutlinedIcon />
-                            </IconButton>
-                          </TableCell>
-                        ) : (
-                          <>
-                            {index === 8 ? (
-                              <TableCell key={index}>
-                                <IconButton
-                                  onClick={() => handleEditClick(rows)}
-                                  aria-label="info"
-                                >
-                                  <EditOutlinedIcon />
-                                </IconButton>
-                              </TableCell>
-                            ) : (
-                              <TableCell align="center" key={index}>
-                                {row}
-                              </TableCell>
-                            )}
-                          </>
-                        )}
-                      </>
-                    );
-                  })}
+                  {rows.map((row: any, index: number) =>
+                    index === 5 ? (
+                      <TableCell key={index}>
+                        <IconButton
+                          onClick={() => handleEditClick(rows)}
+                          aria-label="info"
+                        >
+                          <EditOutlinedIcon />
+                        </IconButton>
+                      </TableCell>
+                    ) : (
+                      <TableCell align="center" key={index}>
+                        {row}
+                      </TableCell>
+                    )
+                  )}
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
-        {/* {stocksToDisplayPages ? ( */}
         <PaginationBlock
           activePage={activePage}
           itemsCountPerPage={6}
-          totalItemsCount={stocksToDisplay ? stocksToDisplay.length : 10}
+          totalItemsCount={
+            incomeTypesToDisplay ? incomeTypesToDisplay.length : 10
+          }
           pageRangeDisplayed={3}
-          onChange={(value: any) => handlePageChange(value)}
+          onChange={(value: number) => handlePageChange(value)}
           parentClassName={
             "outer-project-container pagination-container-client"
           }
         />
-        {/* ) : null} */}
       </Grid>
     </div>
   );
-}
+};
+
+export default IncomeTable;

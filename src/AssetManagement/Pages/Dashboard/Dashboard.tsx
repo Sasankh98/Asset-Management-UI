@@ -4,7 +4,7 @@ import './dashboard.css'
 
 const Dashboard:FC = () => {
   return (
-    <div className='dashboard-container'>
+    <div className='dashboard-container' data-testid="dashboard-container">
      <div className="dashboard-wrapper">
           <div className="dashboard-headers">
             <h4>Current Net Worth</h4>

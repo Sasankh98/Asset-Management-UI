@@ -1,33 +1,25 @@
 import { useState } from "react";
 import "./login.css";
 import CustomButton from "../../../core/CustomButton/CustomButton";
-import { callAPI } from "../../../services/apiServices";
 import { useNavigate } from "react-router-dom";
-import { ConfigMethod, ConfigUrl } from "../../../config/ConfigAPI";
 import { DisplayContentEnum } from "../../../shared/Constants";
-// import { useAssetManagementContext } from "../../ContextProvider/ContextProvider";
+import { UserLoginDTO } from "../../../../server/types";
+import loginService from "../../../services/loginService/loginService";
 
 const Login = () => {
-  type LoginDataProps = {
-    email: string;
-    password: string;
-  };
 
-  const [loginData, setLoginData] = useState<LoginDataProps>({
+  const [loginData, setLoginData] = useState<UserLoginDTO>({
     email: "",
     password: "",
   });
-  // const [error, setError] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
   type HandleLoginEvent = React.ChangeEvent<HTMLInputElement>;
 
-  // interface HandleLoginEvent extends React.ChangeEvent<HTMLInputElement> {}
-  // const { displayContent } = useAssetManagementContext();
   const handleLogin = (e: HandleLoginEvent): void => {
     const { name, value } = e.target;
-    setLoginData((prevLoginData: LoginDataProps) => ({
+    setLoginData((prevLoginData: UserLoginDTO) => ({
       ...prevLoginData,
       [name]: value,
     }));
@@ -35,13 +27,10 @@ const Login = () => {
 
   const handleSubmit = async () => {
     try {
-      const response = await callAPI(
-        ConfigUrl.login,
-        ConfigMethod.postMethod,
-        loginData
-      );
+      console.log("Login Data:", loginData);
+      const response = await loginService().login(loginData);
 
-      if (response.status === "success") {
+      if (response?.status === "success") {
         sessionStorage.setItem("token", response.token);
         navigate(`/${DisplayContentEnum.dashboard}`); // Navigate to the displayContent path
       }

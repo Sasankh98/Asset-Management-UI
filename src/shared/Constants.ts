@@ -5,4 +5,14 @@ export const DisplayContentEnum = {
     stocks: "stocks",
     lic: "lic",
     mutualFunds: "mutualFunds",
+    providentFund: "providentFund",
+    calculator: "calculator",
+}
+
+export const IncomeTypesEnum = {
+    salary: "salary",
+    profits: "profits",
+    interest: "interest",
+    dividend: "dividend",
+    others: "others",
 }

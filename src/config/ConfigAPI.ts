@@ -1,8 +1,10 @@
+
 export const ConfigUrl = {
-    login : "api/login",
-    Stocks: "api/stocks",
-    StocksById: "api/stocks/findById",
-    getTotalInvested:"api/overview/totalInvested",
+    login : "login",
+    Stocks: "/stocks",
+    StocksById: "/stocks/findById",
+    getTotalInvested:"/overview/totalInvested",
+    income: "/income",
 }
 
 export const ConfigMethod = {

@@ -20,6 +20,22 @@ const routes: RouteObject[] = [
       </AssetManagementProvider>
     ),
   },
+  {
+    path: "/investments/:displayContent",  // Add explicit route for dashboard
+    element: (
+      <AssetManagementProvider>
+        <AssetManagement />
+      </AssetManagementProvider>
+    ),
+  },
+  {
+    path: "/salary/:displayContent",  // Add explicit route for dashboard
+    element: (
+      <AssetManagementProvider>
+        <AssetManagement />
+      </AssetManagementProvider>
+    ),
+  },
 
 ];
 
