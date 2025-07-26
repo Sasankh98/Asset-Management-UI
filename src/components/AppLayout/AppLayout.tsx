@@ -3,7 +3,7 @@ import { RouteObject, Route, Routes } from "react-router-dom";
 
 import NotFound from "../../AssetManagement/Pages/NotFound/NotFound";
 import routes from "./AppLayoutRoutes";
-console.log("AppLayoutRoutes:", routes);
+
 const AppLayout = () => {
   return (
     <Routes>

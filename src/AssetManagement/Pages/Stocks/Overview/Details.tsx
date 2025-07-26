@@ -17,7 +17,6 @@ const Details = () => {
       console.log(err);
     }
   }, []);
-  console.log("overviewData", overviewData);
   const items = [
     {
       label: "Total Invested Amount",

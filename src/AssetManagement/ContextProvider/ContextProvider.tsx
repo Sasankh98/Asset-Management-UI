@@ -22,8 +22,6 @@ const AssetManagementProvider = ({
   children,
 }: AssetManagementProviderProps) => {
   const { displayContent } = useParams();
-  // const displayContent ="dashboard";
-  console.log( "Display Content:", displayContent);
 
   const contextValue = useMemo(
     () => ({
