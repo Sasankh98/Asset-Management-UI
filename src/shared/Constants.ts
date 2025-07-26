@@ -17,3 +17,10 @@ export const IncomeTypesEnum = {
     dividend: "dividend",
     others: "others",
 }
+
+export const ImageIcons = {
+    goldenRetriever: "Golden Retriever",
+    bike: "Triumph Street Triple 765 RS",
+    marriage: "Marriage",
+    tattoo: "Tattoo",
+}
