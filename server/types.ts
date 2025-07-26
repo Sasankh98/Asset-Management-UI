@@ -84,11 +84,12 @@ export interface StockDTO {
  */
 export interface Goals {
   id: number;
-  title: string;
+  goal: string;
   description: string;
   targetAmount: number;
   savedAmount: number;
   targetDate: string;
+  value:number;
   user: string;
   createdAt: string;
   updatedAt: string;
@@ -97,4 +98,13 @@ export interface Goals {
 export interface GoalsDTO {
   status: string;
   data: Goals[];
+}
+
+export interface CreateGoalsDTO {
+  goal: string ;
+  targetAmount: number;
+  savedAmount: number;
+  targetDate: string;
+  user: string;
+  value: number;
 }
