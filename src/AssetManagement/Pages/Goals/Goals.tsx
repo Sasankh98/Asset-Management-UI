@@ -13,7 +13,9 @@ const Goals = () => {
   const [selectedGoal, setSelectedGoal] = useState<GoalsType>();
   const [loading, setLoading] = useState<boolean>(false);
   const [type, setType] = useState<"create" | "edit" | "">("");
+
   useEffect(() => {
+    console.log("use effect called")
     setLoading(true);
     GoalsService()
       .getGoalsDetails()
@@ -54,6 +56,7 @@ const Goals = () => {
           marginTop: "1rem",
           justifyContent: "center",
         }}
+        data-testid="goals-container"
       >
         <CustomButton
           handleClick={() => handleOpenGoalsCreate()}
@@ -72,7 +75,7 @@ const Goals = () => {
           margin: "1rem auto", // center at page level if needed
         }}
       >
-        {goals.map((goal) => (
+        {goals?.map((goal) => (
           <GoalsCard
             key={goal.id}
             goal={goal}

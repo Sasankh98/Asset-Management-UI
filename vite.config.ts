@@ -18,11 +18,19 @@ export default defineConfig(({ command }) => ({
   },
   test: {
     environment: "happy-dom",
+    globals: true,
     reporters: ["junit", "default"],
     outputFile: {
       junit: "./junit.xml",
     },
     setupFiles: "./test/vitest.setup.ts",
+        watchExclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/.git/**',
+      '**/coverage/**',
+      '**/junit.xml'
+    ],
     coverage: {
       enabled: true,
       globals: true,

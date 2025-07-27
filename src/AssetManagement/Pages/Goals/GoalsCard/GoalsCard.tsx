@@ -11,8 +11,10 @@ import LinearWithValueLabel from "./ProgressTracker";
 import { Goals } from "../../../../../server/types";
 import { formatCurrency } from "../../../../utils/currencyConverter";
 import { ImageIcons } from "../../../../shared/Constants";
-import { Edit } from "@mui/icons-material";
-import { Tooltip, Fade, Skeleton } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import  Tooltip from "@mui/material/Tooltip";
+import Fade from "@mui/material/Fade";
+import Skeleton from "@mui/material/Skeleton";
 import { Dispatch, SetStateAction } from "react";
 import { getTimeAgo } from "../../../../utils/dateTime";
 
@@ -84,7 +86,7 @@ export default function GoalsCard({
                   transition: { timeout: 600 },
                 }}
               >
-                <Edit />
+                <EditIcon />
               </Tooltip>
             </IconButton>
           )

@@ -1,18 +1,16 @@
 import * as React from "react";
 import { createTheme } from "@mui/material/styles";
-import {
-  Dashboard,
-  AttachMoney,
-  Receipt,
-  Calculate,
-  MoneyOff,
-  AccountBalance,
-  Money,
-  CurrencyExchange,
-  ShowChart,
-  WaterfallChart,
-  FlagCircle,
-} from "@mui/icons-material";
+import FlagCircleIcon from '@mui/icons-material/FlagCircle'
+import WaterfallChartIcon from '@mui/icons-material/WaterfallChart'
+import ShowChartIcon from '@mui/icons-material/ShowChart'
+import DashboardIcon from '@mui/icons-material/Dashboard'
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney'
+import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange'
+import CalculateIcon from '@mui/icons-material/Calculate'
+import MoneyIcon from '@mui/icons-material/Money'
+import ReceiptIcon from '@mui/icons-material/Receipt'
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
+import MoneyOffIcon from '@mui/icons-material/MoneyOff'
 import {
   AppProvider,
   type Navigation,
@@ -25,60 +23,60 @@ const NAVIGATION: Navigation = [
   {
     segment: "dashboard",
     title: "Dashboard",
-    icon: <Dashboard />,
+    icon: <DashboardIcon />,
   },
   {
     segment: "investments",
     title: "Investments",
-    icon: <ShowChart />,
+    icon: <ShowChartIcon />,
     children: [
       {
         segment: "stocks",
         title: "Stocks",
-        icon: <WaterfallChart />,
+        icon: <WaterfallChartIcon />,
       },
       {
         segment: "mutualFunds",
         title: "Mutual Funds",
-        icon: <CurrencyExchange />,
+        icon: <CurrencyExchangeIcon />,
       },
       {
         segment: "providentFund",
         title: "Provident Fund",
-        icon: <Money />,
+        icon: <MoneyIcon />,
       },
       {
         segment: "lic",
         title: "LIC",
-        icon: <Receipt />,
+        icon: <ReceiptIcon />,
       },
     ],
   },
   {
     segment: "calculator",
     title: "Calculator",
-    icon: <Calculate />,
+    icon: <CalculateIcon />,
   },
   {
     segment: "salary",
     title: "Salary",
-    icon: <AccountBalance />,
+    icon: <AccountBalanceIcon />,
     children: [
       {
         segment: "income",
         title: "Income",
-        icon: <AttachMoney />,
+        icon: <AttachMoneyIcon />,
       },
       {
         segment: "expenses",
         title: "Expenses",
-        icon: <MoneyOff />,
+        icon: <MoneyOffIcon />,
       },
     ],
   },{
     segment: "goals",
     title: "Goals",
-    icon: <FlagCircle />,
+    icon: <FlagCircleIcon />,
   },
 ];
 
@@ -101,6 +99,7 @@ const demoTheme = createTheme({
 export default function DashboardLayoutCustomPageItems({children}: {children?: React.ReactNode}) {
 
   return (
+    <div data-testid = 'side-bar-component'>
       <AppProvider
         navigation={NAVIGATION}
         // router={router}
@@ -110,5 +109,6 @@ export default function DashboardLayoutCustomPageItems({children}: {children?: R
          {children}
         </DashboardLayout>
       </AppProvider>
+      </div>
   );
 }
