@@ -74,6 +74,7 @@ export default function GoalsCard({
           loading ? null : (
             <IconButton
               aria-label="settings"
+              data-testid="edit-button"
               onClick={() => handleOpenGoalsEdit()}
             >
               <Tooltip
@@ -158,7 +159,7 @@ export default function GoalsCard({
         sx={{ display: "flex", flexDirection: "column", marginTop: "-1rem" }}
       >
         {loading ? (
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", justifyContent: "space-between" }} data-testid="loading-true">
             <div style={{ display: "flex", flexDirection: "column" }}>
               <Skeleton
                 animation="wave"

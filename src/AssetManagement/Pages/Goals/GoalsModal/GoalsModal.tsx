@@ -365,6 +365,7 @@ const GoalsForm = ({
             </Button>
             <Button
               variant="contained"
+              data-testid="handle-goals-button"
               onClick={handleGoals}
               sx={{
                 borderRadius: 3,
