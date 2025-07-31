@@ -27,12 +27,14 @@ export interface UserInfoDTO {
 /**
  * @Income has the structure for user income information.
  * @IncomeDTO has the structure for the income data response.
+ * @CreateIncomeDTO has the structure for creating new income entries.
+ * These interfaces are used in the IncomeService to manage income-related operations.
  */
 
 export interface Income {
   id: number;
   incomeType: string;
-  amount: number | string;
+  amount: number;
   date: string;
   user: string;
   createdAt: string;
@@ -42,6 +44,13 @@ export interface Income {
 export interface IncomeDTO {
   status: string;
   data: Income[];
+}
+
+export interface CreateIncomeDTO {
+  incomeType: string;
+  amount: number;
+  date: string;
+  user: string;
 }
 
 /**
@@ -89,7 +98,7 @@ export interface Goals {
   targetAmount: number;
   savedAmount: number;
   targetDate: string;
-  value:number;
+  value: number;
   user: string;
   createdAt: string;
   updatedAt: string;
@@ -101,7 +110,7 @@ export interface GoalsDTO {
 }
 
 export interface CreateGoalsDTO {
-  goal: string ;
+  goal: string;
   targetAmount: number;
   savedAmount: number;
   targetDate: string;

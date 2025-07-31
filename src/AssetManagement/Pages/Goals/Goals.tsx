@@ -15,7 +15,6 @@ const Goals = () => {
   const [type, setType] = useState<"create" | "edit" | "">("");
 
   useEffect(() => {
-    console.log("use effect called")
     setLoading(true);
     GoalsService()
       .getGoalsDetails()

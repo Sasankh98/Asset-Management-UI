@@ -54,7 +54,7 @@ export default function GoalsCard({
     setSelectedGoal(goal);
   };
   return (
-    <Card sx={{ maxWidth: 345 }}>
+    <Card sx={{ maxWidth: 345, borderRadius:2 }}>
       <CardHeader
         avatar={
           loading ? (

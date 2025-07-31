@@ -8,7 +8,13 @@ import {
 import { useParams } from "react-router";
 
 export interface RefreshDataProps {
-  refreshGoals: boolean
+  refreshGoals: boolean,
+  refreshIncome?: boolean,
+  refreshExpenses?: boolean,
+  refreshStocks?: boolean,
+  refreshMutualFunds?: boolean,
+  refreshProvidentFund?: boolean,
+  refreshLic?: boolean
 }
 export interface AssetManagementContextProps {
   displayContent: string | undefined;
@@ -30,16 +36,23 @@ const AssetManagementProvider = ({
 }: AssetManagementProviderProps) => {
   const { displayContent } = useParams();
   const [refreshData,setRefreshData] = useState<RefreshDataProps>({
-    refreshGoals: false
+    refreshGoals: false,
+    refreshIncome: false
   })
+    const [order, setOrder] = useState<"asc" | "desc">("asc");
+    const [orderBy, setOrderBy] = useState<number | undefined>(0);
 
   const contextValue = useMemo(
     () => ({
       displayContent,
       refreshData,
       setRefreshData,
+      order,
+      setOrder,
+      orderBy,
+      setOrderBy
     }),
-    [displayContent,refreshData]
+    [displayContent,refreshData,order,orderBy]
   );
 
   return (
