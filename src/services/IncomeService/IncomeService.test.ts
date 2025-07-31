@@ -1,16 +1,21 @@
-import { describe, expect, vi, it,MockedFunction } from "vitest";
+import { describe, expect, vi, it, MockedFunction } from "vitest";
 import { httpService, baseURL } from "../axiosConnection";
 
-import { IncomeDTO } from "../../../server/types";
+import { IncomeDTO, CreateIncomeDTO } from "../../../server/types";
 import IncomeService from "./IncomeService";
 
 vi.mock("../axiosConnection");
 
 describe("Income Service", () => {
   const service = IncomeService();
-const mockedGet = httpService.get as unknown as MockedFunction<typeof httpService.get>;
+  const mockedGet = httpService.get as unknown as MockedFunction<
+    typeof httpService.get
+  >;
+  const mockedPost = httpService.post as unknown as MockedFunction<
+    typeof httpService.post
+  >;
 
-  it("Should call Goals get service when called", async () => {
+  it("Should call Income get service when called", async () => {
     const mockResponse: IncomeDTO = {
       status: "success",
       data: [
@@ -41,56 +46,54 @@ const mockedGet = httpService.get as unknown as MockedFunction<typeof httpServic
     );
     expect(httpService.get).toHaveBeenCalledWith(`${baseURL}/income`);
   });
-//   it("Should call Goals post service when called", async () => {
-//     const mockResponse: GoalsDTO = {
-//       status: "success",
-//       data: [
-//         {
-//           id: 1,
-//           goal: "Marriage",
-//           description: "",
-//           targetAmount: 20000,
-//           savedAmount: 34,
-//           targetDate: "2026-12-31",
-//           value: 400000,
-//           user: "Sasankh",
-//           updatedAt: "2025-07-26T14:40:56.785Z",
-//           createdAt: "2025-07-26T14:40:56.785Z",
-//         },
-//       ],
-//     };
+  it("Should call Income post service when called", async () => {
+    const mockResponse: IncomeDTO = {
+      status: "success",
+      data: [
+        {
+          id: 1,
+          incomeType: "salary",
+          amount: 23443.43,
+          date: "2025-12-02",
+          user: "sasankh",
+          updatedAt: "2025-07-31T16:35:39.713Z",
+          createdAt: "2025-07-31T16:35:39.713Z",
+        },
+      ],
+    };
 
-//     const mockRequest: CreateGoalsDTO = {
-//       goal: "string",
-//       targetAmount: 100,
-//       savedAmount: 10,
-//       targetDate: "2026-12-31",
-//       user: "Sasankh",
-//       value: 1000,
-//     };
-//     (httpService.post as any).mockResolvedValue(mockResponse);
+    const mockRequest: CreateIncomeDTO = {
+      incomeType: "salary",
+      amount: 23443.43,
+      date: "2025-12-02",
+      user: "sasankh",
+    };
+    mockedPost.mockResolvedValue(mockResponse);
 
-//     const result = await service.postGoalsDetails(mockRequest);
-//     expect(result).toEqual(mockResponse);
-//     expect(httpService.post).toHaveBeenCalledWith(`${baseURL}/goals`,mockRequest);
-//   });
+    const result = await service.postIncomeDetails(mockRequest);
+    expect(result).toEqual(mockResponse);
+    expect(httpService.post).toHaveBeenCalledWith(
+      `${baseURL}/income`,
+      mockRequest
+    );
+  });
 
-//   it("should handle errors in post goals", async () => {
-//     const mockError = new Error("Failed to fetch goals");
-//     const mockRequest: CreateGoalsDTO = {
-//       goal: "string",
-//       targetAmount: 100,
-//       savedAmount: 10,
-//       targetDate: "2026-12-31",
-//       user: "Sasankh",
-//       value: 1000,
-//     };
-//     (httpService.post as any).mockRejectedValue(mockError);
+  it("should handle errors in post income", async () => {
+    const mockError = new Error("Failed to fetch income details");
+    const mockRequest: CreateIncomeDTO = {
+      incomeType: "salary",
+      amount: 23443.43,
+      date: "2025-12-02",
+      user: "sasankh",
+    };
+    mockedPost.mockRejectedValue(mockError);
 
-//     await expect(service.postGoalsDetails(mockRequest)).rejects.toThrow(
-//       "Failed to fetch goals"
-//     );
-//     expect(httpService.post).toHaveBeenCalledWith(`${baseURL}/goals`,mockRequest);
-//   });
-
+    await expect(service.postIncomeDetails(mockRequest)).rejects.toThrow(
+      "Failed to fetch income details"
+    );
+    expect(httpService.post).toHaveBeenCalledWith(
+      `${baseURL}/income`,
+      mockRequest
+    );
+  });
 });
