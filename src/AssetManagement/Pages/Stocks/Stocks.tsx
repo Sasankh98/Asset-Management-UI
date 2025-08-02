@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import StocksTable from "./StocksTable/table";
+import StocksTable from "./StocksTable/StocksTable";
 import { callAPI } from "../../../services/apiServices";
 import { ConfigMethod, ConfigUrl } from "../../../config/ConfigAPI";
 import CustomButton from "../../../core/CustomButton/CustomButton";

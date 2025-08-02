@@ -21,23 +21,23 @@ import {
   GlassTextField,
   GlassSelect,
   MenuProps,
-} from "./TransactionForm.styles";
+} from "../../../../core/MUI/styles";
 
-interface IncomeFormProps {
+interface SalaryFormProps {
   open: boolean;
   type: "create" | "edit" | "";
   handleClose: () => void;
   setRefreshData: Dispatch<SetStateAction<RefreshDataProps>>;
-  selectedIncome?: Salary | undefined;
+  selectedTransaction?: Salary | undefined;
 }
 
 const SalaryForm = ({
   open,
   type,
   handleClose,
-  selectedIncome,
+  selectedTransaction,
   setRefreshData,
-}: IncomeFormProps) => {
+}: SalaryFormProps) => {
   const [transactionData, setTransactionData] = useState<CreateSalaryDTO>({
     transactionType: "",
     amount: 0,
@@ -87,7 +87,7 @@ const SalaryForm = ({
       }
     } else if (type === "edit" && transactionData) {
       const response = await SalaryService().updateSalaryDetails(
-        selectedIncome?.id,
+        selectedTransaction?.id,
         transactionData
       );
       if (response) {
@@ -101,13 +101,13 @@ const SalaryForm = ({
   };
 
   useEffect(() => {
-    if (type === "edit" && selectedIncome) {
+    if (type === "edit" && selectedTransaction) {
       setTransactionData({
-        transactionType: selectedIncome?.transactionType || "",
-        amount: selectedIncome?.amount || 0,
-        date: selectedIncome?.date || "",
-        type: selectedIncome?.type || "",
-        user: selectedIncome?.user || "Sasankh",
+        transactionType: selectedTransaction?.transactionType || "",
+        amount: selectedTransaction?.amount || 0,
+        date: selectedTransaction?.date || "",
+        type: selectedTransaction?.type || "",
+        user: selectedTransaction?.user || "Sasankh",
       });
     } else if (type === "create") {
       setTransactionData({
@@ -118,7 +118,7 @@ const SalaryForm = ({
         user: "Sasankh",
       });
     }
-  }, [type, selectedIncome]);
+  }, [type, selectedTransaction]);
   return (
     <ThemeProvider theme={Theme}>
       <StyledModal open={open} onClose={handleClose}>

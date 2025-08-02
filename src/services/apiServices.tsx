@@ -1,26 +1,3 @@
-// import { getService, postService, patchService } from "./axiosConnection";
-
-// type apiServiceProps = {
-//   url: string;
-//   method: string;
-//   data?: object;
-// }
-
-// export const callAPI = async ({url, method, data}:apiServiceProps) => {
-//   let response = {};
-//   const err = "Method Provided is not valid";
-//   if (method === "GET") {
-//     response = await getService(url);
-//   } else if (method === "POST") {
-//     response = await postService(url, data);
-//   } else if (method === "PATCH") {
-//     response = await patchService(url,data);
-//   } else {
-//     return err;
-//   }
-//   return response.data;
-// };
-
 
 import { getService, postService, patchService } from "./axiosConnection";
 

@@ -41,11 +41,11 @@ const SalaryComponent = () => {
   }, [refreshData.refreshSalary]);
 
   return (
-    <div>
+    <div data-testid="salary-container">
       {snackBarOptions.open && <CustomSnackbar />}
       {transactionFormOpen && (
         <TransactionForm
-          selectedIncome={selectedTransaction}
+          selectedTransaction={selectedTransaction}
           type={type}
           handleClose={handleCloseTransactionForm}
           open={transactionFormOpen}
