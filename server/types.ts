@@ -84,9 +84,19 @@ export interface Stock {
   createdAt: string;
   updatedAt: string;
 }
-export interface StockDTO {
+export interface StocksDTO {
   status: string;
   data: Stock[];
+}
+
+export interface CreateStocksDTO {
+  stockName: string;
+  avg: number;
+  quantity: number;
+  user: string;
+  buyTax: number;
+  buyDate: string;
+  status: string;
 }
 
 /**
