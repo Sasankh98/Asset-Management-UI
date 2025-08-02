@@ -1,101 +1,100 @@
-import { styled } from "@mui/material";
+import { FormControl, SelectChangeEvent } from "@mui/material";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
-import Modal from "@mui/material/Modal";
-import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import InputAdornment from "@mui/material/InputAdornment";
 import { ThemeProvider } from "@mui/material/styles";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Theme } from "../../../../core/MUI/Theme";
-import { CreateIncomeDTO, Income } from "../../../../../server/types";
-import { RefreshDataProps } from "../../../ContextProvider/ContextProvider";
-import IncomeService from "../../../../services/IncomeService/IncomeService";
+import { CreateSalaryDTO, Salary } from "../../../../../server/types";
+import {
+  RefreshDataProps,
+  useAssetManagementContext,
+} from "../../../ContextProvider/ContextProvider";
+import SalaryService from "../../../../services/SalaryService/SalaryService";
+import { TransactionTypesEnum, TypeEnum } from "../../../../shared/Constants";
+import {
+  GlassInputLabel,
+  GlassMenuItem,
+  StyledModal,
+  GlassTextField,
+  GlassSelect,
+  MenuProps,
+} from "./TransactionForm.styles";
 
 interface IncomeFormProps {
   open: boolean;
   type: "create" | "edit" | "";
   handleClose: () => void;
   setRefreshData: Dispatch<SetStateAction<RefreshDataProps>>;
-  selectedIncome?: Income | undefined;
+  selectedIncome?: Salary | undefined;
 }
-const StyledModal = styled(Modal)({
-  backdropFilter: "blur(8px)",
-  backgroundColor: "rgba(0, 0, 0, 0.3)",
-});
-const GlassTextField = styled(TextField)(({ theme }) => ({
-  "& .MuiOutlinedInput-root": {
-    borderRadius: theme.spacing(1.5),
-    background: "rgba(255, 255, 255, 0.1)",
-    backdropFilter: "blur(10px)",
-    border: "1px solid rgba(255, 255, 255, 0.2)",
-    color: "rgba(255, 255, 255, 0.9)",
-    "& fieldset": {
-      border: "none",
-    },
-    "&:hover": {
-      background: "rgba(255, 255, 255, 0.15)",
-    },
-    "&.Mui-focused": {
-      background: "rgba(255, 255, 255, 0.15)",
-      border: "1px solid rgba(255, 255, 255, 0.4)",
-    },
-  },
-  "& .MuiInputLabel-root": {
-    color: "rgba(255, 255, 255, 0.7)",
-    "&.Mui-focused": {
-      color: "rgba(255, 255, 255, 0.9)",
-    },
-  },
-}));
 
-const IncomeForm = ({
+const SalaryForm = ({
   open,
   type,
   handleClose,
   selectedIncome,
   setRefreshData,
 }: IncomeFormProps) => {
-  const [incomeData, setIncomeData] = useState<CreateIncomeDTO>({
-    incomeType: "",
+  const [transactionData, setTransactionData] = useState<CreateSalaryDTO>({
+    transactionType: "",
     amount: 0,
     date: "",
+    type: "",
     user: "Sasankh",
   });
 
-  const handleIncomeData = (
+  const { setSnackBarOptions } = useAssetManagementContext();
+
+  const handleTransactionData = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setIncomeData({ ...incomeData, [name]: value });
+    setTransactionData({ ...transactionData, [name]: value });
+  };
+
+  const handleSelectChange = (event: SelectChangeEvent<unknown>) => {
+    const { name, value } = event.target;
+    if (name) {
+      setTransactionData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleIncome = async () => {
     if (type === "create") {
-
-      if (!incomeData.incomeType || !incomeData.amount || !incomeData.date) {
+      if (
+        !transactionData.transactionType ||
+        !transactionData.amount ||
+        !transactionData.date
+      ) {
         alert("Please fill all fields");
         return;
       }
-      const response = await IncomeService().postIncomeDetails(incomeData);
+      const response = await SalaryService().postSalaryDetails(transactionData);
       if (response) {
         handleClose();
+        setSnackBarOptions({
+          open: true,
+          message: "Created Transaction details Successfully",
+          severity: "success",
+        });
         setRefreshData((prev) => ({
           ...prev,
-          refreshIncome: true,
+          refreshSalary: true,
         }));
       }
-    } else if (type === "edit" && incomeData) {
-      const response = await IncomeService().updateIncomeDetails(
+    } else if (type === "edit" && transactionData) {
+      const response = await SalaryService().updateSalaryDetails(
         selectedIncome?.id,
-        incomeData
+        transactionData
       );
       if (response) {
         handleClose();
         setRefreshData((prev) => ({
           ...prev,
-          refreshGoals: true,
+          refreshSalary: true,
         }));
       }
     }
@@ -103,21 +102,19 @@ const IncomeForm = ({
 
   useEffect(() => {
     if (type === "edit" && selectedIncome) {
-console.log(selectedIncome,"........",selectedIncome?.incomeType,type)
-
-      setIncomeData({
-        incomeType: selectedIncome?.incomeType || "",
+      setTransactionData({
+        transactionType: selectedIncome?.transactionType || "",
         amount: selectedIncome?.amount || 0,
         date: selectedIncome?.date || "",
+        type: selectedIncome?.type || "",
         user: selectedIncome?.user || "Sasankh",
       });
     } else if (type === "create") {
-console.log(selectedIncome,"........",type)
-
-      setIncomeData({
-        incomeType: "",
+      setTransactionData({
+        transactionType: "",
         amount: 0,
         date: "",
+        type: "",
         user: "Sasankh",
       });
     }
@@ -188,7 +185,9 @@ console.log(selectedIncome,"........",type)
               fontWeight="600"
               sx={{ color: "rgba(255, 255, 255, 0.9)" }}
             >
-              {type === "edit" ? "Edit Income Details" : "Create New Income Details"}
+              {type === "edit"
+                ? "Edit Transaction Details"
+                : "Create New Transaction Details"}
             </Typography>
             <Typography
               variant="body2"
@@ -199,8 +198,8 @@ console.log(selectedIncome,"........",type)
               }}
             >
               {type === "edit"
-                ? "Update your income details"
-                : "Set up a new income source"}
+                ? "Update your Transaction details"
+                : "Set up a new Transaction source"}
             </Typography>
           </Box>
 
@@ -209,15 +208,27 @@ console.log(selectedIncome,"........",type)
             component="form"
             sx={{ display: "flex", flexDirection: "column", gap: 3 }}
           >
-            <GlassTextField
-              fullWidth
-              label="Income Type"
-              placeholder="e.g., Salary, Interest"
-              value={incomeData?.incomeType || ""}
-              onChange={handleIncomeData}
-              name="incomeType"
-              variant="outlined"
-            />
+            <FormControl fullWidth sx={{ mb: 2 }}>
+              <GlassInputLabel id="customer-id-label">
+                Select Salary Type
+              </GlassInputLabel>
+
+              <GlassSelect
+                labelId="demo-simple-select-standard-label"
+                id="demo-simple-select-standard"
+                value={transactionData?.type || ""}
+                onChange={handleSelectChange}
+                label="Type"
+                name="type"
+                MenuProps={MenuProps}
+              >
+                {TypeEnum.map((enumTypes) => (
+                  <GlassMenuItem value={enumTypes.value} key={enumTypes.value}>
+                    {enumTypes.name}
+                  </GlassMenuItem>
+                ))}
+              </GlassSelect>
+            </FormControl>
 
             <Grid container spacing={2}>
               <Grid size={6}>
@@ -225,8 +236,8 @@ console.log(selectedIncome,"........",type)
                   fullWidth
                   label="Amount"
                   placeholder="0"
-                  value={incomeData?.amount || ""}
-                  onChange={handleIncomeData}
+                  value={transactionData?.amount || ""}
+                  onChange={handleTransactionData}
                   name="amount"
                   type="number"
                   InputProps={{
@@ -240,16 +251,35 @@ console.log(selectedIncome,"........",type)
                 <GlassTextField
                   fullWidth
                   label="Credited Date"
-                  value={incomeData?.date || ""}
-                  onChange={handleIncomeData}
+                  value={transactionData?.date || ""}
+                  onChange={handleTransactionData}
                   name="date"
                   type="date"
                   InputLabelProps={{ shrink: true }}
                 />
               </Grid>
             </Grid>
+            <FormControl fullWidth sx={{ mb: 2 }}>
+              <GlassInputLabel id="customer-id-label">
+                Select Transaction Type
+              </GlassInputLabel>
 
-           
+              <GlassSelect
+                labelId="demo-simple-select-standard-label"
+                id="demo-simple-select-standard"
+                value={transactionData?.transactionType || ""}
+                onChange={handleSelectChange}
+                label="Select Transaction Type"
+                name="transactionType"
+                MenuProps={MenuProps}
+              >
+                {TransactionTypesEnum.map((enumTypes) => (
+                  <GlassMenuItem value={enumTypes.name} key={enumTypes.name}>
+                    {enumTypes.name}
+                  </GlassMenuItem>
+                ))}
+              </GlassSelect>
+            </FormControl>
           </Box>
 
           {/* Action Buttons */}
@@ -304,7 +334,7 @@ console.log(selectedIncome,"........",type)
                 },
               }}
             >
-              {type === "edit" ? "Update Income" : "Create Income"}
+              {type === "edit" ? "Update Transaction" : "Create Transaction"}
             </Button>
           </Box>
         </Box>
@@ -313,4 +343,4 @@ console.log(selectedIncome,"........",type)
   );
 };
 
-export default IncomeForm;
+export default SalaryForm;

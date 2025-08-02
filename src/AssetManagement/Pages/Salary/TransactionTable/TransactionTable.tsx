@@ -1,4 +1,4 @@
-import { Income } from "../../../../../server/types";
+import { Salary } from "../../../../../server/types";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Headers } from "../../../../config/config";
 import {
@@ -19,27 +19,24 @@ import { formatCurrency } from "../../../../utils/currencyConverter";
 import { dateFormat } from "../../../../utils/dateTime";
 
 interface IncomeTableProps {
-  incomeData: Income[];
-  setIncomeFormOpen: Dispatch<SetStateAction<boolean>>;
+  transactionData: Salary[];
+  setTransactionFormOpen: Dispatch<SetStateAction<boolean>>;
   setType: React.Dispatch<React.SetStateAction<"create" | "edit" | "">>;
-  setSelectedIncome: Dispatch<SetStateAction<Income | undefined>>;
+  setSelectedTransaction: Dispatch<SetStateAction<Salary | undefined>>;
 }
+type TableRow = (string | number)[];
 
-const IncomeTable = ({
-  incomeData,
-  setIncomeFormOpen,
+const TransactionTable = ({
+  transactionData,
+  setTransactionFormOpen,
   setType,
-  setSelectedIncome,
+  setSelectedTransaction,
 }: IncomeTableProps) => {
   // Pagination
-  const [tableBody, setTableBody] = useState([] as Income[]); //
-  const [activePage, setActivePage] = useState<number>(1); //
-  const [incomeTypesToDisplayPages, setIncomeTypesToDisplayPages] = useState(
-    [] as Income[]
-  ); //
-
+  const [tableBody, setTableBody] = useState([] as TableRow[]); //
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [page, setPage] = useState(0);
+
   // Filtering
   // Sorting
   const [order, setOrder] = useState<"asc" | "desc">("asc");
@@ -51,8 +48,14 @@ const IncomeTable = ({
     setOrderBy(cellId);
   };
 
-  const stableSort = (array: any[], comparator: (a: any, b: any) => number) => {
-    const stabilizeThis = array.map((el, index) => [el, index]);
+  const stableSort = (
+    array: TableRow[],
+    comparator: (a: TableRow, b: TableRow) => number
+  ) => {
+    const stabilizeThis: [TableRow, number][] = array.map((el, index) => [
+      el,
+      index,
+    ]);
     stabilizeThis.sort((a, b) => {
       const order = comparator(a[0], b[0]);
       return order === 0 ? a[1] - b[1] : order;
@@ -63,15 +66,15 @@ const IncomeTable = ({
   const getComparator = (
     order: "asc" | "desc",
     orderBy: number | undefined
-  ) => {
+  ): ((a: TableRow, b: TableRow) => number) => {
     return order === "desc"
-      ? (a: any, b: any) => descendingComparator(a, b, orderBy)
-      : (a: any, b: any) => -descendingComparator(a, b, orderBy);
+      ? (a, b) => descendingComparator(a, b, orderBy)
+      : (a, b) => -descendingComparator(a, b, orderBy);
   };
 
   const descendingComparator = (
-    a: any,
-    b: any,
+    a: TableRow,
+    b: TableRow,
     orderBy: number | undefined
   ) => {
     if (b[orderBy as number] < a[orderBy as number]) {
@@ -83,24 +86,21 @@ const IncomeTable = ({
     return 0;
   };
 
-  const sortedData = stableSort(
-    incomeTypesToDisplayPages,
-    getComparator(order, orderBy)
-  );
+  const sortedData = stableSort(tableBody, getComparator(order, orderBy));
 
-  const handleEditClick = (row: Income) => {
+  const handleEditClick = (row: TableRow) => {
     setType("edit");
-    setIncomeFormOpen(true);
-    // setSelectedIncome(row);
-    setSelectedIncome(incomeData.find((income) => income.id === row[0]));
+    setTransactionFormOpen(true);
+    // setSelectedTransaction(row);
+    setSelectedTransaction(transactionData.find((income) => income.id === row[0]));
   };
 
   useEffect(() => {
-    const outerElement = [] as any[];
-    let key = Headers.IncomeTable.map((el) => el.colId);
+    const outerElement: TableRow[] = [];
+    const key = Headers.IncomeTable.map((el) => el.colId);
 
-    incomeData?.forEach((element) => {
-      const innerElement = [] as any[];
+    transactionData?.forEach((element) => {
+      const innerElement: (string | number)[] = [];
 
       key.forEach((elements) => {
         if (elements === "amount") {
@@ -108,22 +108,26 @@ const IncomeTable = ({
         } else if (elements === "date") {
           innerElement.push(dateFormat(element[elements] as string).dateOnly);
         } else {
-          innerElement.push(element[elements as keyof Income]);
+          innerElement.push(element[elements as keyof Salary]);
         }
       });
       outerElement.push(innerElement);
     });
     setTableBody(outerElement);
-    setIncomeTypesToDisplayPages(outerElement.slice(0, 6));
-  }, [incomeData]);
+  }, [transactionData]);
 
-  const incomeTypesToDisplay = tableBody;
-  const handlePageChange = (pageNumber: number) => {
-    const startIdx = (pageNumber - 1) * 6;
-    const endIdx = pageNumber * 6;
+  const handleChangePage = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) => {
+    setPage(newPage);
+  };
 
-    setIncomeTypesToDisplayPages(incomeTypesToDisplay.slice(startIdx, endIdx));
-    setActivePage(pageNumber);
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
   };
   return (
     <div
@@ -133,15 +137,6 @@ const IncomeTable = ({
         flexDirection: "column",
       }}
     >
-      {/* {editOpen && (
-        <EditStocks
-          data={infoData}
-          open={editOpen}
-          handleClose={handleEditClose}
-        />
-      )} */}
-  
-
       <Grid justifyContent="center">
         {/* <Box> */}
         <Paper
@@ -182,29 +177,31 @@ const IncomeTable = ({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {sortedData?.map((rows, index) => (
-                  <TableRow
-                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                    key={index}
-                  >
-                    {rows.map((row: any, index: number) =>
-                      index === 5 ? (
-                        <TableCell key={index}>
-                          <IconButton
-                            onClick={() => handleEditClick(rows)}
-                            aria-label="info"
-                          >
-                            <EditOutlinedIcon />
-                          </IconButton>
-                        </TableCell>
-                      ) : (
-                        <TableCell align="center" key={index}>
-                          {row}
-                        </TableCell>
-                      )
-                    )}
-                  </TableRow>
-                ))}
+                {sortedData
+                  ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((rows: TableRow, index: number) => (
+                    <TableRow
+                      sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                      key={index}
+                    >
+                      {rows.map((row: string | number, index: number) =>
+                        index === 5 ? (
+                          <TableCell key={index}>
+                            <IconButton
+                              onClick={() => handleEditClick(rows)}
+                              aria-label="info"
+                            >
+                              <EditOutlinedIcon />
+                            </IconButton>
+                          </TableCell>
+                        ) : (
+                          <TableCell align="center" key={index}>
+                            {row}
+                          </TableCell>
+                        )
+                      )}
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </TableContainer>
@@ -212,18 +209,11 @@ const IncomeTable = ({
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
-            count={incomeTypesToDisplay ? incomeTypesToDisplay.length : 10}
-            rowsPerPage={5}
-            page={activePage - 1}
-            onPageChange={(event: unknown, value: number) =>
-              handlePageChange(value)
-            }
-            onRowsPerPageChange={(
-              event: React.ChangeEvent<HTMLInputElement>
-            ) => {
-              setRowsPerPage(parseInt(event.target.value, 10));
-              setPage(0);
-            }}
+            count={tableBody.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
           />
         </Paper>
       </Grid>
@@ -231,4 +221,4 @@ const IncomeTable = ({
   );
 };
 
-export default IncomeTable;
+export default TransactionTable;

@@ -31,26 +31,28 @@ export interface UserInfoDTO {
  * These interfaces are used in the IncomeService to manage income-related operations.
  */
 
-export interface Income {
+export interface Salary {
   id: number;
-  incomeType: string;
+  transactionType: string;
   amount: number;
   date: string;
   user: string;
+  type: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface IncomeDTO {
+export interface SalaryDTO {
   status: string;
-  data: Income[];
+  data: Salary[];
 }
 
-export interface CreateIncomeDTO {
-  incomeType: string;
+export interface CreateSalaryDTO {
+  transactionType: string;
   amount: number;
   date: string;
   user: string;
+  type: string;
 }
 
 /**

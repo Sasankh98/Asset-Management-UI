@@ -3,8 +3,7 @@ import Dashboard from "./Dashboard/Dashboard";
 import { DisplayContentEnum } from "../../shared/Constants";
 import MiniDrawer from "../../components/Sidebar/Sidebar";
 import Stocks from "./Stocks/Stocks";
-import Income from "./Income/Income";
-import Expenses from "./Expenses/Expenses";
+import Salary from "./Salary/Salary";
 import Goals from "./Goals/Goals";
 
 const AssetManagement = () => {
@@ -19,10 +18,8 @@ const AssetManagement = () => {
                 return <Dashboard />;
               case DisplayContentEnum.stocks:
                 return <Stocks />;
-              case DisplayContentEnum.income:
-                return <Income />;
-              case DisplayContentEnum.expenses:
-                return <Expenses />;
+              case DisplayContentEnum.salary:
+                return <Salary />;
               case DisplayContentEnum.mutualFunds:
                 return <Stocks />;
               case DisplayContentEnum.providentFund:

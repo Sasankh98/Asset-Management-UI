@@ -12,11 +12,12 @@ import { Goals } from "../../../../../server/types";
 import { formatCurrency } from "../../../../utils/currencyConverter";
 import { ImageIcons } from "../../../../shared/Constants";
 import EditIcon from "@mui/icons-material/Edit";
-import  Tooltip from "@mui/material/Tooltip";
+import Tooltip from "@mui/material/Tooltip";
 import Fade from "@mui/material/Fade";
 import Skeleton from "@mui/material/Skeleton";
 import { Dispatch, SetStateAction } from "react";
 import { getTimeAgo } from "../../../../utils/dateTime";
+import { Box } from "@mui/material";
 
 interface GoalsCardProps {
   goal: Goals;
@@ -54,7 +55,7 @@ export default function GoalsCard({
     setSelectedGoal(goal);
   };
   return (
-    <Card sx={{ maxWidth: 345, borderRadius:2 }}>
+    <Card sx={{ maxWidth: 345, borderRadius: 2 }}>
       <CardHeader
         avatar={
           loading ? (
@@ -133,7 +134,7 @@ export default function GoalsCard({
             <Skeleton animation="wave" height={10} width="80%" />
           </>
         ) : (
-          <Typography variant="body2" sx={{ color: "text.secondary" }}>
+          <Box sx={{ color: "text.secondary" }}>
             <Typography>
               Target Amount - {formatCurrency(goal.targetAmount)}
             </Typography>
@@ -141,25 +142,28 @@ export default function GoalsCard({
               currentValue={goal.savedAmount}
               targetValue={goal.targetAmount}
             />
-            <Typography
+            <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                gap: 1,
               }}
-              gap={1}
             >
               {formatCurrency(goal.savedAmount)}
               <Typography sx={{ fontSize: 12 }}>saved so far !!</Typography>
-            </Typography>
-          </Typography>
+            </Box>
+          </Box>
         )}
       </CardContent>
       <CardContent
         sx={{ display: "flex", flexDirection: "column", marginTop: "-1rem" }}
       >
         {loading ? (
-          <div style={{ display: "flex", justifyContent: "space-between" }} data-testid="loading-true">
+          <div
+            style={{ display: "flex", justifyContent: "space-between" }}
+            data-testid="loading-true"
+          >
             <div style={{ display: "flex", flexDirection: "column" }}>
               <Skeleton
                 animation="wave"
@@ -188,14 +192,14 @@ export default function GoalsCard({
         ) : (
           <>
             <Typography sx={{ marginBottom: 2 }}>Goal:</Typography>
-            <Typography
+            <Box
               sx={{
                 display: "flex",
                 flexDirection: "row",
                 justifyContent: "space-between",
               }}
             >
-              <Typography
+               <Box
                 sx={{
                   display: "flex",
                   flexDirection: "column",
@@ -205,12 +209,12 @@ export default function GoalsCard({
                 <Typography sx={{ marginBottom: 2 }}>Target Date</Typography>
                 <Typography sx={{ marginBottom: 2 }}>Value</Typography>
                 <Typography>Remaining</Typography>
-              </Typography>
-              <Typography
+              </Box>
+              <Box
                 sx={{
                   display: "flex",
                   flexDirection: "column",
-                  textAlign: "right",
+                  textAlign: "left",
                 }}
               >
                 <Typography sx={{ marginBottom: 2 }}>
@@ -222,8 +226,8 @@ export default function GoalsCard({
                 <Typography>
                   {formatCurrency(goal.targetAmount - goal.savedAmount)}
                 </Typography>
-              </Typography>
-            </Typography>
+              </Box>
+            </Box>
           </>
         )}
       </CardContent>

@@ -1,23 +1,18 @@
 import * as React from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+
 import { createTheme } from "@mui/material/styles";
-import FlagCircleIcon from '@mui/icons-material/FlagCircle'
-import WaterfallChartIcon from '@mui/icons-material/WaterfallChart'
-import ShowChartIcon from '@mui/icons-material/ShowChart'
-import DashboardIcon from '@mui/icons-material/Dashboard'
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney'
-import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange'
-import CalculateIcon from '@mui/icons-material/Calculate'
-import MoneyIcon from '@mui/icons-material/Money'
-import ReceiptIcon from '@mui/icons-material/Receipt'
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
-import MoneyOffIcon from '@mui/icons-material/MoneyOff'
-import {
-  AppProvider,
-  type Navigation,
-} from "@toolpad/core/AppProvider";
-import {
-  DashboardLayout,
-} from "@toolpad/core/DashboardLayout";
+import FlagCircleIcon from "@mui/icons-material/FlagCircle";
+import WaterfallChartIcon from "@mui/icons-material/WaterfallChart";
+import ShowChartIcon from "@mui/icons-material/ShowChart";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
+import CalculateIcon from "@mui/icons-material/Calculate";
+import MoneyIcon from "@mui/icons-material/Money";
+import ReceiptIcon from "@mui/icons-material/Receipt";
+import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import { AppProvider, type Navigation } from "@toolpad/core/AppProvider";
+import { DashboardLayout } from "@toolpad/core/DashboardLayout";
 
 const NAVIGATION: Navigation = [
   {
@@ -61,19 +56,20 @@ const NAVIGATION: Navigation = [
     segment: "salary",
     title: "Salary",
     icon: <AccountBalanceIcon />,
-    children: [
-      {
-        segment: "income",
-        title: "Income",
-        icon: <AttachMoneyIcon />,
-      },
-      {
-        segment: "expenses",
-        title: "Expenses",
-        icon: <MoneyOffIcon />,
-      },
-    ],
-  },{
+    // children: [
+    //   {
+    //     segment: "income",
+    //     title: "Income",
+    //     icon: <AttachMoneyIcon />,
+    //   },
+    //   {
+    //     segment: "expenses",
+    //     title: "Expenses",
+    //     icon: <MoneyOffIcon />,
+    //   },
+    // ],
+  },
+  {
     segment: "goals",
     title: "Goals",
     icon: <FlagCircleIcon />,
@@ -96,19 +92,29 @@ const demoTheme = createTheme({
   },
 });
 
-export default function DashboardLayoutCustomPageItems({children}: {children?: React.ReactNode}) {
-
+export default function DashboardLayoutCustomPageItems({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const router = {
+    push: (path: string) => {
+      navigate(path);
+    },
+   navigate: (url: string | URL) => {
+      navigate(typeof url === 'string' ? url : url.pathname + url.search);
+    },
+    currentPath: location.pathname,
+    pathname: location.pathname,
+    searchParams: new URLSearchParams(location.search),
+  };
   return (
-    <div data-testid = 'side-bar-component'>
-      <AppProvider
-        navigation={NAVIGATION}
-        // router={router}
-        theme={demoTheme}
-      >
-        <DashboardLayout>
-         {children}
-        </DashboardLayout>
+    <div data-testid="side-bar-component">
+      <AppProvider navigation={NAVIGATION} router={router} theme={demoTheme}>
+        <DashboardLayout>{children}</DashboardLayout>
       </AppProvider>
-      </div>
+    </div>
   );
 }

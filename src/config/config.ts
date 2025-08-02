@@ -31,17 +31,17 @@ export const Headers = {
   ],
   IncomeTable: [
     { name: "Income Id", colId: "id", id: 0 },
-    { name: "Income Type", colId: "incomeType", id: 1 },
+    { name: "Transaction Type", colId: "transactionType", id: 1 },
     { name: "Amount", colId: "amount", id: 2 },
     { name: "Date", colId: "date", id: 3 },
-    { name: "Created At", colId: "createdAt", id: 4 },
+    { name: "Income/Expense", colId: "type", id: 4 },
      { name: "Edit", colId: "edit" },
   ],
-  IncomeTableHeaders: [
-    "income_id",
-    "income_type",
-    "amount",
-    "date",
-    "created_at",
-  ],
+  // IncomeTableHeaders: [
+  //   "income_id",
+  //   "income_type",
+  //   "amount",
+  //   "date",
+  //   "created_at",
+  // ],
 };

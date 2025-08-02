@@ -1,28 +1,29 @@
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useMemo,
-  useState,
-} from "react";
+import { createContext, ReactNode, useContext, useMemo, useState } from "react";
 import { useParams } from "react-router";
 
 export interface RefreshDataProps {
-  refreshGoals: boolean,
-  refreshIncome?: boolean,
-  refreshExpenses?: boolean,
-  refreshStocks?: boolean,
-  refreshMutualFunds?: boolean,
-  refreshProvidentFund?: boolean,
-  refreshLic?: boolean
+  refreshGoals: boolean;
+  refreshSalary: boolean;
+  refreshStocks?: boolean;
+  refreshMutualFunds?: boolean;
+  refreshProvidentFund?: boolean;
+  refreshLic?: boolean;
+}
+
+export interface SnackBarProps {
+  open: boolean;
+  message: string;
+  severity: "success" | "error" | "warning" | "info";
+
 }
 export interface AssetManagementContextProps {
   displayContent: string | undefined;
-  refreshData:RefreshDataProps,
-  setRefreshData:React.Dispatch<React.SetStateAction<RefreshDataProps>>
+  refreshData: RefreshDataProps;
+  setRefreshData: React.Dispatch<React.SetStateAction<RefreshDataProps>>;
+  snackBarOptions: SnackBarProps;
+  setSnackBarOptions: React.Dispatch<React.SetStateAction<SnackBarProps>>;
   // setDisplayContent: (val: string) => void;
 }
-
 
 interface AssetManagementProviderProps {
   children: ReactNode;
@@ -35,12 +36,17 @@ const AssetManagementProvider = ({
   children,
 }: AssetManagementProviderProps) => {
   const { displayContent } = useParams();
-  const [refreshData,setRefreshData] = useState<RefreshDataProps>({
+  const [refreshData, setRefreshData] = useState<RefreshDataProps>({
     refreshGoals: false,
-    refreshIncome: false
-  })
-    const [order, setOrder] = useState<"asc" | "desc">("asc");
-    const [orderBy, setOrderBy] = useState<number | undefined>(0);
+    refreshSalary: false,
+  });
+  const [order, setOrder] = useState<"asc" | "desc">("asc");
+  const [orderBy, setOrderBy] = useState<number | undefined>(0);
+  const [snackBarOptions, setSnackBarOptions] = useState<SnackBarProps>({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   const contextValue = useMemo(
     () => ({
@@ -50,9 +56,11 @@ const AssetManagementProvider = ({
       order,
       setOrder,
       orderBy,
-      setOrderBy
+      setOrderBy,
+      snackBarOptions,
+      setSnackBarOptions,
     }),
-    [displayContent,refreshData,order,orderBy]
+    [displayContent, refreshData, order, orderBy, snackBarOptions]
   );
 
   return (
