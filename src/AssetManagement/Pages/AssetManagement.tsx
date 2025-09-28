@@ -5,6 +5,7 @@ import MiniDrawer from "../../components/Sidebar/Sidebar";
 import Stocks from "./Stocks/Stocks";
 import Salary from "./Salary/Salary";
 import Goals from "./Goals/Goals";
+import MutualFunds from "./MutualFunds/MutualFunds";
 
 const AssetManagement = () => {
   const { displayContent } = useParams();
@@ -21,7 +22,7 @@ const AssetManagement = () => {
               case DisplayContentEnum.salary:
                 return <Salary />;
               case DisplayContentEnum.mutualFunds:
-                return <Stocks />;
+                return <MutualFunds />;
               case DisplayContentEnum.providentFund:
                 return <Stocks />;
               case DisplayContentEnum.lic:

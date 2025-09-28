@@ -38,6 +38,17 @@ function StocksService() {
         throw error; // rethrowing the error so the caller can handle it
       }
     },
+    getDailyStocksDetails: async (symbol:string): Promise<unknown | null> => {
+      try {
+        const response = await httpService.get<unknown>(
+          `${baseURL}/stocks/daily?symbol=${symbol}`
+        );
+        return response as unknown;
+      } catch (error) {
+        console.error("error fetching Salary details:", error);
+        throw error; // rethrowing the error so the caller can handle it
+      }
+    },
   };
 }
 export default StocksService;

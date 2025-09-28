@@ -74,8 +74,8 @@ export interface Stock {
   totalReturns: number;
   profitLoss: number;
   dividends: number;
-  buyTax: string;
-  sellTax: string;
+  buyTax: number;
+  sellTax: number;
   netreturn: number;
   netProfitLoss: number;
   netProfitLossPercent: number;
@@ -128,4 +128,31 @@ export interface CreateGoalsDTO {
   targetDate: string;
   user: string;
   value: number;
+}
+
+export interface MutualFund {
+  id: number;
+  fundName: string;
+  category: string;
+  invested: number;
+  currentValue: number;
+  units: number;
+  nav: number;
+  gain_loss: number;
+  targetProgress: number;
+}
+
+export interface MutualFundsDTO {
+  status: string;
+  data: MutualFund[];
+}
+
+export interface CreateMutualFundsDTO {
+  fundName: string;
+  category: string;
+  invested: number;
+  currentValue: number;
+  units: number;
+  nav: number;
+  user: string;
 }

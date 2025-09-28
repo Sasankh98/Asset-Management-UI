@@ -37,11 +37,15 @@ export const Headers = {
     { name: "Income/Expense", colId: "type", id: 4 },
      { name: "Edit", colId: "edit" },
   ],
-  // IncomeTableHeaders: [
-  //   "income_id",
-  //   "income_type",
-  //   "amount",
-  //   "date",
-  //   "created_at",
-  // ],
+  MutualFundTable: [
+    { name: "Fund Name", colId: "fundName", id: 0 },
+    { name: "Category", colId: "category", id: 1 },
+    { name: "Invested", colId: "invested", id: 2 },
+    { name: "Current Value", colId: "currentValue", id: 3 },
+    { name: "Units", colId: "units", id: 4 },
+    { name: "NAV", colId: "nav", id: 5 },
+    { name: "Gain/Loss", colId: "gain_loss", id: 6 },
+    { name: "Target Progress", colId: "targetProgress", id: 7 },
+     { name: "", colId: "menu" },
+  ],
 };
