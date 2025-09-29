@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => ({
       overlay: true,
     },
   },
-  base: mode === "production" ? "/Asset-Management-ui-TS/" : "/",
+  base: mode === "production" ? "/Asset-Management/" : "/",
 
   build: {
     chunkSizeWarningLimit: 10000,
