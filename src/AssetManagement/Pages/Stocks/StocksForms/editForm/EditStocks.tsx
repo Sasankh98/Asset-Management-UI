@@ -12,8 +12,8 @@ import CustomButton from "../../../../../core/CustomButton/CustomButton";
 import { Theme } from "../../../../../core/MUI/Theme";
 import React, { useEffect, useState } from "react";
 import "./editStocks.css";
-import StocksService from "../../../../../services/StocksService/StocksService";
 import { CreateStocksDTO, Stock } from "../../../../../../server/types";
+import StocksService from "../../../../../services/StocksService/StocksService";
 
 interface EditStocksProps {
   open: boolean;
