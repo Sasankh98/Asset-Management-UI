@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import TransactionTable from "./TransactionTable/TransactionTable";
-import SalaryService from "../../../services/SalaryService/SalaryService";
+import SalaryService from "../../../Services/SalaryService/SalaryService";
 import { Salary } from "../../../../server/types";
 import { useAssetManagementContext } from "../../ContextProvider/ContextProvider";
 import TransactionForm from "./TransactionForm/TransactionForm";

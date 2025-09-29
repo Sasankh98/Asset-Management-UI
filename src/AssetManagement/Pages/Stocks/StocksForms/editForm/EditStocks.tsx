@@ -13,7 +13,7 @@ import { Theme } from "../../../../../core/MUI/Theme";
 import React, { useEffect, useState } from "react";
 import "./editStocks.css";
 import { CreateStocksDTO, Stock } from "../../../../../../server/types";
-import StocksService from "../../../../../services/StocksService/StocksService";
+import StocksService from "../../../../../Services/StocksService/StocksService";
 
 interface EditStocksProps {
   open: boolean;

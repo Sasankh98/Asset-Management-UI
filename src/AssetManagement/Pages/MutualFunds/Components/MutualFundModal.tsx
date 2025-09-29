@@ -13,8 +13,11 @@ import {
   RefreshDataProps,
   useAssetManagementContext,
 } from "../../../ContextProvider/ContextProvider";
-import MutualFundService from "../../../../services/MutualFunds/MutualFundsService";
-import { TransactionTypesEnum, MutualFundTypes } from "../../../../shared/Constants";
+import MutualFundService from "../../../../Services/MutualFunds/MutualFundsService";
+import {
+  TransactionTypesEnum,
+  MutualFundTypes,
+} from "../../../../shared/Constants";
 import {
   GlassInputLabel,
   GlassMenuItem,
@@ -251,7 +254,6 @@ const MutualFundModal = ({
                   type="text"
                 />
               </Grid>
-             
             </Grid>
             <Grid container spacing={2}>
               <Grid size={6}>

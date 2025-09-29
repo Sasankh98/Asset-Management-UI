@@ -1,10 +1,16 @@
 import { describe, vi, it, beforeEach, afterEach, expect } from "vitest";
-import { render, cleanup, screen, waitFor, fireEvent } from "@testing-library/react";
+import {
+  render,
+  cleanup,
+  screen,
+  waitFor,
+  fireEvent,
+} from "@testing-library/react";
 import Goals from "./Goals";
 import { BrowserRouter } from "react-router-dom";
 import AssetManagementProvider from "../../ContextProvider/ContextProvider";
 import { GoalsDTO } from "../../../../server/types";
-import {  httpService } from "../../../services/axiosConnection";
+import { httpService } from "../../../Services/axiosConnection";
 const mockGoals: GoalsDTO = {
   status: "success",
   data: [
@@ -35,11 +41,11 @@ const mockGoals: GoalsDTO = {
   ],
 };
 
-vi.mock("../../../services/axiosConnection", () => ({
+vi.mock("../../../Services/axiosConnection", () => ({
   httpService: {
     get: vi.fn(),
   },
-  baseURL : "example.com"
+  baseURL: "example.com",
 }));
 describe("Goals Component", () => {
   beforeEach(() => {
@@ -65,10 +71,10 @@ describe("Goals Component", () => {
     });
   });
 
-  it('clicking on add goal button renders goal form',async()=>{
-    const button = await screen.findByText(/Add Goal/)
-    fireEvent.click(button)
+  it("clicking on add goal button renders goal form", async () => {
+    const button = await screen.findByText(/Add Goal/);
+    fireEvent.click(button);
 
-    expect(screen.findAllByText(/Create New Goal/))
-  })
+    expect(screen.findAllByText(/Create New Goal/));
+  });
 });

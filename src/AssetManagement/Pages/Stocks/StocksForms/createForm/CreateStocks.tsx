@@ -22,7 +22,7 @@ import CustomButton from "../../../../../core/CustomButton/CustomButton";
 import { Theme } from "../../../../../core/MUI/Theme";
 import { useEffect, useState } from "react";
 import "./createStocks.css";
-import StocksService from "../../../../../services/StocksService/StocksService";
+import StocksService from "../../../../../Services/StocksService/StocksService";
 import { CreateStocksDTO } from "../../../../../../server/types";
 
 interface CreateStocksProps {
@@ -54,15 +54,15 @@ const CreateStocks = (props: CreateStocksProps) => {
   };
 
   const handleSelectChange = (event: SelectChangeEvent) => {
-  // event.target.value is the new value.
-  // MUI's Select target may not have exact HTMLInputElement typing for .name,
-  // so cast to access name safely:
-  const target = event.target as HTMLInputElement & { name?: string };
-  const name = target.name;
-  const value = event.target.value;
-  if (!name) return;
-  setStocksData((prev) => ({ ...prev, [name]: value }));
-};
+    // event.target.value is the new value.
+    // MUI's Select target may not have exact HTMLInputElement typing for .name,
+    // so cast to access name safely:
+    const target = event.target as HTMLInputElement & { name?: string };
+    const name = target.name;
+    const value = event.target.value;
+    if (!name) return;
+    setStocksData((prev) => ({ ...prev, [name]: value }));
+  };
 
   useEffect(() => {
     if (stocksData.status === "sold") {
@@ -73,9 +73,7 @@ const CreateStocks = (props: CreateStocksProps) => {
     props.handleClose();
     // setLoader(true)
     try {
-      const response = await StocksService().postStockDetails(
-        stocksData
-      );
+      const response = await StocksService().postStockDetails(stocksData);
       //   if (response) setLoader(false)
       console.log(response);
     } catch (err) {
@@ -105,10 +103,7 @@ const CreateStocks = (props: CreateStocksProps) => {
             <Grid container spacing={2}>
               <Grid size={6}>
                 <FormControl fullWidth sx={{ mb: 2 }}>
-                  <InputLabel
-                    id="customer-id-label"
-                    shrink
-                  >
+                  <InputLabel id="customer-id-label" shrink>
                     Stock Status
                   </InputLabel>
                   <Select
@@ -157,7 +152,7 @@ const CreateStocks = (props: CreateStocksProps) => {
                 />
               </Grid>
             </Grid>
-            <Grid container  spacing={2} sx={{ marginTop: 0 }}>
+            <Grid container spacing={2} sx={{ marginTop: 0 }}>
               <Grid size={6}>
                 <TextField
                   fullWidth
@@ -181,7 +176,7 @@ const CreateStocks = (props: CreateStocksProps) => {
 
             {show && (
               <>
-                <Grid container  spacing={2} sx={{ marginTop: 0 }}>
+                <Grid container spacing={2} sx={{ marginTop: 0 }}>
                   <Grid size={4}>
                     <TextField
                       placeholder="Enter Sell Price"
@@ -205,7 +200,7 @@ const CreateStocks = (props: CreateStocksProps) => {
                     />
                   </Grid>
                 </Grid>
-                <Grid container  spacing={2} sx={{ marginTop: 0 }}>
+                <Grid container spacing={2} sx={{ marginTop: 0 }}>
                   <Grid size={6}>
                     <TextField
                       fullWidth

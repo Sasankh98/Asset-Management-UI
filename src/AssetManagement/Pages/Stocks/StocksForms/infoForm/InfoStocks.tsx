@@ -6,7 +6,7 @@ import Modal from "@mui/material/Modal";
 import { ThemeProvider } from "@mui/material/styles";
 
 import { Theme } from "../../../../../core/MUI/Theme";
-import StocksService from "../../../../../services/StocksService/StocksService";
+import StocksService from "../../../../../Services/StocksService/StocksService";
 import { Stock } from "../../../../../../server/types";
 
 interface InfoStocksProps {
@@ -18,14 +18,16 @@ const InfoStocks = (props: InfoStocksProps) => {
   const [stockData, setStockData] = useState<Stock | undefined>(undefined);
 
   useEffect(() => {
-      (async () => {
-    try {
-      const res: any = await StocksService().getStocksByIdDetails(props.data[0]);
-      setStockData(res?.data[0]);
-    } catch (err) {
-      console.error("Failed to fetch stocks:", err);
-    }
-  })();
+    (async () => {
+      try {
+        const res: any = await StocksService().getStocksByIdDetails(
+          props.data[0]
+        );
+        setStockData(res?.data[0]);
+      } catch (err) {
+        console.error("Failed to fetch stocks:", err);
+      }
+    })();
   }, [props.data]);
 
   return (

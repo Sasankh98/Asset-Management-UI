@@ -1,20 +1,18 @@
-import {
-  styled,
-} from "@mui/material/styles";
-import Box from '@mui/material/Box'
-import Grid from '@mui/material/Grid'
-import Modal from '@mui/material/Modal'
-import TextField from '@mui/material/TextField'
-import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
-import InputAdornment from '@mui/material/InputAdornment';
-import LinearProgress from '@mui/material/LinearProgress';
+import { styled } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import Grid from "@mui/material/Grid";
+import Modal from "@mui/material/Modal";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import InputAdornment from "@mui/material/InputAdornment";
+import LinearProgress from "@mui/material/LinearProgress";
 
-import { ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider } from "@mui/material/styles";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Theme } from "../../../../core/MUI/Theme";
 import { CreateGoalsDTO, Goals } from "../../../../../server/types";
-import GoalsService from "../../../../services/GoalsService/GoalsService";
+import GoalsService from "../../../../Services/GoalsService/GoalsService";
 import { RefreshDataProps } from "../../../ContextProvider/ContextProvider";
 
 interface GoalsFormProps {

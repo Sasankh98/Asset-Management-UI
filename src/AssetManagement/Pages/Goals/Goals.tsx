@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import GoalsCard from "./GoalsCard/GoalsCard";
-import GoalsService from "../../../services/GoalsService/GoalsService";
+import GoalsService from "../../../Services/GoalsService/GoalsService";
 import { Goals as GoalsType } from "../../../../server/types";
 import CustomButton from "../../../core/CustomButton/CustomButton";
 import GoalsForm from "./GoalsModal/GoalsModal";

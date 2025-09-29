@@ -1,6 +1,6 @@
 // import  { useEffect, useState } from "react";
 // import { ConfigMethod, ConfigUrl } from "../../../../config/ConfigAPI";
-// import { callAPI } from "../../../../services/apiServices";
+// import { callAPI } from "../../../../Services/apiServices";
 // const Details = () => {
 //   const [overviewData, setOverviewData] = useState();
 

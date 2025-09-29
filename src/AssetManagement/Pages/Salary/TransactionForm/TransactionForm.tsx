@@ -13,7 +13,7 @@ import {
   RefreshDataProps,
   useAssetManagementContext,
 } from "../../../ContextProvider/ContextProvider";
-import SalaryService from "../../../../services/SalaryService/SalaryService";
+import SalaryService from "../../../../Services/SalaryService/SalaryService";
 import { TransactionTypesEnum, TypeEnum } from "../../../../shared/Constants";
 import {
   GlassInputLabel,

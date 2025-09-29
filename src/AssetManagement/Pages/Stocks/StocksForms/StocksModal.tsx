@@ -13,7 +13,7 @@ import {
   RefreshDataProps,
   useAssetManagementContext,
 } from "../../../ContextProvider/ContextProvider";
-import StocksService from "../../../../services/StocksService/StocksService";
+import StocksService from "../../../../Services/StocksService/StocksService";
 import { TransactionTypesEnum, TypeEnum } from "../../../../shared/Constants";
 import {
   GlassInputLabel,
@@ -230,7 +230,7 @@ const StocksModal = ({
               <GlassSelect
                 labelId="demo-simple-select-standard-label"
                 id="demo-simple-select-standard"
-                value={ ""}
+                value={""}
                 onChange={handleSelectChange}
                 label="Type"
                 name="type"
@@ -250,7 +250,7 @@ const StocksModal = ({
                   fullWidth
                   label="Amount"
                   placeholder="0"
-                  value={ ""}
+                  value={""}
                   onChange={handleTransactionData}
                   name="amount"
                   type="number"
@@ -265,7 +265,7 @@ const StocksModal = ({
                 <GlassTextField
                   fullWidth
                   label="Credited Date"
-                  value={ ""}
+                  value={""}
                   onChange={handleTransactionData}
                   name="date"
                   type="date"
@@ -281,7 +281,7 @@ const StocksModal = ({
               <GlassSelect
                 labelId="demo-simple-select-standard-label"
                 id="demo-simple-select-standard"
-                value={ ""}
+                value={""}
                 onChange={handleSelectChange}
                 label="Select Transaction Type"
                 name="transactionType"
