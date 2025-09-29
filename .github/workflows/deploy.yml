@@ -29,15 +29,8 @@ jobs:
         run: npm run build
 
       - name: Create 404 fallback for SPA
-        run: |
-          if [ -f dist/index.html ]; then
-            cp dist/index.html dist/404.html
-            echo "Created dist/404.html"
-          else
-            echo "Error: dist/index.html not found - build may have failed"
-            ls -la dist || true
-            exit 1
-          fi
+        run: cp dist/index.html dist/404.html
+           
 
       - name: Deploy to GitHub Pages (using PAT)
         uses: JamesIves/github-pages-deploy-action@v4

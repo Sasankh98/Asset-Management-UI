@@ -17,7 +17,6 @@ export default defineConfig(({ mode }) => ({
   build: {
     chunkSizeWarningLimit: 10000,
     rollupOptions: {
-      input: "src/main.tsx",
       output: {
         entryFileNames: `assets/[name].js`,
         chunkFileNames: `assets/[name].js`,
