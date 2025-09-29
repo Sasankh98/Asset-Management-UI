@@ -31,8 +31,8 @@ jobs:
       - name: Deploy to GitHub Pages (using PAT)
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          branch: gh-pages           # target branch
-          folder: dist               # folder to deploy
+          branch: gh-pages          # target branch
+          folder: dist              # folder to deploy
           clean: true
           commit-message: "Deploy site from ${{ github.repository }}@${{ github.sha }}"
           token: ${{ secrets.ASSET_MANAGEMENT }}
