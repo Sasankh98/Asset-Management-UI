@@ -19,17 +19,17 @@ import { formatCurrency } from "../../../../utils/currencyConverter";
 
 interface IncomeTableProps {
   mutualFundDetails: MutualFund[];
-  setTransactionFormOpen?: Dispatch<SetStateAction<boolean>>;
-  setType?: React.Dispatch<React.SetStateAction<"create" | "edit" | "">>;
-  setSelectedTransaction?: Dispatch<SetStateAction<MutualFund | undefined>>;
+  setMutualFundFormOpen: Dispatch<SetStateAction<boolean>>;
+  setType: React.Dispatch<React.SetStateAction<"create" | "edit" | "">>;
+  setSelectedMutualFund: Dispatch<SetStateAction<MutualFund | undefined>>;
 }
 type TableRow = (string | number)[];
 
 const MutualFundTable = ({
   mutualFundDetails,
-  //   setTransactionFormOpen,
-  //   setType,
-  //   setSelectedTransaction,
+  setMutualFundFormOpen,
+  setType,
+  setSelectedMutualFund,
 }: IncomeTableProps) => {
   // Pagination
   const [tableBody, setTableBody] = useState([] as TableRow[]); //
@@ -87,14 +87,13 @@ const MutualFundTable = ({
 
   const sortedData = stableSort(tableBody, getComparator(order, orderBy));
 
-  //   const handleEditClick = (row: TableRow) => {
-  //     setType("edit");
-  //     setTransactionFormOpen(true);
-  //     // setSelectedTransaction(row);
-  //     setSelectedTransaction(
-  //       mutualFundDetails.find((income) => income.id === row[0])
-  //     );
-  //   };
+  const handleEditClick = (row: TableRow) => {
+    setType("edit");
+    setMutualFundFormOpen(true);
+    setSelectedMutualFund(
+      mutualFundDetails.find((income) => income.id === row[0])
+    );
+  };
 
   useEffect(() => {
     const outerElement: TableRow[] = [];
@@ -142,7 +141,6 @@ const MutualFundTable = ({
       }}
     >
       <Grid justifyContent="center">
-        {/* <Box> */}
         <Paper sx={{ width: "100%", mb: 2 }}>
           <TableContainer component={Paper}>
             <Table aria-label="simple table">
@@ -190,7 +188,7 @@ const MutualFundTable = ({
                         index === 8 ? (
                           <TableCell key={index}>
                             <IconButton
-                              //   onClick={() => handleEditClick(rows)}
+                              onClick={() => handleEditClick(rows)}
                               aria-label="info"
                             >
                               <EditOutlinedIcon />
@@ -203,7 +201,7 @@ const MutualFundTable = ({
                             style={
                               row.toString().includes("-")
                                 ? { color: "red" }
-                                : { color: "green" }
+                                : { color: "#22BB33" }
                             }
                           >
                             {row}
@@ -214,13 +212,11 @@ const MutualFundTable = ({
                           </TableCell>
                         )
                       )}
-                      {/* ))} */}
                     </TableRow>
                   ))}
               </TableBody>
             </Table>
           </TableContainer>
-
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component="div"

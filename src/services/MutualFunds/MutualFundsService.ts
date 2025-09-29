@@ -1,4 +1,4 @@
-import { CreateMutualFundsDTO, MutualFundsDTO } from "../../../server/types";
+import { CreateMutualFundsDTO, MutualFundsDTO, MutualFundsDashboardDTO } from "../../../server/types";
 import { httpService, baseURL } from "../axiosConnection";
 
 function MutualFundsService() {
@@ -14,6 +14,18 @@ function MutualFundsService() {
         throw error; // rethrowing the error so the caller can handle it
       }
     },
+    getmutualFundsDashboardList: async (): Promise<MutualFundsDashboardDTO | null> => {
+      try {
+        const response = await httpService.get<MutualFundsDashboardDTO>(
+          `${baseURL}/mutualFunds/dashboard`
+        );
+        return response as MutualFundsDashboardDTO;
+      } catch (error) {
+        console.error("Fetching failed:", error);
+        throw error; // rethrowing the error so the caller can handle it
+      }
+    },
+
     postMutualFundDetails: async (goalsData:CreateMutualFundsDTO): Promise<MutualFundsDTO | null> => {
       try {
         const response = await httpService.post<CreateMutualFundsDTO,MutualFundsDTO>(
@@ -25,17 +37,17 @@ function MutualFundsService() {
         throw error; // rethrowing the error so the caller can handle it
       }
     },
-    // updateMutualFundDetails: async (id:number,goalsData:CreateGoalsDTO): Promise<GoalsDTO | null> => {
-    //   try {
-    //     const response = await httpService.patch<CreateGoalsDTO,GoalsDTO>(
-    //       `${baseURL}/mutualFunds?id=${id}`,goalsData
-    //     );
-    //     return response as GoalsDTO;
-    //   } catch (error) {
-    //     console.error("Update failed:", error);
-    //     throw error; // rethrowing the error so the caller can handle it
-    //   }
-    // },
+    updateMutualFundDetails: async (id:number | undefined,goalsData:CreateMutualFundsDTO): Promise<MutualFundsDTO | null> => {
+      try {
+        const response = await httpService.patch<CreateMutualFundsDTO,MutualFundsDTO>(
+          `${baseURL}/mutualFunds?id=${id}`,goalsData
+        );
+        return response as MutualFundsDTO;
+      } catch (error) {
+        console.error("Update failed:", error);
+        throw error; // rethrowing the error so the caller can handle it
+      }
+    },
   };
 }
 export default MutualFundsService;

@@ -147,6 +147,16 @@ export interface MutualFundsDTO {
   data: MutualFund[];
 }
 
+export interface MutualFundsDashboard{
+  totalInvested: number;
+  totalCurrentValue: number;
+  totalGainLoss: number;
+}
+export interface MutualFundsDashboardDTO {
+  status: string;
+  data: MutualFundsDashboard;
+}
+
 export interface CreateMutualFundsDTO {
   fundName: string;
   category: string;

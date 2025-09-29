@@ -15,7 +15,7 @@ function SalaryService() {
         throw error; // rethrowing the error so the caller can handle it
       }
     },
-    updateSalaryDetails: async (id:number |undefined,incomeData: CreateSalaryDTO): Promise<SalaryDTO | null> => {
+    updateSalaryDetails: async (id:number | undefined,incomeData: CreateSalaryDTO): Promise<SalaryDTO | null> => {
       try {
         const response = await httpService.patch<CreateSalaryDTO, SalaryDTO>(
           `${baseURL}/salary?id=${id}`,

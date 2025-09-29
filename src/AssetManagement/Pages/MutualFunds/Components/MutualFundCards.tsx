@@ -13,12 +13,14 @@ interface MutualFundCardProps {
   value: string;
   content: string;
   icon: string;
+  isColoured?: boolean;
 }
 const MutualFundCard = ({
   header,
   value,
   content,
   icon,
+  isColoured = false,
 }: MutualFundCardProps) => {
   const iconElement = () => {
     switch (icon) {
@@ -33,20 +35,34 @@ const MutualFundCard = ({
     }
   };
   return (
-    <Card sx={{ minWidth: 275,borderRadius: 3 , boxShadow:"0.125rem 0.125rem 1.5rem grey"}}>
+    <Card
+      sx={{
+        minWidth: 275,
+        borderRadius: 3,
+        boxShadow: "0.125rem 0.125rem 1.5rem grey",
+      }}
+    >
       <CardContent
         sx={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
       >
-        <Typography sx={{ display: "flex", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
           <Typography sx={{ color: "text.secondary", fontSize: 14 }}>
             {header}
           </Typography>
           <Typography>{iconElement()}</Typography>
-        </Typography>
-        <Typography sx={{ textAlign: "left" }}>
-          <Typography>{value}</Typography>
+        </div>
+        <div style={{ textAlign: "left" }}>
+          {!isColoured ? (
+            <Typography>{value}</Typography>
+          ) : (
+            <Typography
+              sx={value.includes("-") ? { color: "red" } : { color: "#22BB33" }}
+            >
+              {value}
+            </Typography>
+          )}
           <Typography variant="body2">{content}</Typography>
-        </Typography>
+        </div>
       </CardContent>
     </Card>
   );

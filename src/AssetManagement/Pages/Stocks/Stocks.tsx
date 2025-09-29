@@ -3,14 +3,14 @@ import StocksTable from "./StocksTable/StocksTable";
 import { callAPI } from "../../../services/apiServices";
 import { ConfigMethod, ConfigUrl } from "../../../config/ConfigAPI";
 import CustomButton from "../../../core/CustomButton/CustomButton";
-import { CreateStocks } from "./StocksForms";
+// import { CreateStocks } from "./StocksForms";
 import Details from "./Overview/Details";
 import StocksModal from "./StocksForms/StocksModal";
 import { useAssetManagementContext } from "../../ContextProvider/ContextProvider";
 import StocksService from "../../../services/StocksService/StocksService";
 
 const Stocks = () => {
-  const [stocksData, setStocksData] = useState();
+  const [stocksData, setStocksData] = useState([]);
   const [addStocksOpen, setAddStocksOpen] = useState(false);
   const [type, setType] = useState<"create" | "edit" | "info" | "">("")
   const {setRefreshData} = useAssetManagementContext();
@@ -36,7 +36,7 @@ const Stocks = () => {
   };
 
   return (
-    <div>
+    <div data-testid="stocks-wrapper">
       <Details />
       {addStocksOpen ? (
         // <CreateStocks open={addStocksOpen} handleClose={handleAddStocksClose} />

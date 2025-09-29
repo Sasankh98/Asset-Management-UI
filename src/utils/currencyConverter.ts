@@ -1,5 +1,5 @@
-export   const formatCurrency = (value: number | null) => {
-    if (value === null) return '';
+export   const formatCurrency = (value: number | null | undefined) => {
+    if (value === null || value === undefined) return '';
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',

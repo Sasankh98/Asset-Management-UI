@@ -1,8 +1,8 @@
 import { beforeEach, describe, test, vi, expect, afterEach } from "vitest";
-import { cleanup, render, screen,fireEvent} from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import AssetManagementProvider from "../../ContextProvider/ContextProvider";
-import SalaryComponent from "./Salary";
+import Stocks from "./Stocks";
 // Mock child components to isolate the test
 
 describe("AssetManagement Component", () => {
@@ -11,7 +11,7 @@ describe("AssetManagement Component", () => {
     render(
       <BrowserRouter>
         <AssetManagementProvider>
-          <SalaryComponent />
+          <Stocks />
         </AssetManagementProvider>
       </BrowserRouter>
     );
@@ -21,13 +21,7 @@ describe("AssetManagement Component", () => {
     cleanup();
   });
 
-  test("renders Salary component", () => {
-    expect(screen.getByTestId("salary-container")).toBeInTheDocument();
-  });
-  test("renders Salary component", () => {
-    const button = screen.getByRole("button",{name:/Add Transaction/i});
-    fireEvent.click(button);
-    expect(screen.getByTestId("salary-container")).toBeInTheDocument();
-
+  test("renders Stocks component", () => {
+    expect(screen.getByTestId("stocks-wrapper")).toBeInTheDocument();
   });
 });

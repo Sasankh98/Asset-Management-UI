@@ -41,3 +41,24 @@ export const ImageIcons = {
   marriage: "Marriage",
   tattoo: "Tattoo",
 };
+
+export const mutualFundsDashboard = {
+  currentValue: "Current Value",
+  totalInvestment: "Total Investment",
+  gainLoss: "Gain/Loss",
+  targetProgress: "Target Progress",
+  tpv: "Total Portfolio value",
+  amountinvested: "Amount Invested",
+  target: "Target:",
+};
+
+export const enum Icons {
+  symbol = "symbol",
+  chart = "chart",
+  tracking = "tracking",
+}
+
+export const MutualFundTypes = [
+  { name: "Small Cap", value: "smallcap" },
+  { name: "Large Cap", value: "largecap" },
+];
