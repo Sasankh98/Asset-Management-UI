@@ -10,7 +10,7 @@ import Goals from "./Goals";
 import { BrowserRouter } from "react-router-dom";
 import AssetManagementProvider from "../../ContextProvider/ContextProvider";
 import { GoalsDTO } from "../../../../server/types";
-import { httpService } from "../../../Services/axiosConnection";
+import { httpService } from "../../../services/axiosConnection";
 const mockGoals: GoalsDTO = {
   status: "success",
   data: [

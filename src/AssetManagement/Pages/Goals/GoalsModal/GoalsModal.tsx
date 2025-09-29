@@ -12,7 +12,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Theme } from "../../../../core/MUI/Theme";
 import { CreateGoalsDTO, Goals } from "../../../../../server/types";
-import GoalsService from "../../../../Services/GoalsService/GoalsService";
+import GoalsService from "../../../../services/GoalsService/GoalsService";
 import { RefreshDataProps } from "../../../ContextProvider/ContextProvider";
 
 interface GoalsFormProps {

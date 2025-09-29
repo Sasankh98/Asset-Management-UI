@@ -5,7 +5,7 @@ import MutualFundCard from "./Components/MutualFundCards";
 import CenterTabs from "./Components/MutualFundTabs";
 import MutualFundTable from "./Components/MutualFundTable";
 import { MutualFund, MutualFundsDashboard } from "../../../../server/types";
-import MutualFundsService from "../../../Services/MutualFunds/MutualFundsService";
+import MutualFundsService from "../../../services/MutualFunds/MutualFundsService";
 import { mutualFundsDashboard, Icons } from "../../../shared/Constants";
 import "./MutualFunds.css";
 import { formatCurrency } from "../../../utils/currencyConverter";

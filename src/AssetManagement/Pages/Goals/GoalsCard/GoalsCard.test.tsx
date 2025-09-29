@@ -4,7 +4,7 @@ import GoalsCard from "./GoalsCard";
 import { BrowserRouter } from "react-router-dom";
 import AssetManagementProvider from "../../../ContextProvider/ContextProvider";
 import { Goals } from "../../../../../server/types";
-import { httpService } from "../../../../Services/axiosConnection";
+import { httpService } from "../../../../services/axiosConnection";
 import { Dispatch, SetStateAction } from "react";
 const mockGoals: Goals = {
   id: 1,

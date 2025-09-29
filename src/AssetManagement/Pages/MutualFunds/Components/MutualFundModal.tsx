@@ -13,7 +13,7 @@ import {
   RefreshDataProps,
   useAssetManagementContext,
 } from "../../../ContextProvider/ContextProvider";
-import MutualFundService from "../../../../Services/MutualFunds/MutualFundsService";
+import MutualFundService from "../../../../services/MutualFunds/MutualFundsService";
 import {
   TransactionTypesEnum,
   MutualFundTypes,
