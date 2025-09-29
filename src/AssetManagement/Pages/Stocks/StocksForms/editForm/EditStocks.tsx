@@ -47,12 +47,12 @@ const EditStocks = (props: EditStocksProps) => {
     updatedAt: "",
   });
 
-const handleEditStocks = (
-  event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-) => {
-  const { name, value } = event.target;
-  setStocksData((prev) => ({ ...(prev ?? {}), [name]: value } as Stock));
-};
+  const handleEditStocks = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = event.target;
+    setStocksData((prev) => ({ ...(prev ?? {}), [name]: value }) as Stock);
+  };
 
   const handleSelectChange = (event: SelectChangeEvent) => {
     // event.target.value is the new value.
@@ -62,26 +62,28 @@ const handleEditStocks = (
     const name = target.name;
     const value = event.target.value;
     if (!name) return;
-    setStocksData((prev) => ({ ...(prev ?? {}), [name]: value } as Stock));
+    setStocksData((prev) => ({ ...(prev ?? {}), [name]: value }) as Stock);
   };
 
   useEffect(() => {
-    StocksService()
-      .getStocksByIdDetails(props.data[0])
-      .then((res) => {
-        setStocksData(res?.data[0]);
-        // setStocksData((prev) => ({
-        //   ...prev,
-        //   ...res.data[0],
-        // }));
-      });
+     (async () => {
+    try {
+      const res: any = await StocksService().getStocksByIdDetails(props.data[0]);
+      setStocksData(res?.data[0]);
+    } catch (err) {
+      console.error("Failed to fetch stocks:", err);
+    }
+  })();
   }, [props.data]);
 
   const handleSubmit = async () => {
     // setLoader(true)
     console.log(stocksData);
     try {
-      const response = await StocksService().updateStockDetails(stocksData?.id,stocksData as CreateStocksDTO)
+      const response = await StocksService().updateStockDetails(
+        stocksData?.id,
+        stocksData as CreateStocksDTO
+      );
       if (response) props.handleClose();
       console.log(response);
     } catch (err) {

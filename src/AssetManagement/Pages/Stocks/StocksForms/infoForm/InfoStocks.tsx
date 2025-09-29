@@ -18,10 +18,14 @@ const InfoStocks = (props: InfoStocksProps) => {
   const [stockData, setStockData] = useState<Stock | undefined>(undefined);
 
   useEffect(() => {
-      StocksService().getStocksByIdDetails(props.data[0]).then((res) => {
-      setStockData(res?.data[0])
-      
-    });
+      (async () => {
+    try {
+      const res: any = await StocksService().getStocksByIdDetails(props.data[0]);
+      setStockData(res?.data[0]);
+    } catch (err) {
+      console.error("Failed to fetch stocks:", err);
+    }
+  })();
   }, [props.data]);
 
   return (
