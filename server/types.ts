@@ -140,6 +140,9 @@ export interface MutualFund {
   nav: number;
   gain_loss: number;
   targetProgress: number;
+  user: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface MutualFundsDTO {
@@ -147,7 +150,7 @@ export interface MutualFundsDTO {
   data: MutualFund[];
 }
 
-export interface MutualFundsDashboard{
+export interface MutualFundsDashboard {
   totalInvested: number;
   totalCurrentValue: number;
   totalGainLoss: number;

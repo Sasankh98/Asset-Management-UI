@@ -1,14 +1,13 @@
-import {
-  Box,
-  FormControl,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Modal,
-  Select,
-  TextField,
-  ThemeProvider,
-} from "@mui/material";
+import { ThemeProvider } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import FormControl from "@mui/material/FormControl";
+import Grid from "@mui/material/Grid";
+import InputLabel from "@mui/material/InputLabel";
+import type { SelectChangeEvent } from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import Modal from "@mui/material/Modal";
+import Select from "@mui/material/Select";
+import TextField from "@mui/material/TextField";
 import { ConfigMethod, ConfigUrl } from "../../../../../config/ConfigAPI";
 import CustomButton from "../../../../../core/CustomButton/CustomButton";
 import { Theme } from "../../../../../core/MUI/Theme";
@@ -21,46 +20,61 @@ interface EditStocksProps {
   handleClose: () => void;
   data: any[];
 }
-const EditStocks = (props:EditStocksProps) => {
+const EditStocks = (props: EditStocksProps) => {
   // const [loader,setLoader] = useState(false)
   const [stocksData, setStocksData] = useState({
+    id: "",
+    stockName: "",
     avg: "",
     quantity: "",
-    buyTax:"",
+    buyTax: "",
     marketPrice: "",
     sellPrice: "",
     dividends: "",
     sellTax: "",
     sellDate: "",
     status: "",
+    buyDate:""
   });
 
-  const handleEditStocks = (e) => {
-    const { name, value } = e.target;
+  const handleEditStocks = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
     setStocksData({ ...stocksData, [name]: value });
   };
 
-  useEffect(()=>{
-    callAPI(ConfigUrl.StocksById,ConfigMethod.postMethod,{id:props.data[0]}).then((res)=>{
-      // setIdData(res.data[0])
-      setStocksData((prev)=>({
-        ...prev,
-        ...res.data[0]
-      }))
-    })
-  },[props.data])
+  const handleSelectChange = (event: SelectChangeEvent) => {
+  // event.target.value is the new value.
+  // MUI's Select target may not have exact HTMLInputElement typing for .name,
+  // so cast to access name safely:
+  const target = event.target as HTMLInputElement & { name?: string };
+  const name = target.name;
+  const value = event.target.value;
+  if (!name) return;
+  setStocksData((prev) => ({ ...prev, [name]: value }));
+};
 
- 
+  useEffect(() => {
+    callAPI(ConfigUrl.StocksById, ConfigMethod.postMethod, {
+      id: props.data[0],
+    }).then((res) => {
+      // setIdData(res.data[0])
+      setStocksData((prev) => ({
+        ...prev,
+        ...res.data[0],
+      }));
+    });
+  }, [props.data]);
+
   const handleSubmit = async () => {
     // setLoader(true)
-    console.log(stocksData)
+    console.log(stocksData);
     try {
       const response = await callAPI(
         `${ConfigUrl.Stocks}/?id=${stocksData?.id}&stockName=${stocksData?.stockName}`,
         ConfigMethod.patchMethod,
         stocksData
       );
-      if(response) props.handleClose();
+      if (response) props.handleClose();
       console.log(response);
     } catch (err) {
       console.log(err);
@@ -86,22 +100,17 @@ const EditStocks = (props:EditStocksProps) => {
           >
             <h2>Update Existing Stocks</h2>
 
-            <Grid container item xs={12} spacing={2}>
-              <Grid item xs={6}>
+            <Grid container spacing={2}>
+              <Grid size={6}>
                 <FormControl fullWidth sx={{ mb: 2 }}>
-                  <InputLabel
-                    id="customer-id-label"
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                  >
+                  <InputLabel id="customer-id-label" shrink>
                     Stock Status
                   </InputLabel>
                   <Select
                     labelId="demo-simple-select-standard-label"
                     id="demo-simple-select-standard"
                     value={stocksData.status || "NA"}
-                    onChange={handleEditStocks}
+                    onChange={handleSelectChange}
                     label="Status"
                     name="status"
                   >
@@ -111,7 +120,7 @@ const EditStocks = (props:EditStocksProps) => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={6}>
                 <TextField
                   label="Stock Name"
                   fullWidth
@@ -124,8 +133,8 @@ const EditStocks = (props:EditStocksProps) => {
                 />
               </Grid>
             </Grid>
-            <Grid container item xs={12} spacing={2}>
-              <Grid item xs={4}>
+            <Grid container spacing={2}>
+              <Grid size={4}>
                 <TextField
                   label="Average Price"
                   placeholder="Enter Average Price"
@@ -135,7 +144,7 @@ const EditStocks = (props:EditStocksProps) => {
                   name="avg"
                 />
               </Grid>
-              <Grid item xs={4}>
+              <Grid size={4}>
                 <TextField
                   label="Stock Quantity"
                   placeholder="Enter Stock Quantity"
@@ -144,7 +153,7 @@ const EditStocks = (props:EditStocksProps) => {
                   name="quantity"
                 />
               </Grid>
-              <Grid item xs={4}>
+              <Grid size={4}>
                 <TextField
                   label="Buying Tax"
                   placeholder="Enter Buying Tax"
@@ -154,8 +163,8 @@ const EditStocks = (props:EditStocksProps) => {
                 />
               </Grid>
             </Grid>
-            <Grid container item xs={12} spacing={2} sx={{ marginTop: 0 }}>
-              <Grid item xs={6}>
+            <Grid container spacing={2} sx={{ marginTop: 0 }}>
+              <Grid size={6}>
                 <TextField
                   fullWidth
                   type="date"
@@ -165,7 +174,7 @@ const EditStocks = (props:EditStocksProps) => {
                   name="buyDate"
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={6}>
                 <TextField
                   fullWidth
                   disabled
@@ -178,8 +187,8 @@ const EditStocks = (props:EditStocksProps) => {
             </Grid>
 
             <>
-              <Grid container item xs={12} spacing={2} sx={{ marginTop: 0 }}>
-                <Grid item xs={4}>
+              <Grid container spacing={2} sx={{ marginTop: 0 }}>
+                <Grid size={4}>
                   <TextField
                     placeholder="Enter Sell Price"
                     value={stocksData.sellPrice}
@@ -188,7 +197,7 @@ const EditStocks = (props:EditStocksProps) => {
                   />
                 </Grid>
 
-                <Grid item xs={4}>
+                <Grid size={4}>
                   <TextField
                     placeholder="Enter Selling Tax"
                     value={stocksData.sellTax}
@@ -196,7 +205,7 @@ const EditStocks = (props:EditStocksProps) => {
                     name="sellTax"
                   />
                 </Grid>
-                <Grid item xs={4}>
+                <Grid size={4}>
                   <TextField
                     placeholder="Enter Dividends"
                     value={stocksData.dividends}
@@ -205,8 +214,8 @@ const EditStocks = (props:EditStocksProps) => {
                   />
                 </Grid>
               </Grid>
-              <Grid container item xs={12} spacing={2} sx={{ marginTop: 0 }}>
-                <Grid item xs={6}>
+              <Grid container spacing={2} sx={{ marginTop: 0 }}>
+                <Grid size={6}>
                   <TextField
                     fullWidth
                     type="date"

@@ -13,14 +13,14 @@ export default function CustomSnackbar() {
     if (reason === "clickaway") {
       return;
     }
-
+    console.log(event);
     setSnackBarOptions({ ...snackBarOptions, open: false });
   };
 
   return (
     <div>
       <Snackbar
-      anchorOrigin={{ vertical:"bottom", horizontal:"right" }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         open={snackBarOptions.open}
         autoHideDuration={3500}
         onClose={handleClose}
@@ -28,7 +28,6 @@ export default function CustomSnackbar() {
         <Alert
           onClose={handleClose}
           severity={snackBarOptions.severity}
-          
           sx={{ width: "100%" }}
         >
           {snackBarOptions.message}

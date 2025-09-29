@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Typography } from "@mui/material";
+import Typography from "@mui/material/Typography";
 import CustomButton from "../../../core/CustomButton/CustomButton";
 import MutualFundCard from "./Components/MutualFundCards";
 import CenterTabs from "./Components/MutualFundTabs";

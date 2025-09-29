@@ -1,9 +1,10 @@
-import { FormControl, SelectChangeEvent } from "@mui/material";
+import { SelectChangeEvent } from "@mui/material/Select";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import InputAdornment from "@mui/material/InputAdornment";
+import FormControl from "@mui/material/FormControl";
 import { ThemeProvider } from "@mui/material/styles";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Theme } from "../../../../core/MUI/Theme";
@@ -229,7 +230,7 @@ const StocksModal = ({
               <GlassSelect
                 labelId="demo-simple-select-standard-label"
                 id="demo-simple-select-standard"
-                value={transactionData?.type || ""}
+                value={ ""}
                 onChange={handleSelectChange}
                 label="Type"
                 name="type"
@@ -249,7 +250,7 @@ const StocksModal = ({
                   fullWidth
                   label="Amount"
                   placeholder="0"
-                  value={transactionData?.amount || ""}
+                  value={ ""}
                   onChange={handleTransactionData}
                   name="amount"
                   type="number"
@@ -264,7 +265,7 @@ const StocksModal = ({
                 <GlassTextField
                   fullWidth
                   label="Credited Date"
-                  value={transactionData?.date || ""}
+                  value={ ""}
                   onChange={handleTransactionData}
                   name="date"
                   type="date"
@@ -280,7 +281,7 @@ const StocksModal = ({
               <GlassSelect
                 labelId="demo-simple-select-standard-label"
                 id="demo-simple-select-standard"
-                value={transactionData?.transactionType || ""}
+                value={ ""}
                 onChange={handleSelectChange}
                 label="Select Transaction Type"
                 name="transactionType"
@@ -329,7 +330,7 @@ const StocksModal = ({
             <Button
               variant="contained"
               data-testid="handle-goals-button"
-              onClick={handleIncome}
+              onClick={handleStock}
               sx={{
                 borderRadius: 3,
                 textTransform: "none",

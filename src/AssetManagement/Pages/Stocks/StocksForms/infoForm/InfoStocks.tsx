@@ -1,6 +1,10 @@
 import CustomButton from "../../../../../core/CustomButton/CustomButton";
 import { useEffect, useState } from "react";
-import { Box, Grid, Modal, ThemeProvider } from "@mui/material";
+import Box from "@mui/material/Box";
+import Grid from "@mui/material/Grid";
+import Modal from "@mui/material/Modal";
+import { ThemeProvider } from "@mui/material/styles";
+
 import { Theme } from "../../../../../core/MUI/Theme";
 import { callAPI } from "../../../../../services/apiServices";
 import { ConfigMethod, ConfigUrl } from "../../../../../config/ConfigAPI";
@@ -42,31 +46,31 @@ const InfoStocks = (props: InfoStocksProps) => {
               //   transform:"translate(-50%,-50%)"
             }}
           >
-            <h2>Stock Details </h2>
+            {stockData && <h2>Stock Details </h2>}
 
-            <Grid container item xs={12} spacing={2}>
-              <Grid item xs={6}></Grid>
-              <Grid item xs={6}></Grid>
+            <Grid container spacing={2}>
+              <Grid size={6}></Grid>
+              <Grid size={6}></Grid>
             </Grid>
-            <Grid container item xs={12} spacing={2}>
-              <Grid item xs={4}></Grid>
-              <Grid item xs={4}></Grid>
-              <Grid item xs={4}></Grid>
+            <Grid container spacing={2}>
+              <Grid size={4}></Grid>
+              <Grid size={4}></Grid>
+              <Grid size={4}></Grid>
             </Grid>
-            <Grid container item xs={12} spacing={2} sx={{ marginTop: 0 }}>
-              <Grid item xs={6}></Grid>
-              <Grid item xs={6}></Grid>
+            <Grid container spacing={2} sx={{ marginTop: 0 }}>
+              <Grid size={6}></Grid>
+              <Grid size={6}></Grid>
             </Grid>
 
             <>
-              <Grid container item xs={12} spacing={2} sx={{ marginTop: 0 }}>
-                <Grid item xs={4}></Grid>
+              <Grid container spacing={2} sx={{ marginTop: 0 }}>
+                <Grid size={4}></Grid>
 
-                <Grid item xs={4}></Grid>
-                <Grid item xs={4}></Grid>
+                <Grid size={4}></Grid>
+                <Grid size={4}></Grid>
               </Grid>
-              <Grid container item xs={12} spacing={2} sx={{ marginTop: 0 }}>
-                <Grid item xs={6}></Grid>
+              <Grid container spacing={2} sx={{ marginTop: 0 }}>
+                <Grid size={6}></Grid>
               </Grid>
             </>
 

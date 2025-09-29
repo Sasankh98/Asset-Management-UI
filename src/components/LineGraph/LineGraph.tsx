@@ -9,7 +9,10 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { Box, Typography, Paper, useTheme } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
 
 interface DataPoint {
   date: string;
@@ -316,14 +319,14 @@ export default function LineGraph({ monthlyData }: LineGraphProps) {
               dataKey="date"
               tickFormatter={(date) => new Date(date).getDate().toString()}
               stroke={theme.palette.text.secondary}
-              tick={{ fontSize: 12,fill: 'white' }}
+              tick={{ fontSize: 12, fill: "white" }}
               tickLine={{ stroke: theme.palette.divider }}
               axisLine={{ stroke: theme.palette.divider }}
             />
             <YAxis
               tickFormatter={(value) => formatCurrency(value)}
               stroke={theme.palette.text.secondary}
-              tick={{ fontSize: 12,fill: 'white' }}
+              tick={{ fontSize: 12, fill: "white" }}
               tickLine={{ stroke: theme.palette.divider }}
               axisLine={{ stroke: theme.palette.divider }}
               allowDecimals={true}

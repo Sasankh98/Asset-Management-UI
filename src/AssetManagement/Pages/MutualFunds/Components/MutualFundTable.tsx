@@ -1,19 +1,17 @@
 import { MutualFund } from "../../../../../server/types";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Headers } from "../../../../config/config";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Grid,
-  TableSortLabel,
-  IconButton,
-  TablePagination,
-} from "@mui/material";
+import TablePagination from "@mui/material/TablePagination";
+import Paper from "@mui/material/Paper";
+import Table from "@mui/material/Table";
+import Grid from "@mui/material/Grid";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import TableSortLabel from "@mui/material/TableSortLabel";
+import IconButton from "@mui/material/IconButton";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { formatCurrency } from "../../../../utils/currencyConverter";
 
@@ -124,6 +122,7 @@ const MutualFundTable = ({
     newPage: number
   ) => {
     setPage(newPage);
+    console.log(event)
   };
 
   const handleChangeRowsPerPage = (

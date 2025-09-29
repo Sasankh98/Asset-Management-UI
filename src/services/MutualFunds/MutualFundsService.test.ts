@@ -19,20 +19,22 @@ describe("Mutual Funds Service", () => {
   it("Should call mutual funds get service when called", async () => {
     const mockResponse: MutualFundsDTO = {
       status: "success",
-      data: {
-        id: 1,
-        fundName: "ABC Growth Fund",
-        category: "Equity",
-        invested: "10000.00",
-        currentValue: "10000.00",
-        nav: "10000.00",
-        units: 10000,
-        user: "sasankh",
-        updatedAt: "2025-09-28T09:17:48.296Z",
-        createdAt: "2025-09-28T09:17:48.296Z",
-        gain_loss: null,
-        targetProgress: null,
-      },
+      data: [
+        {
+          id: 1,
+          fundName: "ABC Growth Fund",
+          category: "Equity",
+          invested: 10000.0,
+          currentValue: 10000.0,
+          nav: 10000.0,
+          units: 10000,
+          user: "sasankh",
+          updatedAt: "2025-09-28T09:17:48.296Z",
+          createdAt: "2025-09-28T09:17:48.296Z",
+          gain_loss: 3000,
+          targetProgress: 9,
+        },
+      ],
     };
 
     mockedGet.mockResolvedValue(mockResponse);
@@ -54,20 +56,22 @@ describe("Mutual Funds Service", () => {
   it("Should call mutual funds post service when called", async () => {
     const mockResponse: MutualFundsDTO = {
       status: "success",
-      data: {
-        id: 1,
-        fundName: "ABC Growth Fund",
-        category: "Equity",
-        invested: "10000.00",
-        currentValue: "10000.00",
-        nav: "10000.00",
-        units: 10000,
-        user: "sasankh",
-        updatedAt: "2025-09-28T09:17:48.296Z",
-        createdAt: "2025-09-28T09:17:48.296Z",
-        gain_loss: null,
-        targetProgress: null,
-      },
+      data: [
+        {
+          id: 1,
+          fundName: "ABC Growth Fund",
+          category: "Equity",
+          invested: 10000.0,
+          currentValue: 10000.0,
+          nav: 10000.0,
+          units: 10000,
+          user: "sasankh",
+          updatedAt: "2025-09-28T09:17:48.296Z",
+          createdAt: "2025-09-28T09:17:48.296Z",
+          gain_loss: 3000,
+          targetProgress: 9,
+        },
+      ],
     };
 
     const mockRequest: CreateMutualFundsDTO = {

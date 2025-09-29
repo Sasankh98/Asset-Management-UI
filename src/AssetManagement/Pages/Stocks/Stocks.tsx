@@ -3,8 +3,6 @@ import StocksTable from "./StocksTable/StocksTable";
 import { callAPI } from "../../../services/apiServices";
 import { ConfigMethod, ConfigUrl } from "../../../config/ConfigAPI";
 import CustomButton from "../../../core/CustomButton/CustomButton";
-// import { CreateStocks } from "./StocksForms";
-// import Details from "./Overview/Details";
 import StocksModal from "./StocksForms/StocksModal";
 import { useAssetManagementContext } from "../../ContextProvider/ContextProvider";
 import StocksService from "../../../services/StocksService/StocksService";

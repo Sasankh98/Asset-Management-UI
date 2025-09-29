@@ -1,6 +1,6 @@
 import {
   styled,
-} from "@mui/material";
+} from "@mui/material/styles";
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Modal from '@mui/material/Modal'

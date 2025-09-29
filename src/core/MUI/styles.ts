@@ -1,9 +1,8 @@
-import {
-  InputLabel,
-  MenuItem,
-  Select,
-  styled,
-} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+import InputLabel from "@mui/material/InputLabel";
+
 import Modal from "@mui/material/Modal";
 import TextField from "@mui/material/TextField";
 

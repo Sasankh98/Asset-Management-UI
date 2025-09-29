@@ -1,14 +1,23 @@
-import {
-  Box,
-  FormControl,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Modal,
-  Select,
-  TextField,
-  ThemeProvider,
-} from "@mui/material";
+import { ThemeProvider } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import FormControl from "@mui/material/FormControl";
+import Grid from "@mui/material/Grid";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import Modal from "@mui/material/Modal";
+import Select from "@mui/material/Select";
+import TextField from "@mui/material/TextField";
+import type { SelectChangeEvent } from "@mui/material/Select";
+// import {
+//   Box,
+//   Grid,
+//   FormControl,
+//   InputLabel,
+//   MenuItem,
+//   Modal,
+//   Select,
+//   TextField,
+// } from "../../../../../core/MUI/components";
 import { ConfigMethod, ConfigUrl } from "../../../../../config/ConfigAPI";
 import CustomButton from "../../../../../core/CustomButton/CustomButton";
 import { Theme } from "../../../../../core/MUI/Theme";
@@ -20,7 +29,7 @@ interface CreateStocksProps {
   open: boolean;
   handleClose: () => void;
 }
-const CreateStocks = (props:CreateStocksProps) => {
+const CreateStocks = (props: CreateStocksProps) => {
   // const [loader,setLoader] = useState(false)
   const [show, setShow] = useState(false);
   const [stocksData, setStocksData] = useState({
@@ -37,10 +46,23 @@ const CreateStocks = (props:CreateStocksProps) => {
     status: "active",
   });
 
-  const handleCreateStocks = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleCreateStocks = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setStocksData({ ...stocksData, [name]: value });
   };
+
+  const handleSelectChange = (event: SelectChangeEvent) => {
+  // event.target.value is the new value.
+  // MUI's Select target may not have exact HTMLInputElement typing for .name,
+  // so cast to access name safely:
+  const target = event.target as HTMLInputElement & { name?: string };
+  const name = target.name;
+  const value = event.target.value;
+  if (!name) return;
+  setStocksData((prev) => ({ ...prev, [name]: value }));
+};
 
   useEffect(() => {
     if (stocksData.status === "sold") {
@@ -82,14 +104,12 @@ const CreateStocks = (props:CreateStocksProps) => {
           >
             <h2>Create New Stocks</h2>
 
-            <Grid container item xs={12} spacing={2}>
-              <Grid item xs={6}>
+            <Grid container spacing={2}>
+              <Grid size={6}>
                 <FormControl fullWidth sx={{ mb: 2 }}>
                   <InputLabel
                     id="customer-id-label"
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
+                    shrink
                   >
                     Stock Status
                   </InputLabel>
@@ -97,7 +117,7 @@ const CreateStocks = (props:CreateStocksProps) => {
                     labelId="demo-simple-select-standard-label"
                     id="demo-simple-select-standard"
                     value={stocksData.status}
-                    onChange={handleCreateStocks}
+                    onChange={handleSelectChange}
                     label="Status"
                     name="status"
                   >
@@ -107,7 +127,7 @@ const CreateStocks = (props:CreateStocksProps) => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={6}>
                 <TextField
                   fullWidth
                   placeholder="Enter Share Name"
@@ -116,22 +136,22 @@ const CreateStocks = (props:CreateStocksProps) => {
                 />
               </Grid>
             </Grid>
-            <Grid container item xs={12} spacing={2}>
-              <Grid item xs={4}>
+            <Grid container spacing={2}>
+              <Grid size={4}>
                 <TextField
                   placeholder="Enter Average Price"
                   onChange={handleCreateStocks}
                   name="avg"
                 />
               </Grid>
-              <Grid item xs={4}>
+              <Grid size={4}>
                 <TextField
                   placeholder="Enter Stock Quantity"
                   onChange={handleCreateStocks}
                   name="quantity"
                 />
               </Grid>
-              <Grid item xs={4}>
+              <Grid size={4}>
                 <TextField
                   placeholder="Enter Buying Tax"
                   onChange={handleCreateStocks}
@@ -139,8 +159,8 @@ const CreateStocks = (props:CreateStocksProps) => {
                 />
               </Grid>
             </Grid>
-            <Grid container item xs={12} spacing={2} sx={{ marginTop: 0 }}>
-              <Grid item xs={6}>
+            <Grid container  spacing={2} sx={{ marginTop: 0 }}>
+              <Grid size={6}>
                 <TextField
                   fullWidth
                   type="date"
@@ -149,7 +169,7 @@ const CreateStocks = (props:CreateStocksProps) => {
                   name="buyDate"
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={6}>
                 <TextField
                   fullWidth
                   disabled
@@ -163,8 +183,8 @@ const CreateStocks = (props:CreateStocksProps) => {
 
             {show && (
               <>
-                <Grid container item xs={12} spacing={2} sx={{ marginTop: 0 }}>
-                  <Grid item xs={4}>
+                <Grid container  spacing={2} sx={{ marginTop: 0 }}>
+                  <Grid size={4}>
                     <TextField
                       placeholder="Enter Sell Price"
                       onChange={handleCreateStocks}
@@ -172,14 +192,14 @@ const CreateStocks = (props:CreateStocksProps) => {
                     />
                   </Grid>
 
-                  <Grid item xs={4}>
+                  <Grid size={4}>
                     <TextField
                       placeholder="Enter Selling Tax"
                       onChange={handleCreateStocks}
                       name="sellTax"
                     />
                   </Grid>
-                  <Grid item xs={4}>
+                  <Grid size={4}>
                     <TextField
                       placeholder="Enter Dividends"
                       onChange={handleCreateStocks}
@@ -187,8 +207,8 @@ const CreateStocks = (props:CreateStocksProps) => {
                     />
                   </Grid>
                 </Grid>
-                <Grid container item xs={12} spacing={2} sx={{ marginTop: 0 }}>
-                  <Grid item xs={6}>
+                <Grid container  spacing={2} sx={{ marginTop: 0 }}>
+                  <Grid size={6}>
                     <TextField
                       fullWidth
                       type="date"

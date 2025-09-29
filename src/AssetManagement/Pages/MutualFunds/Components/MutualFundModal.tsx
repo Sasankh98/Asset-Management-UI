@@ -1,4 +1,5 @@
-import { FormControl, SelectChangeEvent } from "@mui/material";
+import { SelectChangeEvent } from "@mui/material/Select";
+import FormControl from "@mui/material/FormControl";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";

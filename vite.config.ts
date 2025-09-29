@@ -4,7 +4,7 @@ import cssInjectedByJsPlugin from "vite-plugin-css-injected-by-js";
 import { coverageConfigDefaults } from "vitest/config";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default defineConfig(({ command, mode }) => ({
+export default defineConfig(({ mode }) => ({
   plugins: [cssInjectedByJsPlugin()],
   server: {
     port: 5173,

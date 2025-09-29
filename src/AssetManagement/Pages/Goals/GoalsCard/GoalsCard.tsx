@@ -17,7 +17,7 @@ import Fade from "@mui/material/Fade";
 import Skeleton from "@mui/material/Skeleton";
 import { Dispatch, SetStateAction } from "react";
 import { getTimeAgo } from "../../../../utils/dateTime";
-import { Box } from "@mui/material";
+import  Box  from "@mui/material/Box";
 
 interface GoalsCardProps {
   goal: Goals;
