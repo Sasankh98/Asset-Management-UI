@@ -12,17 +12,27 @@ const Stocks = () => {
   const [type, setType] = useState<"create" | "edit" | "info" | "">("")
   const {setRefreshData} = useAssetManagementContext();
 
-  useEffect(() => {
-    StocksService().getStocksDetails().then((res) => {
+useEffect(() => {
+  (async () => {
+    try {
+      const res: any = await StocksService().getStocksDetails();
       setStocksData(res?.data);
-    });
-  }, []);
+    } catch (err) {
+      console.error("Failed to fetch stocks:", err);
+    }
+  })();
+}, []);
 
-  useEffect(()=>{
-    StocksService().getDailyStocksDetails("BPCL.BSE").then((res)=>{
-      console.log("Daily Stock Data:", res)
-    })
-  },[])
+useEffect(() => {
+  (async () => {
+    try {
+      const res: any = await StocksService().getDailyStocksDetails("BPCL.BSE");
+      console.log("Daily Stock Data:", res);
+    } catch (err) {
+      console.error("Failed to fetch daily stock data:", err);
+    }
+  })();
+}, []);
 
   const handleAddStocksOpen = () => {
     setAddStocksOpen(true);
