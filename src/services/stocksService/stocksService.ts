@@ -38,6 +38,17 @@ function StocksService() {
         throw error; // rethrowing the error so the caller can handle it
       }
     },
+    getStocksByIdDetails: async (id: number): Promise<StocksDTO | null> => {
+      try {
+        const response = await httpService.get<StocksDTO>(
+          `${baseURL}/stocks/findById?id=${id}`
+        );
+        return response as StocksDTO;
+      } catch (error) {
+        console.error("error fetching Salary details:", error);
+        throw error; // rethrowing the error so the caller can handle it
+      }
+    },
     getDailyStocksDetails: async (symbol:string): Promise<unknown | null> => {
       try {
         const response = await httpService.get<unknown>(

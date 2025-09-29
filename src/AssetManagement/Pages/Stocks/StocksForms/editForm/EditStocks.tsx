@@ -8,12 +8,12 @@ import MenuItem from "@mui/material/MenuItem";
 import Modal from "@mui/material/Modal";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
-import { ConfigMethod, ConfigUrl } from "../../../../../config/ConfigAPI";
 import CustomButton from "../../../../../core/CustomButton/CustomButton";
 import { Theme } from "../../../../../core/MUI/Theme";
 import React, { useEffect, useState } from "react";
-import { callAPI } from "../../../../../services/apiServices";
 import "./editStocks.css";
+import StocksService from "../../../../../services/StocksService/StocksService";
+import { CreateStocksDTO, Stock } from "../../../../../../server/types";
 
 interface EditStocksProps {
   open: boolean;
@@ -22,58 +22,66 @@ interface EditStocksProps {
 }
 const EditStocks = (props: EditStocksProps) => {
   // const [loader,setLoader] = useState(false)
-  const [stocksData, setStocksData] = useState({
-    id: "",
+  const [stocksData, setStocksData] = useState<Stock | undefined>({
+    id: 0,
     stockName: "",
-    avg: "",
-    quantity: "",
-    buyTax: "",
-    marketPrice: "",
-    sellPrice: "",
-    dividends: "",
-    sellTax: "",
+    avg: 0,
+    quantity: 0,
+    buyTax: 0,
+    marketPrice: 0,
+    sellPrice: 0,
+    dividends: 0,
+    sellTax: 0,
     sellDate: "",
     status: "",
-    buyDate:""
+    buyDate: "",
+    totalInvested: 0,
+    currentValue: 0,
+    totalReturns: 0,
+    profitLoss: 0,
+    netreturn: 0,
+    netProfitLoss: 0,
+    netProfitLossPercent: 0,
+    user: "",
+    createdAt: "",
+    updatedAt: "",
   });
 
-  const handleEditStocks = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    setStocksData({ ...stocksData, [name]: value });
-  };
-
-  const handleSelectChange = (event: SelectChangeEvent) => {
-  // event.target.value is the new value.
-  // MUI's Select target may not have exact HTMLInputElement typing for .name,
-  // so cast to access name safely:
-  const target = event.target as HTMLInputElement & { name?: string };
-  const name = target.name;
-  const value = event.target.value;
-  if (!name) return;
-  setStocksData((prev) => ({ ...prev, [name]: value }));
+const handleEditStocks = (
+  event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+) => {
+  const { name, value } = event.target;
+  setStocksData((prev) => ({ ...(prev ?? {}), [name]: value } as Stock));
 };
 
+  const handleSelectChange = (event: SelectChangeEvent) => {
+    // event.target.value is the new value.
+    // MUI's Select target may not have exact HTMLInputElement typing for .name,
+    // so cast to access name safely:
+    const target = event.target as HTMLInputElement & { name?: string };
+    const name = target.name;
+    const value = event.target.value;
+    if (!name) return;
+    setStocksData((prev) => ({ ...(prev ?? {}), [name]: value } as Stock));
+  };
+
   useEffect(() => {
-    callAPI(ConfigUrl.StocksById, ConfigMethod.postMethod, {
-      id: props.data[0],
-    }).then((res) => {
-      // setIdData(res.data[0])
-      setStocksData((prev) => ({
-        ...prev,
-        ...res.data[0],
-      }));
-    });
+    StocksService()
+      .getStocksByIdDetails(props.data[0])
+      .then((res) => {
+        setStocksData(res?.data[0]);
+        // setStocksData((prev) => ({
+        //   ...prev,
+        //   ...res.data[0],
+        // }));
+      });
   }, [props.data]);
 
   const handleSubmit = async () => {
     // setLoader(true)
     console.log(stocksData);
     try {
-      const response = await callAPI(
-        `${ConfigUrl.Stocks}/?id=${stocksData?.id}&stockName=${stocksData?.stockName}`,
-        ConfigMethod.patchMethod,
-        stocksData
-      );
+      const response = await StocksService().updateStockDetails(stocksData?.id,stocksData as CreateStocksDTO)
       if (response) props.handleClose();
       console.log(response);
     } catch (err) {
@@ -109,7 +117,7 @@ const EditStocks = (props: EditStocksProps) => {
                   <Select
                     labelId="demo-simple-select-standard-label"
                     id="demo-simple-select-standard"
-                    value={stocksData.status || "NA"}
+                    value={stocksData?.status || "NA"}
                     onChange={handleSelectChange}
                     label="Status"
                     name="status"
@@ -127,8 +135,8 @@ const EditStocks = (props: EditStocksProps) => {
                   disabled
                   placeholder="Enter Share Name"
                   onChange={handleEditStocks}
-                  // defaultValue={stocksData.stockName}
-                  value={stocksData.stockName}
+                  // defaultValue={stocksData?.stockName}
+                  value={stocksData?.stockName}
                   name="stockName"
                 />
               </Grid>
@@ -138,8 +146,8 @@ const EditStocks = (props: EditStocksProps) => {
                 <TextField
                   label="Average Price"
                   placeholder="Enter Average Price"
-                  value={stocksData.avg}
-                  // defaultValue={stocksData.avg}
+                  value={stocksData?.avg}
+                  // defaultValue={stocksData?.avg}
                   onChange={handleEditStocks}
                   name="avg"
                 />
@@ -148,7 +156,7 @@ const EditStocks = (props: EditStocksProps) => {
                 <TextField
                   label="Stock Quantity"
                   placeholder="Enter Stock Quantity"
-                  value={stocksData.quantity}
+                  value={stocksData?.quantity}
                   onChange={handleEditStocks}
                   name="quantity"
                 />
@@ -157,7 +165,7 @@ const EditStocks = (props: EditStocksProps) => {
                 <TextField
                   label="Buying Tax"
                   placeholder="Enter Buying Tax"
-                  value={stocksData.buyTax}
+                  value={stocksData?.buyTax}
                   onChange={handleEditStocks}
                   name="buyTax"
                 />
@@ -169,7 +177,7 @@ const EditStocks = (props: EditStocksProps) => {
                   fullWidth
                   type="date"
                   placeholder="Buy Date"
-                  value={stocksData.buyDate}
+                  value={stocksData?.buyDate}
                   onChange={handleEditStocks}
                   name="buyDate"
                 />
@@ -191,7 +199,7 @@ const EditStocks = (props: EditStocksProps) => {
                 <Grid size={4}>
                   <TextField
                     placeholder="Enter Sell Price"
-                    value={stocksData.sellPrice}
+                    value={stocksData?.sellPrice}
                     onChange={handleEditStocks}
                     name="sellPrice"
                   />
@@ -200,7 +208,7 @@ const EditStocks = (props: EditStocksProps) => {
                 <Grid size={4}>
                   <TextField
                     placeholder="Enter Selling Tax"
-                    value={stocksData.sellTax}
+                    value={stocksData?.sellTax}
                     onChange={handleEditStocks}
                     name="sellTax"
                   />
@@ -208,7 +216,7 @@ const EditStocks = (props: EditStocksProps) => {
                 <Grid size={4}>
                   <TextField
                     placeholder="Enter Dividends"
-                    value={stocksData.dividends}
+                    value={stocksData?.dividends}
                     onChange={handleEditStocks}
                     name="dividends"
                   />
@@ -219,7 +227,7 @@ const EditStocks = (props: EditStocksProps) => {
                   <TextField
                     fullWidth
                     type="date"
-                    value={stocksData.sellDate}
+                    value={stocksData?.sellDate}
                     onChange={handleEditStocks}
                     name="sellDate"
                     placeholder="Sell Date"

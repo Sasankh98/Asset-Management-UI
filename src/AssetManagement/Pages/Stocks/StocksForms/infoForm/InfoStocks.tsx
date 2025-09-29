@@ -6,8 +6,8 @@ import Modal from "@mui/material/Modal";
 import { ThemeProvider } from "@mui/material/styles";
 
 import { Theme } from "../../../../../core/MUI/Theme";
-import { callAPI } from "../../../../../services/apiServices";
-import { ConfigMethod, ConfigUrl } from "../../../../../config/ConfigAPI";
+import StocksService from "../../../../../services/StocksService/StocksService";
+import { Stock } from "../../../../../../server/types";
 
 interface InfoStocksProps {
   open: boolean;
@@ -15,17 +15,12 @@ interface InfoStocksProps {
   data: any[];
 }
 const InfoStocks = (props: InfoStocksProps) => {
-  const [stockData, setStockData] = useState({});
+  const [stockData, setStockData] = useState<Stock | undefined>(undefined);
 
   useEffect(() => {
-    callAPI(ConfigUrl.StocksById, ConfigMethod.postMethod, {
-      id: props.data[0],
-    }).then((res) => {
-      // setIdData(res.data[0])
-      setStockData((prev) => ({
-        ...prev,
-        ...res.data[0],
-      }));
+      StocksService().getStocksByIdDetails(props.data[0]).then((res) => {
+      setStockData(res?.data[0])
+      
     });
   }, [props.data]);
 

@@ -18,12 +18,12 @@ import type { SelectChangeEvent } from "@mui/material/Select";
 //   Select,
 //   TextField,
 // } from "../../../../../core/MUI/components";
-import { ConfigMethod, ConfigUrl } from "../../../../../config/ConfigAPI";
 import CustomButton from "../../../../../core/CustomButton/CustomButton";
 import { Theme } from "../../../../../core/MUI/Theme";
 import { useEffect, useState } from "react";
-import { callAPI } from "../../../../../services/apiServices";
 import "./createStocks.css";
+import StocksService from "../../../../../services/StocksService/StocksService";
+import { CreateStocksDTO } from "../../../../../../server/types";
 
 interface CreateStocksProps {
   open: boolean;
@@ -32,15 +32,15 @@ interface CreateStocksProps {
 const CreateStocks = (props: CreateStocksProps) => {
   // const [loader,setLoader] = useState(false)
   const [show, setShow] = useState(false);
-  const [stocksData, setStocksData] = useState({
+  const [stocksData, setStocksData] = useState<CreateStocksDTO>({
     stockName: "",
-    avg: "",
-    quantity: "",
+    avg: 0,
+    quantity: 0,
+    buyTax: 0,
+    buyDate: "",
     // SellPrice: "",
     // Dividends: "",
-    buyTax: "",
     // SellingTax: "",
-    buyDate: "",
     // SellDate: "",
     user: "Sasankh",
     status: "active",
@@ -73,9 +73,7 @@ const CreateStocks = (props: CreateStocksProps) => {
     props.handleClose();
     // setLoader(true)
     try {
-      const response = await callAPI(
-        ConfigUrl.Stocks,
-        ConfigMethod.postMethod,
+      const response = await StocksService().postStockDetails(
         stocksData
       );
       //   if (response) setLoader(false)

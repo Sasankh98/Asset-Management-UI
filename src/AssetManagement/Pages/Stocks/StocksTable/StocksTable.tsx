@@ -19,7 +19,7 @@ import { Stock } from "../../../../../server/types";
 
 type TableRow = (string | number)[];
 
-export default function StocksTable(props: { stocksData: Stock[] }) {
+export default function StocksTable(props: { stocksData: Stock[] | undefined }) {
   // Pagination
   const [tableBody, setTableBody] = useState([] as TableRow[]); //
   const [rowsPerPage, setRowsPerPage] = useState(5);
