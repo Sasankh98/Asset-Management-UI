@@ -1,5 +1,4 @@
 import  { useEffect, useState } from "react";
-import { Descriptions } from "antd";
 import { ConfigMethod, ConfigUrl } from "../../../../config/ConfigAPI";
 import { callAPI } from "../../../../services/apiServices";
 const Details = () => {

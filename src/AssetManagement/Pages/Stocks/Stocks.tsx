@@ -4,7 +4,7 @@ import { callAPI } from "../../../services/apiServices";
 import { ConfigMethod, ConfigUrl } from "../../../config/ConfigAPI";
 import CustomButton from "../../../core/CustomButton/CustomButton";
 // import { CreateStocks } from "./StocksForms";
-import Details from "./Overview/Details";
+// import Details from "./Overview/Details";
 import StocksModal from "./StocksForms/StocksModal";
 import { useAssetManagementContext } from "../../ContextProvider/ContextProvider";
 import StocksService from "../../../services/StocksService/StocksService";
@@ -37,7 +37,7 @@ const Stocks = () => {
 
   return (
     <div data-testid="stocks-wrapper">
-      <Details />
+      {/* <Details /> */}
       {addStocksOpen ? (
         // <CreateStocks open={addStocksOpen} handleClose={handleAddStocksClose} />
         <StocksModal open={addStocksOpen} handleClose={handleAddStocksClose} type={type} setRefreshData={setRefreshData}/>
