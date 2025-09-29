@@ -18,11 +18,11 @@ const Stocks = () => {
     });
   }, []);
 
-  // useEffect(()=>{
-  //   StocksService().getDailyStocksDetails("BPCL.BSE").then((res)=>{
-  //     console.log("Daily Stock Data:", res)
-  //   })
-  // },[])
+  useEffect(()=>{
+    StocksService().getDailyStocksDetails("BPCL.BSE").then((res)=>{
+      console.log("Daily Stock Data:", res)
+    })
+  },[])
 
   const handleAddStocksOpen = () => {
     setAddStocksOpen(true);
