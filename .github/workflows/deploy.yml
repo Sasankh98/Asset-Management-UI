@@ -1,22 +1,26 @@
-﻿name: Build and deploy to GitHub Pages
+﻿# .github/workflows/deploy.yml
+name: Build and deploy to GitHub Pages (with PAT)
 
 on:
   push:
     branches:
       - main
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+# give the job basic push permissions (PAT is also used)
+permissions:
+  contents: write
 
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Use Node.js
+      - name: Use Node.js 18
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: '18'
 
       - name: Install dependencies
         run: npm ci
@@ -24,9 +28,11 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages (using PAT)
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          branch: gh-pages
-          folder: dist
-          token: ${{ secrets.Asset_Management }}
+          branch: gh-pages           # target branch
+          folder: dist               # folder to deploy
+          clean: true
+          commit-message: "Deploy site from ${{ github.repository }}@${{ github.sha }}"
+          token: ${{ secrets.ASSET_MANAGEMENT }}
