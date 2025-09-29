@@ -5,7 +5,7 @@ import Login from "../../AssetManagement/Pages/Login/Login";
 
 const routes: RouteObject[] = [
   {
-    path: "/",
+    path: "Asset-Management-UI/",
     element: (
       <AssetManagementProvider>
         <Login />
@@ -13,7 +13,7 @@ const routes: RouteObject[] = [
     ),
   },
   {
-    path: "/:displayContent",  // Add explicit route for dashboard
+    path: "Asset-Management-UI/:displayContent",  // Add explicit route for dashboard
     element: (
       <AssetManagementProvider>
         <AssetManagement />
@@ -21,7 +21,7 @@ const routes: RouteObject[] = [
     ),
   },
   {
-    path: "/investments/:displayContent",  // Add explicit route for dashboard
+    path: "Asset-Management-UI/investments/:displayContent",  // Add explicit route for dashboard
     element: (
       <AssetManagementProvider>
         <AssetManagement />
@@ -29,7 +29,7 @@ const routes: RouteObject[] = [
     ),
   },
   {
-    path: "/salary/:displayContent",  // Add explicit route for dashboard
+    path: "Asset-Management-UI/salary/:displayContent",  // Add explicit route for dashboard
     element: (
       <AssetManagementProvider>
         <AssetManagement />

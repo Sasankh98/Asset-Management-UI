@@ -9,7 +9,7 @@ import AppLayout from "./components/AppLayout/AppLayout";
 import { BaseUrlContext } from "./components/Contexts/BaseUrlContext";
 
 function App() {
-  const baseUrl = "/"; // Set your base URL here
+  const baseUrl = "Asset-Management-UI/"; // Set your base URL here
   const router = createBrowserRouter(
     createRoutesFromElements(
         <Route path="/*" element={<AppLayout />} />
