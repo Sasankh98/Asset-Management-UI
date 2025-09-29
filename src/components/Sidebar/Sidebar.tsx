@@ -16,12 +16,12 @@ import { DashboardLayout } from "@toolpad/core/DashboardLayout";
 
 const NAVIGATION: Navigation = [
   {
-    segment: "dashboard",
+    segment: "Asset-Management-UI/dashboard",
     title: "Dashboard",
     icon: <DashboardIcon />,
   },
   {
-    segment: "investments",
+    segment: "Asset-Management-UI/investments",
     title: "Investments",
     icon: <ShowChartIcon />,
     children: [
@@ -48,12 +48,12 @@ const NAVIGATION: Navigation = [
     ],
   },
   {
-    segment: "calculator",
+    segment: "Asset-Management-UI/calculator",
     title: "Calculator",
     icon: <CalculateIcon />,
   },
   {
-    segment: "salary",
+    segment: "Asset-Management-UI/salary",
     title: "Salary",
     icon: <AccountBalanceIcon />,
     // children: [
@@ -70,7 +70,7 @@ const NAVIGATION: Navigation = [
     // ],
   },
   {
-    segment: "goals",
+    segment: "Asset-Management-UI/goals",
     title: "Goals",
     icon: <FlagCircleIcon />,
   },

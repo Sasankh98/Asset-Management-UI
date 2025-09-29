@@ -30,7 +30,7 @@ const Login = () => {
 
       if (response?.status === "success") {
         sessionStorage.setItem("token", response.token);
-        navigate(`/${DisplayContentEnum.dashboard}`); // Navigate to the displayContent path
+        navigate(`Asset-Management-UI/${DisplayContentEnum.dashboard}`); // Navigate to the displayContent path
       }
     } catch (err) {
       console.log(err);
