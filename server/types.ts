@@ -154,6 +154,9 @@ export interface MutualFundsDashboard {
   totalInvested: number;
   totalCurrentValue: number;
   totalGainLoss: number;
+  totalTargetAmount: number;
+  totalTargetProgress: number;
+  totalGainLossPercent: number;
 }
 export interface MutualFundsDashboardDTO {
   status: string;

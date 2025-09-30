@@ -11,7 +11,7 @@ import {
 interface MutualFundCardProps {
   header: string;
   value: string;
-  content: string;
+  content: string | number | undefined;
   icon: string;
   isColoured?: boolean;
 }
@@ -51,18 +51,21 @@ const MutualFundCard = ({
           </Typography>
           <Typography>{iconElement()}</Typography>
         </div>
-        <div style={{ textAlign: "left" }}>
-          {!isColoured ? (
+        {!isColoured ? (
+          <div style={{ textAlign: "left" }}>
             <Typography>{value}</Typography>
-          ) : (
+            <Typography variant="body2">{content}</Typography>
+          </div>
+        ) : (
+          <div style={{ textAlign: "left" }}>
             <Typography
               sx={value.includes("-") ? { color: "red" } : { color: "#22BB33" }}
             >
               {value}
             </Typography>
-          )}
-          <Typography variant="body2">{content}</Typography>
-        </div>
+            <Typography variant="body2" sx={value.includes("-") ? { color: "red" } : { color: "#22BB33" }}>{content}</Typography>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

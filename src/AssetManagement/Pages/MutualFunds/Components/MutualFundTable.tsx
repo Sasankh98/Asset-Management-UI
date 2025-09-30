@@ -14,6 +14,7 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 import IconButton from "@mui/material/IconButton";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { formatCurrency } from "../../../../utils/currencyConverter";
+import Typography from "@mui/material/Typography";
 
 interface IncomeTableProps {
   mutualFundDetails: MutualFund[];
@@ -204,6 +205,10 @@ const MutualFundTable = ({
                             }
                           >
                             {row}
+                          </TableCell>
+                        ) : index === 7 ? (
+                          <TableCell align="center" key={index}>
+                            <Typography variant="body2">{row} %</Typography>
                           </TableCell>
                         ) : (
                           <TableCell align="center" key={index}>

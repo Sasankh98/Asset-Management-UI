@@ -105,14 +105,14 @@ const MutualFunds = () => {
         <MutualFundCard
           header={mutualFundsDashboard.gainLoss}
           value={formatCurrency(mutualFundDashboardDetails?.totalGainLoss)}
-          content={mutualFundsDashboard.gainLoss}
+          content={`${mutualFundDashboardDetails?.totalGainLossPercent} %`}
           isColoured={true}
           icon={Icons.chart}
         />
         <MutualFundCard
           header={mutualFundsDashboard.targetProgress}
-          value={formatCurrency(mutualFundDashboardDetails?.totalGainLoss)}
-          content={mutualFundsDashboard.target}
+          value={`${mutualFundDashboardDetails?.totalTargetProgress} %`}
+          content={`Target: ${formatCurrency(mutualFundDashboardDetails?.totalTargetAmount)}`}
           icon={Icons.tracking}
         />
       </div>
