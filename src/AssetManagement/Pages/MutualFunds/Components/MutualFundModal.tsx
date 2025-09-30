@@ -379,7 +379,7 @@ const MutualFundModal = ({
             </Button>
             <Button
               variant="contained"
-              data-testid="handle-goals-button"
+              data-testid="handle-mutual-fund-button"
               onClick={handleMutualFund}
               sx={{
                 borderRadius: 3,
