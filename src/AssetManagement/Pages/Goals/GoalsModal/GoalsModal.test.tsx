@@ -6,7 +6,6 @@ import AssetManagementProvider, {
   RefreshDataProps,
 } from "../../../ContextProvider/ContextProvider";
 import { Goals } from "../../../../../server/types";
-import { httpService } from "../../../../services/axiosConnection";
 import { Dispatch, SetStateAction } from "react";
 const mockGoals: Goals = {
   id: 1,
@@ -25,14 +24,6 @@ const mockSetRefreshData = vi.fn() as Dispatch<
   SetStateAction<RefreshDataProps>
 >;
 
-vi.mock("../../../../Services/axiosConnection", () => ({
-  httpService: {
-    patch: vi.fn(),
-    post: vi.fn(),
-  },
-  baseURL: "example.com",
-}));
-
 const props = {
   open: true,
   type: "",
@@ -43,8 +34,6 @@ const props = {
 describe("Goals Card Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(httpService.patch).mockResolvedValue(mockGoals);
-    vi.mocked(httpService.post).mockResolvedValue(mockGoals);
   });
 
   afterEach(() => {

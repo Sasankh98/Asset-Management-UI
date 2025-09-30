@@ -4,8 +4,8 @@ import GoalsCard from "./GoalsCard";
 import { BrowserRouter } from "react-router-dom";
 import AssetManagementProvider from "../../../ContextProvider/ContextProvider";
 import { Goals } from "../../../../../server/types";
-import { httpService } from "../../../../services/axiosConnection";
 import { Dispatch, SetStateAction } from "react";
+
 const mockGoals: Goals = {
   id: 1,
   goal: "Marriage",
@@ -22,13 +22,6 @@ const mockGoals: Goals = {
 const mockSetGoalsOpen = vi.fn() as Dispatch<SetStateAction<boolean>>;
 const mockSetType = vi.fn() as Dispatch<SetStateAction<"" | "edit" | "create">>;
 
-vi.mock("../../../../Services/axiosConnection", () => ({
-  httpService: {
-    patch: vi.fn(),
-  },
-  baseURL: "example.com",
-}));
-
 const props = {
   goal: mockGoals,
   setGoalsOpen: mockSetGoalsOpen,
@@ -39,7 +32,6 @@ const props = {
 describe("Goals Card Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(httpService.patch).mockResolvedValue(mockGoals);
   });
 
   afterEach(() => {
