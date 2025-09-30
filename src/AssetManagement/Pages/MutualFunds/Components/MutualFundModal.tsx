@@ -15,7 +15,6 @@ import {
 } from "../../../ContextProvider/ContextProvider";
 import MutualFundService from "../../../../services/MutualFunds/MutualFundsService";
 import {
-  TransactionTypesEnum,
   MutualFundTypes,
 } from "../../../../shared/Constants";
 import {
@@ -49,12 +48,12 @@ const MutualFundModal = ({
     currentValue: 0,
     units: 0,
     nav: 0,
+    targetProgress: 0,
     user: "Sasankh",
   });
 
   const { setSnackBarOptions } = useAssetManagementContext();
-
-  const handleTransactionData = (
+  const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
@@ -68,7 +67,7 @@ const MutualFundModal = ({
     }
   };
 
-  const handleIncome = async () => {
+  const handleMutualFund = async () => {
     if (type === "create") {
       if (
         !mutualFundData.fundName ||
@@ -90,7 +89,7 @@ const MutualFundModal = ({
         });
         setRefreshData((prev) => ({
           ...prev,
-          refreshSalary: true,
+          refreshMutualFunds: true,
         }));
       }
     } else if (type === "edit" && mutualFundData) {
@@ -102,7 +101,7 @@ const MutualFundModal = ({
         handleClose();
         setRefreshData((prev) => ({
           ...prev,
-          refreshSalary: true,
+          refreshMutualFunds: true,
         }));
       }
     }
@@ -117,6 +116,7 @@ const MutualFundModal = ({
         currentValue: selectedMutualFund?.currentValue || 0,
         units: selectedMutualFund?.units || 0,
         nav: selectedMutualFund?.nav || 0,
+        targetProgress: selectedMutualFund?.targetProgress || 0,
         user: "Sasankh",
       });
     } else if (type === "create") {
@@ -127,6 +127,7 @@ const MutualFundModal = ({
         currentValue: 0,
         units: 0,
         nav: 0,
+        targetProgress: 0,
         user: "Sasankh",
       });
     }
@@ -152,7 +153,7 @@ const MutualFundModal = ({
 
             // Position and size
             width: { xs: "90%", sm: 600, md: 700 },
-            maxHeight: "90vh",
+            maxHeight: "100vh",
             overflowY: "auto",
             p: { xs: 2, sm: 3, md: 4 },
             position: "absolute",
@@ -220,7 +221,7 @@ const MutualFundModal = ({
             component="form"
             sx={{ display: "flex", flexDirection: "column", gap: 3 }}
           >
-            <FormControl fullWidth sx={{ mb: 2 }}>
+            <FormControl fullWidth>
               <GlassInputLabel id="customer-id-label">
                 Select Mutual Fund Category
               </GlassInputLabel>
@@ -228,6 +229,7 @@ const MutualFundModal = ({
               <GlassSelect
                 labelId="demo-simple-select-standard-label"
                 id="demo-simple-select-standard"
+                defaultValue={mutualFundData?.category || ""}
                 value={mutualFundData?.category || ""}
                 onChange={handleSelectChange}
                 label="category"
@@ -249,7 +251,7 @@ const MutualFundModal = ({
                   label="Mutual Fund Name"
                   placeholder="e.g., HDFC Equity Fund"
                   value={mutualFundData?.fundName || ""}
-                  onChange={handleTransactionData}
+                  onChange={handleInputChange}
                   name="fundName"
                   type="text"
                 />
@@ -259,11 +261,11 @@ const MutualFundModal = ({
               <Grid size={6}>
                 <GlassTextField
                   fullWidth
-                  label="Amount"
+                  label="Invested Amount"
                   placeholder="0"
-                  value={mutualFundData?.category || ""}
-                  onChange={handleTransactionData}
-                  name="category"
+                  value={mutualFundData?.invested || 0}
+                  onChange={handleInputChange}
+                  name="invested"
                   type="number"
                   InputProps={{
                     startAdornment: (
@@ -275,36 +277,73 @@ const MutualFundModal = ({
               <Grid size={6}>
                 <GlassTextField
                   fullWidth
-                  label="Credited Date"
-                  value={mutualFundData?.invested || ""}
-                  onChange={handleTransactionData}
-                  name="invested"
-                  type="invested"
+                  label="Current Value"
+                  value={mutualFundData?.currentValue || 0}
+                  onChange={handleInputChange}
+                  name="currentValue"
+                  type="number"
                   InputLabelProps={{ shrink: true }}
                 />
               </Grid>
             </Grid>
-            <FormControl fullWidth sx={{ mb: 2 }}>
-              <GlassInputLabel id="customer-id-label">
-                Select Transaction Type
-              </GlassInputLabel>
-
-              <GlassSelect
-                labelId="demo-simple-select-standard-label"
-                id="demo-simple-select-standard"
-                value={mutualFundData?.fundName || ""}
-                onChange={handleSelectChange}
-                label="Select Transaction Type"
-                name="fundName"
-                MenuProps={MenuProps}
-              >
-                {TransactionTypesEnum.map((enumTypes) => (
-                  <GlassMenuItem value={enumTypes.name} key={enumTypes.name}>
-                    {enumTypes.name}
-                  </GlassMenuItem>
-                ))}
-              </GlassSelect>
-            </FormControl>
+            <Grid container spacing={2}>
+              <Grid size={6}>
+                <GlassTextField
+                  fullWidth
+                  label="NAV"
+                  placeholder="0"
+                  value={mutualFundData?.nav || 0}
+                  onChange={handleInputChange}
+                  name="nav"
+                  type="number"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">₹</InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid size={6}>
+                <GlassTextField
+                  fullWidth
+                  label="Units Purchased"
+                  value={mutualFundData?.units || 0}
+                  onChange={handleInputChange}
+                  name="units"
+                  type="number"
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
+            </Grid>
+            <Grid container spacing={2}>
+              <Grid size={6}>
+                <GlassTextField
+                  fullWidth
+                  label="Target Amount"
+                  placeholder="0"
+                  value={mutualFundData?.targetProgress || 0}
+                  onChange={handleInputChange}
+                  name="targetProgress"
+                  type="number"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">₹</InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid size={6}>
+                <GlassTextField
+                  fullWidth
+                  label="User"
+                  value={mutualFundData?.user || ""}
+                  onChange={handleInputChange}
+                  name="user"
+                  type="text"
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
+            </Grid>
           </Box>
 
           {/* Action Buttons */}
@@ -341,7 +380,7 @@ const MutualFundModal = ({
             <Button
               variant="contained"
               data-testid="handle-goals-button"
-              onClick={handleIncome}
+              onClick={handleMutualFund}
               sx={{
                 borderRadius: 3,
                 textTransform: "none",
@@ -359,7 +398,7 @@ const MutualFundModal = ({
                 },
               }}
             >
-              {type === "edit" ? "Update Transaction" : "Create Transaction"}
+              {type === "edit" ? "Update Mutual Fund" : "Create Mutual Fund"}
             </Button>
           </Box>
         </Box>

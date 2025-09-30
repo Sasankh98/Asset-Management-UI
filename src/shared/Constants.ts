@@ -59,6 +59,11 @@ export const enum Icons {
 }
 
 export const MutualFundTypes = [
-  { name: "Small Cap", value: "smallcap" },
-  { name: "Large Cap", value: "largecap" },
+  { name: "Small Cap", value: "Small Cap" },
+  { name: "Mid Cap", value: "Mid Cap" },
+  { name: "Large Cap", value: "Large Cap" },
+  { name: "Flexi Cap", value: "Flexi Cap" },
+  { name: "Debt", value: "Debt" },
+  { name: "Liquid", value: "Liquid" },
+  { name: "Hybrid", value: "Hybrid" },
 ];

@@ -90,7 +90,7 @@ const MutualFundTable = ({
     setType("edit");
     setMutualFundFormOpen(true);
     setSelectedMutualFund(
-      mutualFundDetails.find((income) => income.id === row[0])
+      mutualFundDetails.find((mutualFund) => mutualFund.id === row[0])
     );
   };
 
@@ -185,7 +185,7 @@ const MutualFundTable = ({
                       key={index}
                     >
                       {rows.map((row: string | number, index: number) =>
-                        index === 8 ? (
+                        index === 9 ? (
                           <TableCell key={index}>
                             <IconButton
                               onClick={() => handleEditClick(rows)}
@@ -194,7 +194,7 @@ const MutualFundTable = ({
                               <EditOutlinedIcon />
                             </IconButton>
                           </TableCell>
-                        ) : index === 6 ? (
+                        ) : index === 7 ? (
                           <TableCell
                             align="center"
                             key={index}
@@ -206,7 +206,7 @@ const MutualFundTable = ({
                           >
                             {row}
                           </TableCell>
-                        ) : index === 7 ? (
+                        ) : index === 8 ? (
                           <TableCell align="center" key={index}>
                             <Typography variant="body2">{row} %</Typography>
                           </TableCell>

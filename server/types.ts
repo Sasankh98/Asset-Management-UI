@@ -170,5 +170,6 @@ export interface CreateMutualFundsDTO {
   currentValue: number;
   units: number;
   nav: number;
+  targetProgress: number;
   user: string;
 }

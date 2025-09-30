@@ -119,6 +119,7 @@ const MutualFunds = () => {
       <div>
         <CenterTabs setValue={setValue} value={value} />
       </div>
+
       {value === 0 && (
         <div className="MutualFundsTableWrapper">
           <Typography variant="h6">My Mutual Funds</Typography>
@@ -130,6 +131,9 @@ const MutualFunds = () => {
           />
         </div>
       )}
+
+      {value === 1 && <div> Performance Section - Coming Soon </div>}
+      {value === 2 && <div> Target & Allocation Section - Coming Soon </div>}
     </div>
   );
 };
