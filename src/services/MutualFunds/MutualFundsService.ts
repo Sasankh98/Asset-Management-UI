@@ -26,10 +26,10 @@ function MutualFundsService() {
       }
     },
 
-    postMutualFundDetails: async (goalsData:CreateMutualFundsDTO): Promise<MutualFundsDTO | null> => {
+    postMutualFundDetails: async (mutualFundsData:CreateMutualFundsDTO): Promise<MutualFundsDTO | null> => {
       try {
         const response = await httpService.post<CreateMutualFundsDTO,MutualFundsDTO>(
-          `${baseURL}/mutualFunds`,goalsData
+          `${baseURL}/mutualFunds`,mutualFundsData
         );
         return response as MutualFundsDTO;
       } catch (error) {
@@ -37,10 +37,10 @@ function MutualFundsService() {
         throw error; // rethrowing the error so the caller can handle it
       }
     },
-    updateMutualFundDetails: async (id:number | undefined,goalsData:CreateMutualFundsDTO): Promise<MutualFundsDTO | null> => {
+    updateMutualFundDetails: async (id:number | undefined,mutualFundsData:CreateMutualFundsDTO): Promise<MutualFundsDTO | null> => {
       try {
         const response = await httpService.patch<CreateMutualFundsDTO,MutualFundsDTO>(
-          `${baseURL}/mutualFunds?id=${id}`,goalsData
+          `${baseURL}/mutualFunds?id=${id}`,mutualFundsData
         );
         return response as MutualFundsDTO;
       } catch (error) {

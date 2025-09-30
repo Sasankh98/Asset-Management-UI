@@ -5,6 +5,37 @@ import { CreateMutualFundsDTO, MutualFundsDTO } from "../../../server/types";
 
 vi.mock("../axiosConnection");
 
+const mockRequest: CreateMutualFundsDTO = {
+  fundName: "ABC Growth Fund",
+  category: "Equity",
+  invested: 10000,
+  currentValue: 10000,
+  nav: 10000,
+  units: 10000,
+  targetProgress: 100000,
+  user: "sasankh",
+};
+
+const mockResponse: MutualFundsDTO = {
+  status: "success",
+  data: [
+    {
+      id: 1,
+      fundName: "ABC Growth Fund",
+      category: "Equity",
+      invested: 10000.0,
+      currentValue: 10000.0,
+      nav: 10000.0,
+      units: 10000,
+      user: "sasankh",
+      updatedAt: "2025-09-28T09:17:48.296Z",
+      createdAt: "2025-09-28T09:17:48.296Z",
+      gain_loss: 3000,
+      targetProgress: 9,
+    },
+  ],
+};
+
 describe("Mutual Funds Service", () => {
   const service = MutualFundsService();
   const mockedGet = httpService.get as unknown as MockedFunction<
@@ -13,30 +44,10 @@ describe("Mutual Funds Service", () => {
   const mockedPost = httpService.post as unknown as MockedFunction<
     typeof httpService.post
   >;
-  // const mockedPatch = httpService.patch as unknown as MockedFunction<
-  //   typeof httpService.patch
-  // >;
+  const mockedPatch = httpService.patch as unknown as MockedFunction<
+    typeof httpService.patch
+  >;
   it("Should call mutual funds get service when called", async () => {
-    const mockResponse: MutualFundsDTO = {
-      status: "success",
-      data: [
-        {
-          id: 1,
-          fundName: "ABC Growth Fund",
-          category: "Equity",
-          invested: 10000.0,
-          currentValue: 10000.0,
-          nav: 10000.0,
-          units: 10000,
-          user: "sasankh",
-          updatedAt: "2025-09-28T09:17:48.296Z",
-          createdAt: "2025-09-28T09:17:48.296Z",
-          gain_loss: 3000,
-          targetProgress: 9,
-        },
-      ],
-    };
-
     mockedGet.mockResolvedValue(mockResponse);
 
     const result = await service.getMutualFundsDetails();
@@ -53,36 +64,25 @@ describe("Mutual Funds Service", () => {
     );
     expect(httpService.get).toHaveBeenCalledWith(`${baseURL}/mutualFunds`);
   });
-  it("Should call mutual funds post service when called", async () => {
-    const mockResponse: MutualFundsDTO = {
-      status: "success",
-      data: [
-        {
-          id: 1,
-          fundName: "ABC Growth Fund",
-          category: "Equity",
-          invested: 10000.0,
-          currentValue: 10000.0,
-          nav: 10000.0,
-          units: 10000,
-          user: "sasankh",
-          updatedAt: "2025-09-28T09:17:48.296Z",
-          createdAt: "2025-09-28T09:17:48.296Z",
-          gain_loss: 3000,
-          targetProgress: 9,
-        },
-      ],
-    };
+  it("Should call mutual funds Dashboard get service when called", async () => {
+    mockedGet.mockResolvedValue(mockResponse);
 
-    const mockRequest: CreateMutualFundsDTO = {
-      fundName: "ABC Growth Fund",
-      category: "Equity",
-      invested: 10000,
-      currentValue: 10000,
-      nav: 10000,
-      units: 10000,
-      user: "sasankh",
-    };
+    const result = await service.getmutualFundsDashboardList();
+    expect(result).toEqual(mockResponse);
+    expect(httpService.get).toHaveBeenCalledWith(`${baseURL}/mutualFunds/dashboard`);
+  });
+
+  it("should handle errors in fetching mutual funds dashboard", async () => {
+    const mockError = new Error("Failed to fetch mutual funds dashboard");
+    mockedGet.mockRejectedValue(mockError);
+
+    await expect(service.getmutualFundsDashboardList()).rejects.toThrow(
+      "Failed to fetch mutual funds dashboard"
+    );
+    expect(httpService.get).toHaveBeenCalledWith(`${baseURL}/mutualFunds/dashboard`);
+  });
+  it("Should call mutual funds post service when called", async () => {
+
     mockedPost.mockResolvedValue(mockResponse);
 
     const result = await service.postMutualFundDetails(mockRequest);
@@ -95,15 +95,7 @@ describe("Mutual Funds Service", () => {
 
   it("should handle errors in post mutual funds", async () => {
     const mockError = new Error("Failed to fetch mutual funds");
-    const mockRequest: CreateMutualFundsDTO = {
-      fundName: "ABC Growth Fund",
-      category: "Equity",
-      invested: 10000,
-      currentValue: 10000,
-      nav: 10000,
-      units: 10000,
-      user: "sasankh",
-    };
+
     mockedPost.mockRejectedValue(mockError);
 
     await expect(service.postMutualFundDetails(mockRequest)).rejects.toThrow(
@@ -114,63 +106,31 @@ describe("Mutual Funds Service", () => {
       mockRequest
     );
   });
-  // it("Should call mutual funds update service when called", async () => {
-  //   const mockResponse: GoalsDTO = {
-  //     status: "success",
-  //     data: [
-  //       {
-  //         id: 1,
-  //         goal: "Marriage",
-  //         description: "",
-  //         targetAmount: 20000,
-  //         savedAmount: 34,
-  //         targetDate: "2026-12-31",
-  //         value: 400000,
-  //         user: "Sasankh",
-  //         updatedAt: "2025-07-26T14:40:56.785Z",
-  //         createdAt: "2025-07-26T14:40:56.785Z",
-  //       },
-  //     ],
-  //   };
+  it("Should call mutual funds update service when called", async () => {
 
-  //   const mockRequest: CreateGoalsDTO = {
-  //     goal: "string",
-  //     targetAmount: 100,
-  //     savedAmount: 10,
-  //     targetDate: "2026-12-31",
-  //     user: "Sasankh",
-  //     value: 1000,
-  //   };
-  //   const id = 1;
-  //   mockedPatch.mockResolvedValue(mockResponse);
+    const id = 1;
+    mockedPatch.mockResolvedValue(mockResponse);
 
-  //   const result = await service.updateGoalsDetails(id, mockRequest);
-  //   expect(result).toEqual(mockResponse);
-  //   expect(httpService.patch).toHaveBeenCalledWith(
-  //     `${baseURL}/goals?id=${id}`,
-  //     mockRequest
-  //   );
-  // });
+    const result = await service.updateMutualFundDetails(id, mockRequest);
+    expect(result).toEqual(mockResponse);
+    expect(httpService.patch).toHaveBeenCalledWith(
+      `${baseURL}/mutualFunds?id=${id}`,
+      mockRequest
+    );
+  });
 
-  // it("should handle errors in fetching goals", async () => {
-  //   const mockError = new Error("Failed to fetch goals");
-  //   const mockRequest: CreateGoalsDTO = {
-  //     goal: "string",
-  //     targetAmount: 100,
-  //     savedAmount: 10,
-  //     targetDate: "2026-12-31",
-  //     user: "Sasankh",
-  //     value: 1000,
-  //   };
-  //   const id = 1;
-  //   mockedPatch.mockRejectedValue(mockError);
+  it("should handle errors in updating mutual funds", async () => {
+    const mockError = new Error("Failed to updating mutual funds");
 
-  //   await expect(service.updateGoalsDetails(id, mockRequest)).rejects.toThrow(
-  //     "Failed to fetch goals"
-  //   );
-  //   expect(httpService.patch).toHaveBeenCalledWith(
-  //     `${baseURL}/goals?id=${id}`,
-  //     mockRequest
-  //   );
-  // });
+    const id = 1;
+    mockedPatch.mockRejectedValue(mockError);
+
+    await expect(service.updateMutualFundDetails(id, mockRequest)).rejects.toThrow(
+      "Failed to updating mutual funds"
+    );
+    expect(httpService.patch).toHaveBeenCalledWith(
+      `${baseURL}/mutualFunds?id=${id}`,
+      mockRequest
+    );
+  });
 });
