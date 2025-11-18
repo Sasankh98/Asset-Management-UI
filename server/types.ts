@@ -103,7 +103,7 @@ export interface CreateStocksDTO {
  * @Goals has the structure for user goals information.
  * @GoalsDTO has the structure for the goals data response.
  */
-export interface Goals {
+export interface GoalsDTO {
   id: number;
   goal: string;
   description: string;
@@ -114,11 +114,6 @@ export interface Goals {
   user: string;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface GoalsDTO {
-  status: string;
-  data: Goals[];
 }
 
 export interface CreateGoalsDTO {

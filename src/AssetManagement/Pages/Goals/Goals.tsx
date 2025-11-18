@@ -1,33 +1,15 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import GoalsCard from "./GoalsCard/GoalsCard";
-import GoalsService from "../../../services/GoalsService/GoalsService";
-import { Goals as GoalsType } from "../../../../server/types";
+import {type GoalsDTO } from "../../../../server/types";
 import CustomButton from "../../../core/CustomButton/CustomButton";
 import GoalsForm from "./GoalsModal/GoalsModal";
-import { useAssetManagementContext } from "../../ContextProvider/ContextProvider";
+import { useGoalsQuery } from "../../../hooks/queries";
 
 const Goals = () => {
-  const { refreshData, setRefreshData } = useAssetManagementContext();
-  const [goals, setGoals] = useState<GoalsType[]>([]);
   const [goalsOpen, setGoalsOpen] = useState<boolean>(false);
-  const [selectedGoal, setSelectedGoal] = useState<GoalsType>();
-  const [loading, setLoading] = useState<boolean>(false);
+  const [selectedGoal, setSelectedGoal] = useState<GoalsDTO>();
   const [type, setType] = useState<"create" | "edit" | "">("");
-
-  useEffect(() => {
-    setLoading(true);
-    GoalsService()
-      .getGoalsDetails()
-      .then((response) => {
-        if (response && response.data) {
-          setGoals(response.data);
-          setLoading(false);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching goals details:", error);
-      });
-  }, [refreshData]);
+  const goalsQuery = useGoalsQuery();
 
   const handleOpenGoalsCreate = () => {
     setGoalsOpen(true);
@@ -45,7 +27,6 @@ const Goals = () => {
           open={goalsOpen}
           handleClose={() => handleCloseGoalsForm()}
           goals={selectedGoal}
-          setRefreshData={setRefreshData}
         />
       )}
       <div
@@ -74,14 +55,13 @@ const Goals = () => {
           margin: "1rem auto", // center at page level if needed
         }}
       >
-        {goals?.map((goal) => (
+        {goalsQuery.data?.map((goal) => (
           <GoalsCard
             key={goal.id}
             goal={goal}
             setGoalsOpen={setGoalsOpen}
             setType={setType}
             setSelectedGoal={setSelectedGoal}
-            loading={loading}
           />
         ))}
       </div>

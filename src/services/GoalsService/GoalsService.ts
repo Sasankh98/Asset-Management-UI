@@ -3,12 +3,12 @@ import { httpService, baseURL } from "../axiosConnection";
 
 function GoalsService() {
   return {
-    getGoalsDetails: async (): Promise<GoalsDTO | null> => {
+    getGoalsDetails: async (): Promise<GoalsDTO[]> => {
       try {
-        const response = await httpService.get<GoalsDTO>(
+        const response = await httpService.get(
           `${baseURL}/goals`
         );
-        return response as GoalsDTO;
+        return response?.data as GoalsDTO[];
       } catch (error) {
         console.error("Fetching failed:", error);
         throw error; // rethrowing the error so the caller can handle it
