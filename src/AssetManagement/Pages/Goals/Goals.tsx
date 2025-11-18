@@ -10,21 +10,6 @@ const Goals = () => {
   const [selectedGoal, setSelectedGoal] = useState<GoalsDTO>();
   const [type, setType] = useState<"create" | "edit" | "">("");
   const goalsQuery = useGoalsQuery();
-  console.log(goalsQuery.data);
-  // useEffect(() => {
-  //   setLoading(true);
-  //   GoalsService()
-  //     .getGoalsDetails()
-  //     .then((response) => {
-  //       if (response && response.data) {
-  //         setGoals(response.data);
-  //         setLoading(false);
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching goals details:", error);
-  //     });
-  // }, [refreshData]);
 
   const handleOpenGoalsCreate = () => {
     setGoalsOpen(true);
