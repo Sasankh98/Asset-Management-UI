@@ -116,6 +116,11 @@ export interface GoalsDTO {
   updatedAt: string;
 }
 
+export interface GoalsResponseDTO {
+  status: string;
+  data: GoalsDTO[];
+}
+
 export interface CreateGoalsDTO {
   goal: string;
   targetAmount: number;

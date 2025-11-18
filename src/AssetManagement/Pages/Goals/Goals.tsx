@@ -10,7 +10,6 @@ const Goals = () => {
   const [selectedGoal, setSelectedGoal] = useState<GoalsDTO>();
   const [type, setType] = useState<"create" | "edit" | "">("");
   const goalsQuery = useGoalsQuery();
-
   const handleOpenGoalsCreate = () => {
     setGoalsOpen(true);
     setType("create");
@@ -55,7 +54,7 @@ const Goals = () => {
           margin: "1rem auto", // center at page level if needed
         }}
       >
-        {goalsQuery.data?.map((goal) => (
+        {goalsQuery.data?.data.map((goal: GoalsDTO) => (
           <GoalsCard
             key={goal.id}
             goal={goal}

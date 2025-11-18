@@ -3,10 +3,10 @@ import { render, cleanup, screen, fireEvent } from "@testing-library/react";
 import GoalsCard from "./GoalsCard";
 import { BrowserRouter } from "react-router-dom";
 import AssetManagementProvider from "../../../ContextProvider/ContextProvider";
-import { Goals } from "../../../../../server/types";
+import { GoalsDTO } from "../../../../../server/types";
 import { Dispatch, SetStateAction } from "react";
 
-const mockGoals: Goals = {
+const mockGoals: GoalsDTO = {
   id: 1,
   goal: "Marriage",
   description: "",
@@ -46,7 +46,7 @@ describe("Goals Card Component", () => {
         </AssetManagementProvider>
       </BrowserRouter>
     );
-    const button = await screen.getByTestId("edit-button");
+    const button = screen.getByTestId("edit-button");
     fireEvent.click(button);
 
     expect(screen.getByTestId("edit-button"));

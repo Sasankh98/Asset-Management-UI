@@ -1,9 +1,9 @@
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import GoalsService from "../../services/GoalsService/GoalsService";
 import { queryKeys } from "../../react-query";
-import { GoalsDTO } from "../../../server/types";
+import { GoalsResponseDTO } from "../../../server/types";
 
-export function useGoalsQuery(): UseQueryResult<GoalsDTO[], Error> {
+export function useGoalsQuery(): UseQueryResult<GoalsResponseDTO, Error> {
   const service = GoalsService();
   
   return useQuery({

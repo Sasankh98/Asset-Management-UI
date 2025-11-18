@@ -5,9 +5,9 @@ import { BrowserRouter } from "react-router-dom";
 import AssetManagementProvider, {
   RefreshDataProps,
 } from "../../../ContextProvider/ContextProvider";
-import { Goals } from "../../../../../server/types";
+import { GoalsDTO } from "../../../../../server/types";
 import { Dispatch, SetStateAction } from "react";
-const mockGoals: Goals = {
+const mockGoals: GoalsDTO = {
   id: 1,
   goal: "Marriage",
   description: "",
@@ -48,7 +48,7 @@ describe("Goals Card Component", () => {
         </AssetManagementProvider>
       </BrowserRouter>
     );
-    const button = await screen.getByTestId("handle-goals-button");
+    const button = screen.getByTestId("handle-goals-button");
     fireEvent.click(button);
 
     expect(screen.getByTestId("handle-goals-button"));
@@ -61,7 +61,7 @@ describe("Goals Card Component", () => {
         </AssetManagementProvider>
       </BrowserRouter>
     );
-    const button = await screen.getByTestId("handle-goals-button");
+    const button = screen.getByTestId("handle-goals-button");
     fireEvent.click(button);
 
     expect(screen.getByTestId("handle-goals-button"));
