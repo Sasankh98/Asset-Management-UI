@@ -6,11 +6,13 @@ import MiniDrawer from "../../components/Sidebar/Sidebar";
 import Salary from "./Salary/Salary";
 import Goals from "./Goals/Goals";
 import MutualFunds from "./MutualFunds/MutualFunds";
+import { DialogProvider } from "../ContextProvider/DialogContextProvider";
 
 const AssetManagement = () => {
   const { displayContent } = useParams();
   return (
     <div data-testid="asset-management-container">
+      <DialogProvider>
       <MiniDrawer>
         <div>
           {(() => {
@@ -37,6 +39,7 @@ const AssetManagement = () => {
           })()}
         </div>
       </MiniDrawer>
+      </DialogProvider>
     </div>
   );
 };
