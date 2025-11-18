@@ -8,7 +8,7 @@ import Typography from "@mui/material/Typography";
 import { red } from "@mui/material/colors";
 import { gr, bikeIcon, tattoo, marriage } from "../../../../Assets";
 import LinearWithValueLabel from "./ProgressTracker";
-import { Goals } from "../../../../../server/types";
+import { GoalsDTO } from "../../../../../server/types";
 import { formatCurrency } from "../../../../utils/currencyConverter";
 import { ImageIcons } from "../../../../shared/Constants";
 import EditIcon from "@mui/icons-material/Edit";
@@ -20,11 +20,11 @@ import { getTimeAgo } from "../../../../utils/dateTime";
 import  Box  from "@mui/material/Box";
 
 interface GoalsCardProps {
-  goal: Goals;
+  goal: GoalsDTO;
   setGoalsOpen: Dispatch<SetStateAction<boolean>>;
   setType: Dispatch<SetStateAction<"create" | "edit" | "">>;
-  setSelectedGoal: (goal: Goals | undefined) => void;
-  loading: boolean;
+  setSelectedGoal: (goal: GoalsDTO | undefined) => void;
+  loading?: boolean;
 }
 
 export default function GoalsCard({
@@ -32,7 +32,7 @@ export default function GoalsCard({
   setGoalsOpen,
   setType,
   setSelectedGoal,
-  loading,
+  loading =false,
 }: GoalsCardProps) {
   const imageIcon = (() => {
     switch (goal.goal) {

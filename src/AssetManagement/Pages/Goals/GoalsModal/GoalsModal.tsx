@@ -9,18 +9,16 @@ import InputAdornment from "@mui/material/InputAdornment";
 import LinearProgress from "@mui/material/LinearProgress";
 
 import { ThemeProvider } from "@mui/material/styles";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Theme } from "../../../../core/MUI/Theme";
-import { CreateGoalsDTO, Goals } from "../../../../../server/types";
+import { CreateGoalsDTO, GoalsDTO } from "../../../../../server/types";
 import GoalsService from "../../../../services/GoalsService/GoalsService";
-import { RefreshDataProps } from "../../../ContextProvider/ContextProvider";
 
 interface GoalsFormProps {
   open: boolean;
   type: "create" | "edit" | "";
   handleClose: () => void;
-  setRefreshData: Dispatch<SetStateAction<RefreshDataProps>>;
-  goals?: Goals | undefined;
+  goals?: GoalsDTO | undefined;
 }
 const StyledModal = styled(Modal)({
   backdropFilter: "blur(8px)",
@@ -57,7 +55,6 @@ const GoalsForm = ({
   type,
   handleClose,
   goals,
-  setRefreshData,
 }: GoalsFormProps) => {
   const [goalsData, setGoalsData] = useState<CreateGoalsDTO>({
     goal: "",
@@ -80,10 +77,7 @@ const GoalsForm = ({
       const response = await GoalsService().postGoalsDetails(goalsData);
       if (response) {
         handleClose();
-        setRefreshData((prev) => ({
-          ...prev,
-          refreshGoals: true,
-        }));
+        
       }
     } else if (type === "edit" && goals) {
       const response = await GoalsService().updateGoalsDetails(
@@ -92,10 +86,6 @@ const GoalsForm = ({
       );
       if (response) {
         handleClose();
-        setRefreshData((prev) => ({
-          ...prev,
-          refreshGoals: true,
-        }));
       }
     }
   };
