@@ -1,7 +1,7 @@
 import { describe, expect, vi, it, MockedFunction } from "vitest";
 import { httpService, baseURL } from "../axiosConnection";
 import GoalsService from "./GoalsService";
-import { GoalsDTO, CreateGoalsDTO } from "../../../server/types";
+import { GoalsResponseDTO, CreateGoalsDTO } from "../../../server/types";
 
 vi.mock("../axiosConnection");
 
@@ -17,7 +17,7 @@ describe("Goals Service", () => {
     typeof httpService.patch
   >;
   it("Should call Goals get service when called", async () => {
-    const mockResponse: GoalsDTO = {
+    const mockResponse: GoalsResponseDTO = {
       status: "success",
       data: [
         {
@@ -52,7 +52,7 @@ describe("Goals Service", () => {
     expect(httpService.get).toHaveBeenCalledWith(`${baseURL}/goals`);
   });
   it("Should call Goals post service when called", async () => {
-    const mockResponse: GoalsDTO = {
+    const mockResponse: GoalsResponseDTO = {
       status: "success",
       data: [
         {
@@ -109,7 +109,7 @@ describe("Goals Service", () => {
     );
   });
   it("Should call Goals update service when called", async () => {
-    const mockResponse: GoalsDTO = {
+    const mockResponse: GoalsResponseDTO = {
       status: "success",
       data: [
         {
