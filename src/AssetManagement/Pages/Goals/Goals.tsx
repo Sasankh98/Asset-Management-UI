@@ -1,33 +1,55 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import GoalsCard from "./GoalsCard/GoalsCard";
-import {type GoalsDTO } from "../../../../server/types";
+import { type GoalsDTO } from "../../../../server/types";
 import CustomButton from "../../../core/CustomButton/CustomButton";
 import GoalsForm from "./GoalsModal/GoalsModal";
 import { useGoalsQuery } from "../../../hooks/queries";
+import { useDialog } from "../../ContextProvider/DialogContextProvider";
+import GoalFormTitle from "./GoalsTitle";
+import GoalsActions from "./GoalsActions";
+import { ModalTypes } from "../../../shared/Constants";
 
 const Goals = () => {
   const [goalsOpen, setGoalsOpen] = useState<boolean>(false);
   const [selectedGoal, setSelectedGoal] = useState<GoalsDTO>();
-  const [type, setType] = useState<"create" | "edit" | "">("");
+  const { onOpenChange, onTitleChange, onBodyChange, onActionsChange } =
+    useDialog();
   const goalsQuery = useGoalsQuery();
-  const handleOpenGoalsCreate = () => {
-    setGoalsOpen(true);
-    setType("create");
-  };
-  const handleCloseGoalsForm = () => {
-    setGoalsOpen(false);
-  };
 
-  return (
-    <>
-      {goalsOpen && (
+  const handleOpenDialogue = useCallback(
+    (modalType: ModalTypes, selectedGoal?: GoalsDTO) => {
+      onTitleChange(<GoalFormTitle modalType={modalType} />);
+      onBodyChange(
         <GoalsForm
-          type={type}
+          modalType={modalType}
           open={goalsOpen}
           handleClose={() => handleCloseGoalsForm()}
           goals={selectedGoal}
         />
-      )}
+      );
+      onActionsChange(
+        <GoalsActions
+          modalType={modalType}
+          handleClose={() => handleCloseGoalsForm()}
+        />
+      );
+      onOpenChange(true);
+    },
+    [
+      onOpenChange,
+      onBodyChange,
+      onTitleChange,
+      goalsOpen,
+      onActionsChange,
+    ]
+  );
+  const handleCloseGoalsForm = () => {
+    setGoalsOpen(false);
+    onOpenChange(false);
+  };
+
+  return (
+    <>
       <div
         style={{
           display: "flex",
@@ -38,7 +60,7 @@ const Goals = () => {
         data-testid="goals-container"
       >
         <CustomButton
-          handleClick={() => handleOpenGoalsCreate()}
+          handleClick={() => handleOpenDialogue(ModalTypes.create, selectedGoal)}
           text="Add Goal"
           customClass=""
         />
@@ -59,8 +81,8 @@ const Goals = () => {
             key={goal.id}
             goal={goal}
             setGoalsOpen={setGoalsOpen}
-            setType={setType}
             setSelectedGoal={setSelectedGoal}
+            handleOpenDialogue={handleOpenDialogue}
           />
         ))}
       </div>

@@ -67,3 +67,8 @@ export const MutualFundTypes = [
   { name: "Liquid", value: "Liquid" },
   { name: "Hybrid", value: "Hybrid" },
 ];
+
+export const enum ModalTypes {
+  create = "create",
+  edit = "edit"
+}

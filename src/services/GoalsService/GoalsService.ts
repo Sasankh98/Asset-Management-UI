@@ -14,7 +14,7 @@ function GoalsService() {
         throw error; // rethrowing the error so the caller can handle it
       }
     },
-    postGoalsDetails: async (goalsData:CreateGoalsDTO): Promise<GoalsResponseDTO | null> => {
+    postGoalsDetails: async (goalsData:CreateGoalsDTO): Promise<GoalsResponseDTO> => {
       try {
         const response = await httpService.post<CreateGoalsDTO,GoalsResponseDTO>(
           `${baseURL}/goals`,goalsData
@@ -25,7 +25,7 @@ function GoalsService() {
         throw error; // rethrowing the error so the caller can handle it
       }
     },
-    updateGoalsDetails: async (id:number,goalsData:CreateGoalsDTO): Promise<GoalsResponseDTO | null> => {
+    updateGoalsDetails: async (id:number,goalsData:CreateGoalsDTO): Promise<GoalsResponseDTO> => {
       try {
         const response = await httpService.patch<CreateGoalsDTO,GoalsResponseDTO>(
           `${baseURL}/goals?id=${id}`,goalsData

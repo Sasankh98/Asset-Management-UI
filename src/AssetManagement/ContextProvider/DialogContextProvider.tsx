@@ -27,16 +27,43 @@ export interface DialogContextprops {
   body: ReactNode;
   /** controlled body change */
   onBodyChange: Dispatch<SetStateAction<ReactNode>>;
-  actions?: ReactNode;
-  onActionsChange?: Dispatch<SetStateAction<ReactNode>>;
+  actions: ReactNode;
+  onActionsChange: Dispatch<SetStateAction<ReactNode>>;
 }
 
 export const DialogContext = createContext<DialogContextprops | null>(null);
 
-const StyledDialog = styled(Dialog)({
-  backdropFilter: "blur(8px)",
-  backgroundColor: "rgba(0, 0, 0, 0.3)",
-});
+const StyledDialog = styled(Dialog)(({ theme }) => ({
+  "& .MuiPaper-root": {
+    background: "rgba(255, 255, 255, 0.1)",
+    backdropFilter: "blur(20px)",
+    WebkitBackdropFilter: "blur(20px)",
+    border: "1px solid rgba(255, 255, 255, 0.2)",
+    borderRadius: theme.spacing(1),
+    padding: theme.spacing(1),
+    // Enhanced shadow for depth
+    boxShadow: `
+              0 8px 32px rgba(0, 0, 0, 0.12),
+              0 2px 6px rgba(0, 0, 0, 0.08),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1)
+            `,
+    // Subtle inner glow
+    "&::before": {
+      content: '""',
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      borderRadius: 4,
+      background:
+        "linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1))",
+      mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+      maskComposite: "exclude",
+      pointerEvents: "none",
+    },
+  },
+}));
 
 export const DialogProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [open, setOpen] = useState<boolean>(false);
@@ -44,8 +71,8 @@ export const DialogProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [title, setTitle] = useState<ReactNode>(null);
   const [actions, setActions] = useState<ReactNode>(null);
 
-  const handleOpenChange = (_, data) => {
-    setOpen(data.open);
+  const handleOpenChange = () => {
+    setOpen(false);
   };
   return (
     <DialogContext.Provider
@@ -60,7 +87,11 @@ export const DialogProvider: FC<{ children: ReactNode }> = ({ children }) => {
         onActionsChange: setActions,
       }}
     >
-      <StyledDialog open={open} onClose={handleOpenChange} fullWidth>
+      <StyledDialog
+        open={open}
+        onClose={() => handleOpenChange()}
+        fullWidth
+      >
         <DialogTitle>{title}</DialogTitle>
         <DialogContent>{body}</DialogContent>
         <DialogActions>{actions}</DialogActions>
@@ -72,8 +103,8 @@ export const DialogProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
 export const useDialog = () => {
   const context = useContext(DialogContext);
-  if(!context){
-    throw new Error('useDialog must be used within DialogProvider')
+  if (!context) {
+    throw new Error("useDialog must be used within DialogProvider");
   }
   return context;
-}
+};
