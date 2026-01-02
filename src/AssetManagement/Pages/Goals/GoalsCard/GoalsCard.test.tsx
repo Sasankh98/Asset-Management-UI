@@ -20,14 +20,13 @@ const mockGoals: GoalsDTO = {
 };
 
 const mockSetGoalsOpen = vi.fn() as Dispatch<SetStateAction<boolean>>;
-const mockSetType = vi.fn() as Dispatch<SetStateAction<"" | "edit" | "create">>;
 
 const props = {
   goal: mockGoals,
   setGoalsOpen: mockSetGoalsOpen,
-  setType: mockSetType,
   setSelectedGoal: vi.fn(),
   loading: false,
+  handleOpenDialogue: vi.fn(),
 };
 describe("Goals Card Component", () => {
   beforeEach(() => {

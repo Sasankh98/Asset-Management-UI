@@ -10,29 +10,29 @@ import { gr, bikeIcon, tattoo, marriage } from "../../../../Assets";
 import LinearWithValueLabel from "./ProgressTracker";
 import { GoalsDTO } from "../../../../../server/types";
 import { formatCurrency } from "../../../../utils/currencyConverter";
-import { ImageIcons } from "../../../../shared/Constants";
+import { ImageIcons, ModalTypes } from "../../../../shared/Constants";
 import EditIcon from "@mui/icons-material/Edit";
 import Tooltip from "@mui/material/Tooltip";
 import Fade from "@mui/material/Fade";
 import Skeleton from "@mui/material/Skeleton";
 import { Dispatch, SetStateAction } from "react";
 import { getTimeAgo } from "../../../../utils/dateTime";
-import  Box  from "@mui/material/Box";
+import Box from "@mui/material/Box";
 
 interface GoalsCardProps {
   goal: GoalsDTO;
   setGoalsOpen: Dispatch<SetStateAction<boolean>>;
-  setType: Dispatch<SetStateAction<"create" | "edit" | "">>;
-  setSelectedGoal: (goal: GoalsDTO | undefined) => void;
+  setSelectedGoal: (goal: GoalsDTO) => void;
   loading?: boolean;
+  handleOpenDialogue: (modalType: ModalTypes, selectedGoal?: GoalsDTO) => void;
 }
 
 export default function GoalsCard({
   goal,
   setGoalsOpen,
-  setType,
   setSelectedGoal,
-  loading =false,
+  loading = false,
+  handleOpenDialogue,
 }: GoalsCardProps) {
   const imageIcon = (() => {
     switch (goal.goal) {
@@ -50,10 +50,36 @@ export default function GoalsCard({
   })();
 
   const handleOpenGoalsEdit = () => {
-    setType("edit");
     setGoalsOpen(true);
     setSelectedGoal(goal);
+    handleOpenDialogue(ModalTypes.edit, goal);
   };
+  //  const handleOpenDialogue = useCallback(
+  //     (selectedGoal?: GoalsDTO | undefined) => {
+  //       onTitleChange(<GoalFormTitle type={type} />);
+  //       onBodyChange(
+  //         <GoalsForm
+  //           type={type}
+  //           open={goalsOpen}
+  //           handleClose={() => handleCloseGoalsForm()}
+  //           goals={selectedGoal}
+  //         />
+  //       );
+  //       onActionsChange(
+  //         <GoalsActions type={type} handleClose={() => handleCloseGoalsForm()} />
+  //       );
+  //       onOpenChange(true);
+  //     },
+  //     [
+  //       onOpenChange,
+  //       onBodyChange,
+  //       onTitleChange,
+  //       type,
+  //       goalsOpen,
+  //       onActionsChange,
+  //     ]
+  //   );
+
   return (
     <Card sx={{ maxWidth: 345, borderRadius: 2 }}>
       <CardHeader
@@ -199,7 +225,7 @@ export default function GoalsCard({
                 justifyContent: "space-between",
               }}
             >
-               <Box
+              <Box
                 sx={{
                   display: "flex",
                   flexDirection: "column",

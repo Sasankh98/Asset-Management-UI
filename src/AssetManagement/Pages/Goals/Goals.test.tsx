@@ -1,13 +1,9 @@
 import { describe, vi, it, beforeEach, afterEach, expect } from "vitest";
-import {
-  render,
-  cleanup,
-  screen,
-  fireEvent,
-} from "@testing-library/react";
+import { render, cleanup, screen, fireEvent } from "@testing-library/react";
 import Goals from "./Goals";
 import { BrowserRouter } from "react-router-dom";
 import AssetManagementProvider from "../../ContextProvider/ContextProvider";
+import { DialogProvider } from "../../ContextProvider/DialogContextProvider";
 
 describe("Goals Component", () => {
   beforeEach(() => {
@@ -15,7 +11,9 @@ describe("Goals Component", () => {
     render(
       <BrowserRouter>
         <AssetManagementProvider>
-          <Goals />
+          <DialogProvider>
+            <Goals />
+          </DialogProvider>
         </AssetManagementProvider>
       </BrowserRouter>
     );

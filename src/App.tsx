@@ -14,17 +14,14 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 function App() {
   const baseUrl = "Asset-Management-UI/"; // Set your base URL here
   const router = createBrowserRouter(
-    createRoutesFromElements(
-        <Route path="/*" element={<AppLayout />} />
-    ),
-  
+    createRoutesFromElements(<Route path="/*" element={<AppLayout />} />)
   );
   return (
     <QueryClientProvider client={createQueryClient()}>
-    <BaseUrlContext.Provider value={baseUrl}>
-      <RouterProvider router={router} />
-    </BaseUrlContext.Provider>
-    <ReactQueryDevtools />
+      <BaseUrlContext.Provider value={baseUrl}>
+        <RouterProvider router={router} />
+      </BaseUrlContext.Provider>
+      <ReactQueryDevtools />
     </QueryClientProvider>
   );
 }
