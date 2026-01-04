@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 import {
   LineChart,
   Line,
@@ -32,136 +32,132 @@ interface LineGraphProps {
 
 export default function LineGraph({ monthlyData }: LineGraphProps) {
   const theme = useTheme();
-  const [processedData, setProcessedData] = useState<DataPoint[]>([]);
 
-  useEffect(() => {
-    const processData = () => {
-      // Sort data by date
-      const sortedData = [...monthlyData].sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-      );
+  // Memoize the processed data to prevent recalculation on every render
+  const processedData = useMemo(() => {
+    // Sort data by date
+    const sortedData = [...monthlyData].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
 
-      let totalIncome = 0;
-      let cumulativeExpenses = 0;
-      const dailyData = new Map<string, DataPoint>();
+    let totalIncome = 0;
+    let cumulativeExpenses = 0;
+    const dailyData = new Map<string, DataPoint>();
 
-      // Initialize with zero values for each day of the month
-      const currentDate = new Date();
-      const startOfMonth = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        1
-      );
-      const daysInMonth = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth() + 1,
-        0
-      ).getDate();
-      const today = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        currentDate.getDate()
+    // Initialize with zero values for each day of the month
+    const currentDate = new Date();
+    const startOfMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1
+    );
+    const daysInMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      0
+    ).getDate();
+    const today = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      currentDate.getDate()
+    )
+      .toISOString()
+      .split("T")[0];
+
+    // Initialize all days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(
+        startOfMonth.getFullYear(),
+        startOfMonth.getMonth(),
+        day
       )
         .toISOString()
         .split("T")[0];
 
-      // Initialize all days of the month
-      for (let day = 1; day <= daysInMonth; day++) {
-        const date = new Date(
-          startOfMonth.getFullYear(),
-          startOfMonth.getMonth(),
-          day
-        )
-          .toISOString()
-          .split("T")[0];
+      // For dates after today, set null values to break the line
+      if (date > today) {
+        dailyData.set(date, {
+          date,
+          expenses: null,
+          cumulativeExpenses: null,
+          income: null,
+          balance: null,
+        });
+      } else {
+        dailyData.set(date, {
+          date,
+          expenses: 0,
+          cumulativeExpenses: 0,
+          income: 0,
+          balance: 0,
+        });
+      }
+    }
 
-        // For dates after today, set null values to break the line
-        if (date > today) {
-          dailyData.set(date, {
-            date,
-            expenses: null,
-            cumulativeExpenses: null,
-            income: null,
-            balance: null,
-          });
+    // First pass: Calculate total income for days up to today
+    sortedData.forEach((transaction) => {
+      if (transaction.date <= today && transaction.type === "income") {
+        totalIncome += Number(Number(transaction.amount).toFixed(2));
+      }
+    });
+
+    // Second pass: Process all transactions up to today
+    sortedData.forEach((transaction) => {
+      if (transaction.date <= today) {
+        const existingData = dailyData.get(transaction.date) || {
+          date: transaction.date,
+          expenses: 0,
+          cumulativeExpenses: 0,
+          income: totalIncome,
+          balance: totalIncome,
+        };
+
+        if (transaction.type === "expense") {
+          const expenseAmount = Number(Number(transaction.amount).toFixed(2));
+          existingData.expenses = expenseAmount;
+          cumulativeExpenses += expenseAmount;
+          existingData.cumulativeExpenses = Number(
+            cumulativeExpenses.toFixed(2)
+          );
+          existingData.balance = Number(
+            (totalIncome - cumulativeExpenses).toFixed(2)
+          );
         } else {
-          dailyData.set(date, {
-            date,
-            expenses: 0,
-            cumulativeExpenses: 0,
-            income: 0,
-            balance: 0,
-          });
+          existingData.income = totalIncome;
+        }
+
+        dailyData.set(transaction.date, existingData);
+      }
+    });
+
+    // Convert Map to array and sort by date
+    const finalData = Array.from(dailyData.values()).sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+
+    // Update running values for days without transactions (only up to today)
+    let lastCumulativeExpenses = 0;
+    let lastBalance = totalIncome;
+
+    finalData.forEach((data) => {
+      if (data.date <= today) {
+        // Set income for all days up to today
+        data.income = totalIncome;
+
+        // If no transaction on this day, use previous cumulative values
+        if (data.expenses === 0 || data.expenses === null) {
+          data.cumulativeExpenses = lastCumulativeExpenses;
+          data.balance = lastBalance;
+        } else {
+          lastCumulativeExpenses =
+            data.cumulativeExpenses ?? lastCumulativeExpenses;
+          lastBalance = data.balance ?? lastBalance;
         }
       }
+    });
 
-      // First pass: Calculate total income for days up to today
-      sortedData.forEach((transaction) => {
-        if (transaction.date <= today && transaction.type === "income") {
-          totalIncome += Number(Number(transaction.amount).toFixed(2));
-        }
-      });
-
-      // Second pass: Process all transactions up to today
-      sortedData.forEach((transaction) => {
-        if (transaction.date <= today) {
-          const existingData = dailyData.get(transaction.date) || {
-            date: transaction.date,
-            expenses: 0,
-            cumulativeExpenses: 0,
-            income: totalIncome,
-            balance: totalIncome,
-          };
-
-          if (transaction.type === "expense") {
-            const expenseAmount = Number(Number(transaction.amount).toFixed(2));
-            existingData.expenses = expenseAmount;
-            cumulativeExpenses += expenseAmount;
-            existingData.cumulativeExpenses = Number(
-              cumulativeExpenses.toFixed(2)
-            );
-            existingData.balance = Number(
-              (totalIncome - cumulativeExpenses).toFixed(2)
-            );
-          } else {
-            existingData.income = totalIncome;
-          }
-
-          dailyData.set(transaction.date, existingData);
-        }
-      });
-
-      // Convert Map to array and sort by date
-      const processedData = Array.from(dailyData.values()).sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-      );
-
-      // Update running values for days without transactions (only up to today)
-      let lastCumulativeExpenses = 0;
-      let lastBalance = totalIncome;
-
-      processedData.forEach((data) => {
-        if (data.date <= today) {
-          // Set income for all days up to today
-          data.income = totalIncome;
-
-          // If no transaction on this day, use previous cumulative values
-          if (data.expenses === 0 || data.expenses === null) {
-            data.cumulativeExpenses = lastCumulativeExpenses;
-            data.balance = lastBalance;
-          } else {
-            lastCumulativeExpenses =
-              data.cumulativeExpenses ?? lastCumulativeExpenses;
-            lastBalance = data.balance ?? lastBalance;
-          }
-        }
-      });
-
-      return processedData;
-    };
-
-    setProcessedData(processData());
-  }, [monthlyData]);
+    return finalData;
+  }, [monthlyData]); // Only recalculate when monthlyData changes
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-IN", {

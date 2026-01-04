@@ -1,7 +1,11 @@
-import { useMutation, UseMutationResult } from "@tanstack/react-query";
-import { CreateGoalsDTO, GoalsResponseDTO } from "../../../server/types";
-import { createQueryClient, queryKeys } from "../../react-query";
-import GoalsService from "../../services/GoalsService/GoalsService";
+import {
+  useMutation,
+  UseMutationResult,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { CreateGoalsDTO, GoalsDTO } from "../../../server/types";
+import { queryKeys } from "../../react-query";
+import {goalsService} from "../../services/CRUDService";
 
 /**
  * Defines the return type for useGoalsMutation hook
@@ -9,7 +13,7 @@ import GoalsService from "../../services/GoalsService/GoalsService";
  */
 interface UseGoalsMutationReturn {
   createGoal: UseMutationResult<
-    GoalsResponseDTO,
+    GoalsDTO,
     Error,
     {
       data: CreateGoalsDTO;
@@ -17,7 +21,7 @@ interface UseGoalsMutationReturn {
     unknown
   >;
   updateGoal: UseMutationResult<
-    GoalsResponseDTO,
+    GoalsDTO,
     Error,
     {
       id: number;
@@ -28,34 +32,34 @@ interface UseGoalsMutationReturn {
 }
 
 export function useGoalsMutation(): UseGoalsMutationReturn {
-  const queryClient = createQueryClient();
-  const service = GoalsService();
+  const queryClient = useQueryClient();
+  const service = goalsService;
 
   // Create Goals mutation
   const createGoal = useMutation({
     mutationFn: (params: { data: CreateGoalsDTO }) =>
-      service.postGoalsDetails(params.data),
+      service.create(params.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.all() });
     },
     onError: (error: Error) => {
-        console.error("Error creating goal:", error)
-    }
+      console.error("Error creating goal:", error);
+    },
   });
-  // Create Goals mutation
+  // Update Goals mutation
   const updateGoal = useMutation({
-    mutationFn: (params: {id: number, data: CreateGoalsDTO }) =>
-      service.updateGoalsDetails(params.id,params.data),
+    mutationFn: (params: { id: number; data: CreateGoalsDTO }) =>
+      service.update(params.id, params.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.all() });
     },
     onError: (error: Error) => {
-        console.error("Error creating goal:", error)
-    }
+      console.error("Error updating goal:", error);
+    },
   });
 
   return {
     createGoal,
-    updateGoal
-  }
+    updateGoal,
+  };
 }
