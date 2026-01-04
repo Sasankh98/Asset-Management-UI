@@ -70,7 +70,11 @@ const GoalsActions = ({
           },
         }}
       >
-        {isLoading ? "Processing..." : (modalType === ModalTypes.edit ? "Update Goal" : "Create Goal")}
+        {isLoading
+          ? "Processing..."
+          : modalType === ModalTypes.edit
+            ? "Update Goal"
+            : "Create Goal"}
       </Button>
     </Box>
   );

@@ -1,4 +1,8 @@
-import { useMutation, UseMutationResult, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  UseMutationResult,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { CreateGoalsDTO, GoalsResponseDTO } from "../../../server/types";
 import { queryKeys } from "../../react-query";
 import GoalsService from "../../services/GoalsService/GoalsService";
@@ -39,23 +43,23 @@ export function useGoalsMutation(): UseGoalsMutationReturn {
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.all() });
     },
     onError: (error: Error) => {
-        console.error("Error creating goal:", error)
-    }
+      console.error("Error creating goal:", error);
+    },
   });
   // Update Goals mutation
   const updateGoal = useMutation({
-    mutationFn: (params: {id: number, data: CreateGoalsDTO }) =>
-      service.updateGoalsDetails(params.id,params.data),
+    mutationFn: (params: { id: number; data: CreateGoalsDTO }) =>
+      service.updateGoalsDetails(params.id, params.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.all() });
     },
     onError: (error: Error) => {
-        console.error("Error updating goal:", error)
-    }
+      console.error("Error updating goal:", error);
+    },
   });
 
   return {
     createGoal,
-    updateGoal
-  }
+    updateGoal,
+  };
 }

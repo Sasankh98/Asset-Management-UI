@@ -53,7 +53,7 @@ const Goals = () => {
     (newModalType: ModalTypes, newSelectedGoal?: GoalsDTO) => {
       setModalType(newModalType);
       setSelectedGoal(newSelectedGoal);
-      
+
       onTitleChange(<GoalFormTitle modalType={newModalType} />);
       onBodyChange(
         <GoalsForm
@@ -69,7 +69,11 @@ const Goals = () => {
           modalType={newModalType}
           handleClose={handleCloseGoalsForm}
           handleGoals={handleGoals}
-          isLoading={newModalType === ModalTypes.create ? createGoal.isPending : updateGoal.isPending}
+          isLoading={
+            newModalType === ModalTypes.create
+              ? createGoal.isPending
+              : updateGoal.isPending
+          }
         />
       );
       onOpenChange(true);
@@ -99,7 +103,9 @@ const Goals = () => {
         data-testid="goals-container"
       >
         <CustomButton
-          handleClick={() => handleOpenDialogue(ModalTypes.create, selectedGoal)}
+          handleClick={() =>
+            handleOpenDialogue(ModalTypes.create, selectedGoal)
+          }
           text="Add Goal"
           customClass=""
         />
