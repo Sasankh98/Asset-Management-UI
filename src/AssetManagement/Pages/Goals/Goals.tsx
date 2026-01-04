@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef } from "react";
+import { useCallback, useState, useRef, useEffect } from "react";
 import GoalsCard from "./GoalsCard/GoalsCard";
 import { type GoalsDTO } from "../../../../server/types";
 import CustomButton from "../../../core/CustomButton/CustomButton";
@@ -17,10 +17,18 @@ const Goals = () => {
   const [selectedGoal, setSelectedGoal] = useState<GoalsDTO>();
   const [modalType, setModalType] = useState<ModalTypes>(ModalTypes.create);
   const formRef = useRef<GoalsFormRef>(null);
+  const modalTypeRef = useRef<ModalTypes>(ModalTypes.create);
+  const selectedGoalRef = useRef<GoalsDTO>();
   const { onOpenChange, onTitleChange, onBodyChange, onActionsChange } =
     useDialog();
   const goalsQuery = useGoalsQuery();
   const { createGoal, updateGoal } = useGoalsMutation();
+
+  // Sync refs with state to break circular dependency
+  useEffect(() => {
+    modalTypeRef.current = modalType;
+    selectedGoalRef.current = selectedGoal;
+  }, [modalType, selectedGoal]);
 
   const handleCloseGoalsForm = useCallback(() => {
     setGoalsOpen(false);
@@ -37,11 +45,12 @@ const Goals = () => {
       const goalsData = formRef.current.getFormData();
       console.log("Form data:", goalsData);
 
-      if (modalType === ModalTypes.create) {
+      // Use refs instead of state to avoid circular dependencies
+      if (modalTypeRef.current === ModalTypes.create) {
         await createGoal.mutateAsync({ data: goalsData });
-      } else if (modalType === ModalTypes.edit && selectedGoal) {
+      } else if (modalTypeRef.current === ModalTypes.edit && selectedGoalRef.current) {
         await updateGoal.mutateAsync({
-          id: selectedGoal.id,
+          id: selectedGoalRef.current.id,
           data: goalsData,
         });
       }
@@ -49,7 +58,7 @@ const Goals = () => {
     } catch (error) {
       console.error("Error handling goal:", error);
     }
-  }, [modalType, selectedGoal, createGoal, updateGoal, handleCloseGoalsForm]);
+  }, [createGoal, updateGoal, handleCloseGoalsForm]);
 
   const handleOpenDialogue = useCallback(
     (newModalType: ModalTypes, newSelectedGoal?: GoalsDTO) => {

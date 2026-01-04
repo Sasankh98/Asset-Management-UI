@@ -15,9 +15,10 @@ import EditIcon from "@mui/icons-material/Edit";
 import Tooltip from "@mui/material/Tooltip";
 import Fade from "@mui/material/Fade";
 import Skeleton from "@mui/material/Skeleton";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, memo } from "react";
 import { getTimeAgo } from "../../../../utils/dateTime";
 import Box from "@mui/material/Box";
+import { deepEqual } from "../../../../utils/DeepCompare";
 
 interface GoalsCardProps {
   goal: GoalsDTO;
@@ -27,7 +28,7 @@ interface GoalsCardProps {
   handleOpenDialogue: (modalType: ModalTypes, selectedGoal?: GoalsDTO) => void;
 }
 
-export default function GoalsCard({
+function GoalsCard({
   goal,
   setGoalsOpen,
   setSelectedGoal,
@@ -260,3 +261,14 @@ export default function GoalsCard({
     </Card>
   );
 }
+
+// Memoize component to prevent re-renders when parent updates but props haven't changed
+export default memo(GoalsCard, (prevProps, nextProps) => {
+  // Return true if props are equal (no re-render needed)
+  // Deep compare the entire goal object
+  return (
+    deepEqual<GoalsDTO>(prevProps.goal, nextProps.goal) &&
+    prevProps.loading === nextProps.loading
+  );
+});
+
