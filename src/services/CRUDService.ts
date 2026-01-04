@@ -1,11 +1,26 @@
-import { CreateGoalsDTO, GoalsDTO } from "../../server/types";
+import {
+  CreateGoalsDTO,
+  CreateMutualFundsDTO,
+  CreateSalaryDTO,
+  CreateStocksDTO,
+  GoalsDTO,
+  MutualFundsDashboardDTO,
+  MutualFundsDTO,
+  SalaryDTO,
+  StocksDTO,
+  UserInfoDTO,
+  UserLoginDTO,
+} from "../../server/types";
 import { httpService, baseURL } from "./axiosConnection";
 
 export function createCRUDService<T, CreateT = T>(endpoint: string) {
   return {
     list: async (): Promise<{ data: T[] }> => {
       try {
-        const response = await httpService.get(`${baseURL}${endpoint}`) as { status: string; data: T[] };
+        const response = (await httpService.get(`${baseURL}${endpoint}`)) as {
+          status: string;
+          data: T[];
+        };
         return { data: response.data };
       } catch (error) {
         console.error(`Failed to fetch ${endpoint}`, error);
@@ -58,6 +73,23 @@ export function createCRUDService<T, CreateT = T>(endpoint: string) {
 }
 
 // Then each service becomes ONE LINE:
-export const goalsService = createCRUDService<GoalsDTO, CreateGoalsDTO>('/goals');
-// export const mutualFundsService = createCRUDService<MutualFund, CreateMutualFund>('/mutualFunds');
-// export const salaryService = createCRUDService<Salary, CreateSalary>('/salary');
+export const loginService = createCRUDService<UserInfoDTO, UserLoginDTO>(
+  "/login"
+);
+export const goalsService = createCRUDService<GoalsDTO, CreateGoalsDTO>(
+  "/goals"
+);
+export const mutualFundsService = createCRUDService<
+  MutualFundsDTO,
+  CreateMutualFundsDTO
+>("/mutualFunds");
+export const mutualFundsDashboardService = createCRUDService<
+  MutualFundsDashboardDTO,
+  CreateMutualFundsDTO
+>("/mutualFunds/dashboard");
+export const salaryService = createCRUDService<SalaryDTO, CreateSalaryDTO>(
+  "/salary"
+);
+export const stocksService = createCRUDService<StocksDTO, CreateStocksDTO>(
+  "/stocks"
+);

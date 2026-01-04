@@ -119,11 +119,10 @@ const MutualFundTable = ({
   }, [mutualFundDetails]);
 
   const handleChangePage = (
-    event: React.MouseEvent<HTMLButtonElement> | null,
+    _event: React.MouseEvent<HTMLButtonElement> | null,
     newPage: number
   ) => {
     setPage(newPage);
-    console.log(event)
   };
 
   const handleChangeRowsPerPage = (
