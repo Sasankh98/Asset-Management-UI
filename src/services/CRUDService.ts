@@ -5,8 +5,8 @@ export function createCRUDService<T, CreateT = T>(endpoint: string) {
   return {
     list: async (): Promise<{ data: T[] }> => {
       try {
-        const response = await httpService.get(`${baseURL}${endpoint}`);
-        return response as { data: T[] };
+        const response = await httpService.get(`${baseURL}${endpoint}`) as { status: string; data: T[] };
+        return { data: response.data };
       } catch (error) {
         console.error(`Failed to fetch ${endpoint}`, error);
         throw error;

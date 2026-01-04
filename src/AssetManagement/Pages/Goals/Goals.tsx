@@ -104,7 +104,10 @@ console.log({goalsQuery})
       handleGoals,
     ]
   );
-
+// In Goals.tsx, add this near line 147:
+console.log("goalsQuery:", goalsQuery);
+console.log("goalsQuery.data:", goalsQuery.data);
+console.log("goalsQuery.data is array?", Array.isArray(goalsQuery.data));
   return (
     <ErrorBoundary
       level="feature"
