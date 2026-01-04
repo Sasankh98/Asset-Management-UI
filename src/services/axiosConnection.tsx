@@ -24,9 +24,9 @@ const setConfig = async (config?: RequestInit) => {
 
 function sanitizeInput(input: string): string {
   return input
-    .replace(/[\r\n]/g, " ")
-    .replace(/"/g, '\\"')
-    .replace(/'/g, "\\'");
+    .replaceAll(/[\r\n]/g, " ")
+    .replaceAll(/"/g, '\\"')
+    .replaceAll(/'/g, "\\'");
 }
 
 const logResponseError = async (urlPath: string, errorMessage: string) => {
