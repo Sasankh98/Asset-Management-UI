@@ -55,31 +55,6 @@ function GoalsCard({
     setSelectedGoal(goal);
     handleOpenDialogue(ModalTypes.edit, goal);
   };
-  //  const handleOpenDialogue = useCallback(
-  //     (selectedGoal?: GoalsDTO | undefined) => {
-  //       onTitleChange(<GoalFormTitle type={type} />);
-  //       onBodyChange(
-  //         <GoalsForm
-  //           type={type}
-  //           open={goalsOpen}
-  //           handleClose={() => handleCloseGoalsForm()}
-  //           goals={selectedGoal}
-  //         />
-  //       );
-  //       onActionsChange(
-  //         <GoalsActions type={type} handleClose={() => handleCloseGoalsForm()} />
-  //       );
-  //       onOpenChange(true);
-  //     },
-  //     [
-  //       onOpenChange,
-  //       onBodyChange,
-  //       onTitleChange,
-  //       type,
-  //       goalsOpen,
-  //       onActionsChange,
-  //     ]
-  //   );
 
   return (
     <Card sx={{ maxWidth: 345, borderRadius: 2 }}>

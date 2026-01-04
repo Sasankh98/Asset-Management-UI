@@ -89,7 +89,6 @@ const TransactionTable = ({
   const handleEditClick = (row: TableRow) => {
     setType("edit");
     setTransactionFormOpen(true);
-    // setSelectedTransaction(row);
     setSelectedTransaction(transactionData.find((income) => income.id === row[0]));
   };
 

@@ -29,7 +29,7 @@ interface SalaryFormProps {
   type: "create" | "edit" | "";
   handleClose: () => void;
   setRefreshData: Dispatch<SetStateAction<RefreshDataProps>>;
-  selectedTransaction?: Salary | undefined;
+  selectedTransaction?: Salary;
 }
 
 const SalaryForm = ({

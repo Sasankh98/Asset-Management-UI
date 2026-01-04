@@ -2,7 +2,6 @@ import { useParams } from "react-router";
 import Dashboard from "./Dashboard/Dashboard";
 import { DisplayContentEnum } from "../../shared/Constants";
 import MiniDrawer from "../../components/Sidebar/Sidebar";
-// import Stocks from "./Stocks/Stocks";
 import Salary from "./Salary/Salary";
 import Goals from "./Goals/Goals";
 import MutualFunds from "./MutualFunds/MutualFunds";
