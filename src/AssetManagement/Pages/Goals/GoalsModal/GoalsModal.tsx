@@ -1,11 +1,10 @@
-import { styled } from "@mui/material/styles";
+import { styled, ThemeProvider } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import InputAdornment from "@mui/material/InputAdornment";
 import LinearProgress from "@mui/material/LinearProgress";
-import { ThemeProvider } from "@mui/material/styles";
 import { useEffect, useState, forwardRef } from "react";
 import { Theme } from "../../../../core/MUI/Theme";
 import { CreateGoalsDTO, GoalsDTO } from "../../../../../server/types";
