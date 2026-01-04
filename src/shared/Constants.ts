@@ -20,6 +20,7 @@ export const TransactionTypesEnum = [
   { name: "Dividend" },
   { name: "Rent" },
   { name: "Cigarettes" },
+  { name: "Alcohol" },
   { name: "Lunch" },
   { name: "Utilities" },
   { name: "Groceries" },
@@ -27,6 +28,7 @@ export const TransactionTypesEnum = [
   { name: "Fuel" },
   { name: "Bus Fare" },
   { name: "Train Fare" },
+  { name: "Gambling" },
   { name: "Others" },
 ];
 
