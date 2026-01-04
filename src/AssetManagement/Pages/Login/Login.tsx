@@ -4,9 +4,11 @@ import CustomButton from "../../../core/CustomButton/CustomButton";
 import { useNavigate } from "react-router-dom";
 import { DisplayContentEnum } from "../../../shared/Constants";
 import { UserLoginDTO } from "../../../../server/types";
-import loginService from "../../../services/loginService/loginService";
+// import loginService from "../../../services/loginService/loginService";
+import { useLoginMutation } from "../../../hooks/mutations/useLoginMutation";
 
 const Login = () => {
+  const {createToken} = useLoginMutation();
   const [loginData, setLoginData] = useState<UserLoginDTO>({
     email: "",
     password: "",
@@ -26,11 +28,12 @@ const Login = () => {
 
   const handleSubmit = async () => {
     try {
-      const response = await loginService().login(loginData);
+      const response = await createToken.mutateAsync({ data: loginData});
+      // loginService().login(loginData);
 
       if (response?.status === "success") {
         sessionStorage.setItem("token", response.token);
-        navigate(`Asset-Management-UI/${DisplayContentEnum.dashboard}`); // Navigate to the displayContent path
+        navigate(`${DisplayContentEnum.dashboard}`); // Navigate to the displayContent path
       }
     } catch (err) {
       console.log(err);

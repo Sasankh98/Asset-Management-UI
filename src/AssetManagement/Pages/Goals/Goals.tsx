@@ -34,16 +34,14 @@ const Goals = () => {
     setGoalsOpen(false);
     onOpenChange(false);
   }, [onOpenChange]);
-console.log({goalsQuery})
+  
   const handleGoals = useCallback(async () => {
     try {
       if (!formRef.current) {
         console.error("Form ref is not available");
         return;
       }
-
       const goalsData = formRef.current.getFormData();
-      console.log("Form data:", goalsData);
 
       // Use refs instead of state to avoid circular dependencies
       if (modalTypeRef.current === ModalTypes.create) {
