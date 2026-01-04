@@ -20,6 +20,6 @@
 }
 
 .dashboard-headers h4{
-    font-family: Georgia;
+    font-family: Georgia, serif;  /* Fallback to serif if Georgia unavailable */
     font-weight: bolder !important;
 }

@@ -89,7 +89,6 @@ const TransactionTable = ({
   const handleEditClick = (row: TableRow) => {
     setType("edit");
     setTransactionFormOpen(true);
-    // setSelectedTransaction(row);
     setSelectedTransaction(transactionData.find((income) => income.id === row[0]));
   };
 
@@ -125,7 +124,7 @@ const TransactionTable = ({
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
+    setRowsPerPage(Number.parseInt(event.target.value, 10));
     setPage(0);
   };
   return (

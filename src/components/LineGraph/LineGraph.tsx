@@ -203,7 +203,7 @@ export default function LineGraph({ monthlyData }: LineGraphProps) {
               />
               <Typography variant="body2">
                 {entry.name}:{" "}
-                {formatCurrency(Number(parseFloat(entry.value).toFixed(2)))}
+                {formatCurrency(Number(Number.parseFloat(entry.value).toFixed(2)))}
               </Typography>
             </Box>
           ))}

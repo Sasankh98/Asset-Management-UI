@@ -3,16 +3,13 @@ import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-// import Button from "@mui/material/Button";
 import InputAdornment from "@mui/material/InputAdornment";
 import LinearProgress from "@mui/material/LinearProgress";
-
 import { ThemeProvider } from "@mui/material/styles";
 import { useEffect, useState, forwardRef } from "react";
 import { Theme } from "../../../../core/MUI/Theme";
 import { CreateGoalsDTO, GoalsDTO } from "../../../../../server/types";
 import { ModalTypes } from "../../../../shared/Constants";
-// import GoalsService from "../../../../services/GoalsService/GoalsService";
 
 interface GoalsFormProps {
   open: boolean;
