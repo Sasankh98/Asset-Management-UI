@@ -3,14 +3,16 @@ import Button from "@mui/material/Button";
 import { ModalTypes } from "../../../shared/Constants";
 
 interface GoalsActionsProps {
-  modalType:ModalTypes;
+  modalType: ModalTypes;
   handleClose: () => void;
-  handleGoals?: () => void;
+  handleGoals?: () => Promise<void> | void;
+  isLoading?: boolean;
 }
 const GoalsActions = ({
   modalType,
   handleClose,
   handleGoals,
+  isLoading = false,
 }: GoalsActionsProps) => {
   return (
     <Box
@@ -47,6 +49,7 @@ const GoalsActions = ({
         variant="contained"
         data-testid="handle-goals-button"
         onClick={handleGoals}
+        disabled={isLoading}
         sx={{
           borderRadius: 3,
           textTransform: "none",
@@ -61,9 +64,13 @@ const GoalsActions = ({
             transform: "translateY(-1px)",
             boxShadow: "0 6px 20px rgba(0, 0, 0, 0.3)",
           },
+          "&:disabled": {
+            opacity: 0.7,
+            cursor: "not-allowed",
+          },
         }}
       >
-        {modalType === ModalTypes.edit ? "Update Goal" : "Create Goal"}
+        {isLoading ? "Processing..." : (modalType === ModalTypes.edit ? "Update Goal" : "Create Goal")}
       </Button>
     </Box>
   );

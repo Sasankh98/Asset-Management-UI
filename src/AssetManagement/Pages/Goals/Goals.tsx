@@ -1,36 +1,75 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useRef } from "react";
 import GoalsCard from "./GoalsCard/GoalsCard";
 import { type GoalsDTO } from "../../../../server/types";
 import CustomButton from "../../../core/CustomButton/CustomButton";
-import GoalsForm from "./GoalsModal/GoalsModal";
+import GoalsForm, { type GoalsFormRef } from "./GoalsModal/GoalsModal";
 import { useGoalsQuery } from "../../../hooks/queries";
 import { useDialog } from "../../ContextProvider/DialogContextProvider";
 import GoalFormTitle from "./GoalsTitle";
 import GoalsActions from "./GoalsActions";
 import { ModalTypes } from "../../../shared/Constants";
+import { useGoalsMutation } from "../../../hooks/mutations/useGoalsMutation";
 
 const Goals = () => {
   const [goalsOpen, setGoalsOpen] = useState<boolean>(false);
   const [selectedGoal, setSelectedGoal] = useState<GoalsDTO>();
+  const [modalType, setModalType] = useState<ModalTypes>(ModalTypes.create);
+  const formRef = useRef<GoalsFormRef>(null);
   const { onOpenChange, onTitleChange, onBodyChange, onActionsChange } =
     useDialog();
   const goalsQuery = useGoalsQuery();
+  const { createGoal, updateGoal } = useGoalsMutation();
+
+  const handleCloseGoalsForm = useCallback(() => {
+    setGoalsOpen(false);
+    onOpenChange(false);
+  }, [onOpenChange]);
+
+  const handleGoals = useCallback(async () => {
+    try {
+      if (!formRef.current) {
+        console.error("Form ref is not available");
+        return;
+      }
+
+      const goalsData = formRef.current.getFormData();
+      console.log("Form data:", goalsData);
+
+      if (modalType === ModalTypes.create) {
+        await createGoal.mutateAsync({ data: goalsData });
+      } else if (modalType === ModalTypes.edit && selectedGoal) {
+        await updateGoal.mutateAsync({
+          id: selectedGoal.id,
+          data: goalsData,
+        });
+      }
+      handleCloseGoalsForm();
+    } catch (error) {
+      console.error("Error handling goal:", error);
+    }
+  }, [modalType, selectedGoal, createGoal, updateGoal, handleCloseGoalsForm]);
 
   const handleOpenDialogue = useCallback(
-    (modalType: ModalTypes, selectedGoal?: GoalsDTO) => {
-      onTitleChange(<GoalFormTitle modalType={modalType} />);
+    (newModalType: ModalTypes, newSelectedGoal?: GoalsDTO) => {
+      setModalType(newModalType);
+      setSelectedGoal(newSelectedGoal);
+      
+      onTitleChange(<GoalFormTitle modalType={newModalType} />);
       onBodyChange(
         <GoalsForm
-          modalType={modalType}
+          ref={formRef}
+          modalType={newModalType}
           open={goalsOpen}
-          handleClose={() => handleCloseGoalsForm()}
-          goals={selectedGoal}
+          handleClose={handleCloseGoalsForm}
+          goals={newSelectedGoal}
         />
       );
       onActionsChange(
         <GoalsActions
-          modalType={modalType}
-          handleClose={() => handleCloseGoalsForm()}
+          modalType={newModalType}
+          handleClose={handleCloseGoalsForm}
+          handleGoals={handleGoals}
+          isLoading={newModalType === ModalTypes.create ? createGoal.isPending : updateGoal.isPending}
         />
       );
       onOpenChange(true);
@@ -41,12 +80,12 @@ const Goals = () => {
       onTitleChange,
       goalsOpen,
       onActionsChange,
+      createGoal.isPending,
+      updateGoal.isPending,
+      handleCloseGoalsForm,
+      handleGoals,
     ]
   );
-  const handleCloseGoalsForm = () => {
-    setGoalsOpen(false);
-    onOpenChange(false);
-  };
 
   return (
     <>

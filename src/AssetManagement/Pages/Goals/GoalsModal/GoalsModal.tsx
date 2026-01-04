@@ -8,7 +8,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import LinearProgress from "@mui/material/LinearProgress";
 
 import { ThemeProvider } from "@mui/material/styles";
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef } from "react";
 import { Theme } from "../../../../core/MUI/Theme";
 import { CreateGoalsDTO, GoalsDTO } from "../../../../../server/types";
 import { ModalTypes } from "../../../../shared/Constants";
@@ -20,10 +20,11 @@ interface GoalsFormProps {
   handleClose: () => void;
   goals?: GoalsDTO;
 }
-// const StyledModal = styled(Modal)({
-//   backdropFilter: "blur(8px)",
-//   backgroundColor: "rgba(0, 0, 0, 0.3)",
-// });
+
+export interface GoalsFormRef {
+  getFormData: () => CreateGoalsDTO;
+}
+
 const GlassTextField = styled(TextField)(({ theme }) => ({
   "& .MuiOutlinedInput-root": {
     borderRadius: theme.spacing(1.5),
@@ -50,12 +51,13 @@ const GlassTextField = styled(TextField)(({ theme }) => ({
   },
 }));
 
-const GoalsForm = ({
-  // open,
-  modalType,
-  // handleClose,
-  goals,
-}: GoalsFormProps) => {
+const GoalsForm = forwardRef<GoalsFormRef, GoalsFormProps>((
+  {
+    modalType,
+    goals,
+  },
+  ref
+) => {
   const [goalsData, setGoalsData] = useState<CreateGoalsDTO>({
     goal: "",
     targetAmount: 0,
@@ -72,23 +74,14 @@ const GoalsForm = ({
     setGoalsData({ ...goalsData, [name]: value });
   };
 
-  // const handleGoals = async () => {
-  //   if (type === "create") {
-  //     const response = await GoalsService().postGoalsDetails(goalsData);
-  //     if (response) {
-  //       handleClose();
-        
-  //     }
-  //   } else if (type === "edit" && goals) {
-  //     const response = await GoalsService().updateGoalsDetails(
-  //       goals?.id,
-  //       goalsData
-  //     );
-  //     if (response) {
-  //       handleClose();
-  //     }
-  //   }
-  // };
+  // Expose form data through ref
+  useEffect(() => {
+    if (ref && typeof ref === 'object' && 'current' in ref) {
+      ref.current = {
+        getFormData: () => goalsData,
+      };
+    }
+  }, [goalsData, ref]);
 
   useEffect(() => {
     if (modalType === ModalTypes.edit && goals) {
@@ -114,52 +107,6 @@ const GoalsForm = ({
 
   return (
     <ThemeProvider theme={Theme}>
-      {/* <StyledModal open={open} onClose={handleClose}> */}
-        {/* <Box
-          sx={{
-            // Glassmorphism effect
-            background: "rgba(255, 255, 255, 0.1)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)", // Safari support
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            borderRadius: 4,
-
-            // Enhanced shadow for depth
-            boxShadow: `
-              0 8px 32px rgba(0, 0, 0, 0.12),
-              0 2px 6px rgba(0, 0, 0, 0.08),
-              inset 0 1px 0 rgba(255, 255, 255, 0.1)
-            `,
-
-            // Position and size
-            // width: { xs: "90%", sm: 600, md: 700 },
-            maxHeight: "90vh",
-            overflowY: "auto",
-            p: { xs: 2, sm: 3, md: 4 },
-            // position: "absolute",
-            // top: "50%",
-            // left: "50%",
-            // transform: "translate(-50%, -50%)",
-
-            // Subtle inner glow
-            "&::before": {
-              content: '""',
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              borderRadius: 4,
-              padding: "1px",
-              background:
-                "linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1))",
-              mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-              maskComposite: "exclude",
-              pointerEvents: "none",
-            },
-          }}
-        > */}
-
           {/* Progress Indicator for Edit Mode */}
           {modalType === ModalTypes.edit && goalsData?.targetAmount > 0 && (
             <Box
@@ -285,66 +232,10 @@ const GoalsForm = ({
               </Grid>
             </Grid>
           </Box>
-
-          {/* Action Buttons */}
-          {/* <Box
-            sx={{
-              display: "flex",
-              gap: 2,
-              justifyContent: "flex-end",
-              mt: 4,
-              pt: 3,
-              borderTop: "1px solid rgba(255, 255, 255, 0.1)",
-            }}
-          >
-            <Button
-              variant="outlined"
-              onClick={handleClose}
-              sx={{
-                borderRadius: 3,
-                textTransform: "none",
-                px: 3,
-                py: 1.5,
-                background: "rgba(255, 255, 255, 0.1)",
-                backdropFilter: "blur(10px)",
-                border: "1px solid rgba(255, 255, 255, 0.2)",
-                color: "rgba(255, 255, 255, 0.9)",
-                "&:hover": {
-                  background: "rgba(255, 255, 255, 0.15)",
-                  border: "1px solid rgba(255, 255, 255, 0.3)",
-                },
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
-              data-testid="handle-goals-button"
-              onClick={handleGoals}
-              sx={{
-                borderRadius: 3,
-                textTransform: "none",
-                px: 3,
-                py: 1.5,
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                backdropFilter: "blur(10px)",
-                border: "1px solid rgba(255, 255, 255, 0.2)",
-                boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
-                "&:hover": {
-                  background:
-                    "linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)",
-                  transform: "translateY(-1px)",
-                  boxShadow: "0 6px 20px rgba(0, 0, 0, 0.3)",
-                },
-              }}
-            >
-              {type === "edit" ? "Update Goal" : "Create Goal"}
-            </Button>
-          </Box> */}
-        {/* </Box> */}
-      {/* </StyledModal> */}
     </ThemeProvider>
   );
-};
+});
+
+GoalsForm.displayName = "GoalsForm";
 
 export default GoalsForm;
