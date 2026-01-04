@@ -271,4 +271,3 @@ export default memo(GoalsCard, (prevProps, nextProps) => {
     prevProps.loading === nextProps.loading
   );
 });
-

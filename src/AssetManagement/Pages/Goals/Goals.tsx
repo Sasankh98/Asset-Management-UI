@@ -48,7 +48,10 @@ const Goals = () => {
       // Use refs instead of state to avoid circular dependencies
       if (modalTypeRef.current === ModalTypes.create) {
         await createGoal.mutateAsync({ data: goalsData });
-      } else if (modalTypeRef.current === ModalTypes.edit && selectedGoalRef.current) {
+      } else if (
+        modalTypeRef.current === ModalTypes.edit &&
+        selectedGoalRef.current
+      ) {
         await updateGoal.mutateAsync({
           id: selectedGoalRef.current.id,
           data: goalsData,
