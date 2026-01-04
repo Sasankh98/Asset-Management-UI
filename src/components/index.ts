@@ -1,0 +1,1 @@
+export { ErrorBoundary, FeatureErrorFallback } from './ErrorBoundary';

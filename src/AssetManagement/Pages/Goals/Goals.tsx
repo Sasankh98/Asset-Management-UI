@@ -9,6 +9,8 @@ import GoalFormTitle from "./GoalsTitle";
 import GoalsActions from "./GoalsActions";
 import { ModalTypes } from "../../../shared/Constants";
 import { useGoalsMutation } from "../../../hooks/mutations/useGoalsMutation";
+import ErrorBoundary from "../../../components/ErrorBoundary/ErrorBoundary";
+import { FeatureErrorFallback } from "../../../components/ErrorBoundary/FeatureErrorFallback";
 
 const Goals = () => {
   const [goalsOpen, setGoalsOpen] = useState<boolean>(false);
@@ -92,7 +94,16 @@ const Goals = () => {
   );
 
   return (
-    <>
+    <ErrorBoundary
+      level="feature"
+      fallback={
+        <FeatureErrorFallback
+          featureName="Goals"
+          error={null}
+          onReset={() => window.location.reload()}
+        />
+      }
+    >
       <div
         style={{
           display: "flex",
@@ -131,7 +142,7 @@ const Goals = () => {
           />
         ))}
       </div>
-    </>
+    </ErrorBoundary>
   );
 };
 
