@@ -29,7 +29,6 @@ const Login = () => {
   const handleSubmit = async () => {
     try {
       const response = await createToken.mutateAsync({ data: loginData});
-      // loginService().login(loginData);
 
       if (response?.status === "success") {
         sessionStorage.setItem("token", response.token);
