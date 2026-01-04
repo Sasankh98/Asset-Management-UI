@@ -34,7 +34,7 @@ const Goals = () => {
     setGoalsOpen(false);
     onOpenChange(false);
   }, [onOpenChange]);
-
+console.log({goalsQuery})
   const handleGoals = useCallback(async () => {
     try {
       if (!formRef.current) {
@@ -144,7 +144,7 @@ const Goals = () => {
           margin: "1rem auto", // center at page level if needed
         }}
       >
-        {goalsQuery.data?.data.map((goal: GoalsDTO) => (
+        {goalsQuery?.data?.map((goal: GoalsDTO) => (
           <GoalsCard
             key={goal.id}
             goal={goal}
