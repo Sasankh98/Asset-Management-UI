@@ -97,6 +97,11 @@ export interface CreateStocksDTO {
   buyTax: number;
   buyDate: string;
   status: string;
+  marketPrice?: number;
+  sellPrice?: number;
+  sellTax?: number;
+  dividends?: number;
+  sellDate?: string;
 }
 
 /**
