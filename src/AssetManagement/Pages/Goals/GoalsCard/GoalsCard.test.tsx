@@ -27,6 +27,7 @@ const props = {
   setSelectedGoal: vi.fn(),
   loading: false,
   handleOpenDialogue: vi.fn(),
+  handleDeleteGoal: vi.fn(),
 };
 describe("Goals Card Component", () => {
   beforeEach(() => {

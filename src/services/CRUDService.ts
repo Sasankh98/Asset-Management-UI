@@ -17,11 +17,10 @@ export function createCRUDService<T, CreateT = T>(endpoint: string) {
   return {
     list: async (): Promise<{ data: T[] }> => {
       try {
-        const response = (await httpService.get(`${baseURL}${endpoint}`)) as {
-          status: string;
-          data: T[];
-        };
-        return { data: response.data };
+        const response = await httpService.get<{ status: string; data: T[] }>(
+          `${baseURL}${endpoint}`
+        );
+        return { data: response!.data };
       } catch (error) {
         console.error(`Failed to fetch ${endpoint}`, error);
         throw error;
@@ -30,7 +29,7 @@ export function createCRUDService<T, CreateT = T>(endpoint: string) {
 
     get: async (id: number): Promise<T> => {
       try {
-        const response = await httpService.get(`${baseURL}${endpoint}/${id}`);
+        const response = await httpService.get<T>(`${baseURL}${endpoint}/${id}`);
         return response as T;
       } catch (error) {
         console.error(`Failed to fetch ${endpoint}/${id}`, error);
@@ -40,8 +39,11 @@ export function createCRUDService<T, CreateT = T>(endpoint: string) {
 
     create: async (data: CreateT): Promise<T> => {
       try {
-        const response = await httpService.post(`${baseURL}${endpoint}`, data);
-        return response as T;
+        const response = await httpService.post<CreateT, T>(
+          `${baseURL}${endpoint}`,
+          data
+        );
+        return response;
       } catch (error) {
         console.error(`Failed to create at ${endpoint}`, error);
         throw error;
@@ -50,29 +52,28 @@ export function createCRUDService<T, CreateT = T>(endpoint: string) {
 
     update: async (id: number, data: CreateT): Promise<T> => {
       try {
-        const response = await httpService.patch(
+        const response = await httpService.patch<CreateT, T>(
           `${baseURL}${endpoint}?id=${id}`,
           data
         );
-        return response as T;
+        return response;
       } catch (error) {
         console.error(`Failed to update ${endpoint}/${id}`, error);
         throw error;
       }
     },
 
-    // delete: async (id: number): Promise<void> => {
-    //   try {
-    //     await httpService.delete(`${baseURL}${endpoint}/${id}`);
-    //   } catch (error) {
-    //     console.error(`Failed to delete ${endpoint}/${id}`, error);
-    //     throw error;
-    //   }
-    // },
+    delete: async (id: number): Promise<void> => {
+      try {
+        await httpService.del(`${baseURL}${endpoint}/${id}`);
+      } catch (error) {
+        console.error(`Failed to delete ${endpoint}/${id}`, error);
+        throw error;
+      }
+    },
   };
 }
 
-// Then each service becomes ONE LINE:
 export const loginService = createCRUDService<UserInfoDTO, UserLoginDTO>(
   "/login"
 );

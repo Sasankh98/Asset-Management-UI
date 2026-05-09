@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import Typography from "@mui/material/Typography";
-import CustomButton from "../../../core/CustomButton/CustomButton";
+import Button from "@mui/material/Button";
 import MutualFundCard from "./Components/MutualFundCards";
 import CenterTabs from "./Components/MutualFundTabs";
 import MutualFundTable from "./Components/MutualFundTable";
+import MutualFundPerformance from "./Components/MutualFundPerformance";
+import MutualFundTargets from "./Components/MutualFundTargets";
 import { MutualFund, MutualFundsDashboard } from "../../../../server/types";
 import MutualFundsService from "../../../services/MutualFunds/MutualFundsService";
 import { mutualFundsDashboard, Icons } from "../../../shared/Constants";
@@ -20,7 +22,7 @@ const MutualFunds = () => {
     MutualFundsDashboard | undefined
   >(undefined);
   const [mutualFundFormOpen, setMutualFundFormOpen] = useState<boolean>(false);
-  const [type, setType] = useState<"create" | "edit" | "">("");
+  const [type, setType] = useState<"create" | "edit" | undefined>(undefined);
   const [selectedMutualFund, setSelectedMutualFund] = useState<MutualFund>();
   const { refreshData, setRefreshData, snackBarOptions, setSnackBarOptions } =
     useAssetManagementContext();
@@ -42,7 +44,7 @@ const MutualFunds = () => {
           setMutualFundDetails(res.data);
           setSnackBarOptions({
             open: true,
-            message: "Fetched salary details Successfully",
+            message: "Fetched mutual fund details successfully",
             severity: "success",
           });
         }
@@ -54,7 +56,7 @@ const MutualFunds = () => {
         setMutualFundDashboardDetails(res?.data);
         setSnackBarOptions({
           open: true,
-          message: "Fetched salary details Successfully",
+          message: "Fetched mutual fund dashboard successfully",
           severity: "success",
         });
       });
@@ -82,11 +84,9 @@ const MutualFunds = () => {
           </Typography>
         </div>
         <div className="MutualFundsButton">
-          <CustomButton
-            handleClick={() => handleOpenMutualFundCreate()}
-            text="+ Add Fund"
-            customClass=""
-          />
+          <Button variant="contained" onClick={handleOpenMutualFundCreate}>
+            + Add Fund
+          </Button>
         </div>
       </div>
       <div className="MutualFundsCardsWrapper">
@@ -132,8 +132,12 @@ const MutualFunds = () => {
         </div>
       )}
 
-      {value === 1 && <div> Performance Section - Coming Soon </div>}
-      {value === 2 && <div> Target & Allocation Section - Coming Soon </div>}
+      {value === 1 && (
+        <MutualFundPerformance funds={mutualFundDetails} dashboard={mutualFundDashboardDetails} />
+      )}
+      {value === 2 && (
+        <MutualFundTargets funds={mutualFundDetails} dashboard={mutualFundDashboardDetails} />
+      )}
     </div>
   );
 };

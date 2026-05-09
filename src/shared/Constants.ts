@@ -1,4 +1,5 @@
 export const DisplayContentEnum = {
+  netWorth: "netWorth",
   dashboard: "dashboard",
   income: "income",
   expenses: "expenses",
@@ -9,7 +10,14 @@ export const DisplayContentEnum = {
   providentFund: "providentFund",
   calculator: "calculator",
   goals: "goals",
-};
+  loans: "loans",
+  emis: "emis",
+  reports: "reports",
+  settings: "settings",
+} as const;
+
+export type DisplayContent =
+  (typeof DisplayContentEnum)[keyof typeof DisplayContentEnum];
 
 export const TransactionTypesEnum = [
   { name: "Salary" },
@@ -72,5 +80,5 @@ export const MutualFundTypes = [
 
 export const enum ModalTypes {
   create = "create",
-  edit = "edit"
+  edit = "edit",
 }

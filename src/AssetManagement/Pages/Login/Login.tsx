@@ -1,13 +1,16 @@
 import { useState } from "react";
 import "./login.css";
-import CustomButton from "../../../core/CustomButton/CustomButton";
+import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
 import { DisplayContentEnum } from "../../../shared/Constants";
 import { UserLoginDTO } from "../../../../server/types";
 import { useLoginMutation } from "../../../hooks/mutations/useLoginMutation";
+import { useAssetManagementContext } from "../../ContextProvider/ContextProvider";
+import CustomSnackbar from "../../../components/SnackBar/Snackbar";
 
 const Login = () => {
-  const {createToken} = useLoginMutation();
+  const { createToken } = useLoginMutation();
+  const { showSnackbar, snackBarOptions } = useAssetManagementContext();
   const [loginData, setLoginData] = useState<UserLoginDTO>({
     email: "",
     password: "",
@@ -27,18 +30,21 @@ const Login = () => {
 
   const handleSubmit = async () => {
     try {
-      const response = await createToken.mutateAsync({ data: loginData});
+      const response = await createToken.mutateAsync({ data: loginData });
 
       if (response?.status === "success") {
         sessionStorage.setItem("token", response.token);
-        navigate(`${DisplayContentEnum.dashboard}`); // Navigate to the displayContent path
+        navigate(`${DisplayContentEnum.dashboard}`);
       }
     } catch (err) {
-      console.log(err);
+      console.error("Login error:", err);
+      showSnackbar("Invalid email or password. Please try again.", "error");
     }
   };
+
   return (
     <div className="login-wrapper" data-testid="login-wrapper">
+      {snackBarOptions.open && <CustomSnackbar />}
       <div className="login-header">Asset Management Application</div>
       <input placeholder="Enter Email" onChange={handleLogin} name="email" />
       <input
@@ -47,11 +53,14 @@ const Login = () => {
         onChange={handleLogin}
         name="password"
       />
-      <CustomButton
-        text={"Login"}
-        customClass={"login-btn"}
-        handleClick={handleSubmit}
-      />
+      <Button
+        variant="contained"
+        onClick={handleSubmit}
+        disabled={createToken.isPending}
+        className="login-btn"
+      >
+        {createToken.isPending ? "Logging in..." : "Login"}
+      </Button>
     </div>
   );
 };

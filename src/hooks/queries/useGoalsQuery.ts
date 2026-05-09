@@ -12,7 +12,6 @@ export function useGoalsQuery(): UseQueryResult<GoalsDTO[], Error> {
       const response = await service.list();
       return response.data;
     },
-    enabled: true,
     staleTime: 1000 * 60 * 60 * 24,
   });
 }

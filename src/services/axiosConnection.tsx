@@ -1,8 +1,6 @@
-const token = sessionStorage.getItem("token");
-
-export const baseURL = "http://localhost:4000/api";
-
 import { getTimeStamp } from "../utils/dateTime";
+
+export const baseURL = import.meta.env.VITE_API_BASE_URL as string;
 
 export const getUniqueParams = (fullPath: string | undefined) => {
   return fullPath?.includes("?")
@@ -10,12 +8,11 @@ export const getUniqueParams = (fullPath: string | undefined) => {
     : `?timestamp=${getTimeStamp()}`;
 };
 
-const setConfig = async (config?: RequestInit) => {
+const setConfig = (config?: RequestInit): RequestInit => {
+  const token = sessionStorage.getItem("token");
   return {
     ...config,
     headers: {
-      // ...config?.headers,
-      "Access-Control-Allow-Origin": "*",
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
@@ -29,16 +26,16 @@ function sanitizeInput(input: string): string {
     .replaceAll(/'/g, "\\'");
 }
 
-const logResponseError = async (urlPath: string, errorMessage: string) => {
+const logResponseError = (urlPath: string, errorMessage: string) => {
   const sanitizedUrlPath = sanitizeInput(urlPath);
   const sanitizedErrorMessage = sanitizeInput(errorMessage);
-  console.log(
+  console.error(
     `Error in API call to ${sanitizedUrlPath}: ${sanitizedErrorMessage}`
   );
 };
 
 const logError = (urlPath: string, error: unknown) => {
-  console.log(`Error in API call to ${urlPath}:`, error);
+  console.error(`Error in API call to ${urlPath}:`, error);
 };
 
 export async function get<T>(
@@ -46,12 +43,12 @@ export async function get<T>(
   customConfig?: RequestInit
 ): Promise<T | null> {
   const urlPath = fullPath + getUniqueParams(fullPath);
-  customConfig = await setConfig(customConfig);
+  const config = setConfig(customConfig);
   try {
-    const response = await fetch(urlPath, { ...customConfig, method: "GET" });
+    const response = await fetch(urlPath, { ...config, method: "GET" });
     if (!response.ok) {
       const errorMessage = await response.text();
-      await logResponseError(urlPath, errorMessage);
+      logResponseError(urlPath, errorMessage);
       return await Promise.reject(response);
     }
     if (response.status === 204) return null;
@@ -67,21 +64,21 @@ export async function post<T, R>(
   fullPath?: string,
   body?: T,
   customConfig?: RequestInit
-): Promise<R | unknown> {
+): Promise<R> {
   const urlPath = fullPath + getUniqueParams(fullPath);
-  customConfig = await setConfig(customConfig);
+  const config = setConfig(customConfig);
   try {
     const response = await fetch(urlPath, {
-      ...customConfig,
+      ...config,
       body: JSON.stringify(body),
       method: "POST",
     });
     if (!response.ok) {
       const errorMessage = await response.text();
-      await logResponseError(urlPath, errorMessage);
+      logResponseError(urlPath, errorMessage);
       return await Promise.reject(new Error(errorMessage));
     }
-    if (response.status === 204) return null;
+    if (response.status === 204) return null as unknown as R;
     const result: R = (await response.json()) as R;
     return result;
   } catch (error) {
@@ -94,21 +91,21 @@ export async function patch<T, R>(
   fullPath?: string,
   body?: T,
   customConfig?: RequestInit
-): Promise<R | unknown> {
+): Promise<R> {
   const urlPath = fullPath + getUniqueParams(fullPath);
-  customConfig = await setConfig(customConfig);
+  const config = setConfig(customConfig);
   try {
     const response = await fetch(urlPath, {
-      ...customConfig,
+      ...config,
       body: JSON.stringify(body),
       method: "PATCH",
     });
     if (!response.ok) {
       const errorMessage = await response.text();
-      await logResponseError(urlPath, errorMessage);
+      logResponseError(urlPath, errorMessage);
       return await Promise.reject(new Error(errorMessage));
     }
-    if (response.status === 204) return null;
+    if (response.status === 204) return null as unknown as R;
     const result: R = (await response.json()) as R;
     return result;
   } catch (error) {
@@ -123,20 +120,42 @@ export async function put<T, R>(
   customConfig?: RequestInit
 ): Promise<R | null> {
   const urlPath = fullPath + getUniqueParams(fullPath);
-  customConfig = await setConfig(customConfig);
+  const config = setConfig(customConfig);
   try {
     const response = await fetch(urlPath, {
-      ...customConfig,
+      ...config,
       body: JSON.stringify(body),
       method: "PUT",
     });
     if (!response.ok) {
       const errorMessage = await response.text();
-      await logResponseError(urlPath, errorMessage);
+      logResponseError(urlPath, errorMessage);
       return await Promise.reject(new Error(errorMessage));
     }
     if (response.status === 204) return null;
     const result: R = (await response.json()) as R;
+    return result;
+  } catch (error) {
+    logError(urlPath, error);
+    throw error;
+  }
+}
+
+export async function del<T>(
+  fullPath?: string,
+  customConfig?: RequestInit
+): Promise<T | null> {
+  const urlPath = fullPath + getUniqueParams(fullPath);
+  const config = setConfig(customConfig);
+  try {
+    const response = await fetch(urlPath, { ...config, method: "DELETE" });
+    if (!response.ok) {
+      const errorMessage = await response.text();
+      logResponseError(urlPath, errorMessage);
+      return await Promise.reject(new Error(errorMessage));
+    }
+    if (response.status === 204) return null;
+    const result: T = (await response.json()) as T;
     return result;
   } catch (error) {
     logError(urlPath, error);
@@ -149,4 +168,5 @@ export const httpService = {
   post,
   patch,
   put,
+  del,
 };

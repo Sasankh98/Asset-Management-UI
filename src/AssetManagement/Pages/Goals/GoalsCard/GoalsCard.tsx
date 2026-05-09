@@ -12,6 +12,7 @@ import { GoalsDTO } from "../../../../../server/types";
 import { formatCurrency } from "../../../../utils/currencyConverter";
 import { ImageIcons, ModalTypes } from "../../../../shared/Constants";
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import Tooltip from "@mui/material/Tooltip";
 import Fade from "@mui/material/Fade";
 import Skeleton from "@mui/material/Skeleton";
@@ -26,6 +27,7 @@ interface GoalsCardProps {
   setSelectedGoal: (goal: GoalsDTO) => void;
   loading?: boolean;
   handleOpenDialogue: (modalType: ModalTypes, selectedGoal?: GoalsDTO) => void;
+  handleDeleteGoal: (id: number) => Promise<void>;
 }
 
 function GoalsCard({
@@ -34,6 +36,7 @@ function GoalsCard({
   setSelectedGoal,
   loading = false,
   handleOpenDialogue,
+  handleDeleteGoal,
 }: GoalsCardProps) {
   const imageIcon = (() => {
     switch (goal.goal) {
@@ -75,24 +78,37 @@ function GoalsCard({
         }
         action={
           loading ? null : (
-            <IconButton
-              aria-label="settings"
-              data-testid="edit-button"
-              onClick={() => handleOpenGoalsEdit()}
-            >
-              <Tooltip
-                title="Edit Goals"
-                arrow
-                slots={{
-                  transition: Fade,
-                }}
-                slotProps={{
-                  transition: { timeout: 600 },
-                }}
+            <Box sx={{ display: "flex" }}>
+              <IconButton
+                aria-label="edit goal"
+                data-testid="edit-button"
+                onClick={() => handleOpenGoalsEdit()}
               >
-                <EditIcon />
-              </Tooltip>
-            </IconButton>
+                <Tooltip
+                  title="Edit Goal"
+                  arrow
+                  slots={{ transition: Fade }}
+                  slotProps={{ transition: { timeout: 600 } }}
+                >
+                  <EditIcon />
+                </Tooltip>
+              </IconButton>
+              <IconButton
+                aria-label="delete goal"
+                data-testid="delete-button"
+                onClick={() => handleDeleteGoal(goal.id)}
+                sx={{ color: "error.main" }}
+              >
+                <Tooltip
+                  title="Delete Goal"
+                  arrow
+                  slots={{ transition: Fade }}
+                  slotProps={{ transition: { timeout: 600 } }}
+                >
+                  <DeleteIcon />
+                </Tooltip>
+              </IconButton>
+            </Box>
           )
         }
         title={
@@ -237,10 +253,7 @@ function GoalsCard({
   );
 }
 
-// Memoize component to prevent re-renders when parent updates but props haven't changed
 export default memo(GoalsCard, (prevProps, nextProps) => {
-  // Return true if props are equal (no re-render needed)
-  // Deep compare the entire goal object
   return (
     deepEqual<GoalsDTO>(prevProps.goal, nextProps.goal) &&
     prevProps.loading === nextProps.loading

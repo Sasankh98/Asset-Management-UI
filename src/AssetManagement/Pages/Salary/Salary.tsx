@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
+import Button from "@mui/material/Button";
 import TransactionTable from "./TransactionTable/TransactionTable";
 import SalaryService from "../../../services/SalaryService/SalaryService";
 import { Salary } from "../../../../server/types";
 import { useAssetManagementContext } from "../../ContextProvider/ContextProvider";
 import TransactionForm from "./TransactionForm/TransactionForm";
-import CustomButton from "../../../core/CustomButton/CustomButton";
 import LineGraph from "../../../components/LineGraph/LineGraph";
 import CustomSnackbar from "../../../components/SnackBar/Snackbar";
+import PageActionBar from "../../../components/PageActionBar/PageActionBar";
 
 const SalaryComponent = () => {
   const { refreshData, setRefreshData, snackBarOptions, setSnackBarOptions } =
@@ -14,7 +15,7 @@ const SalaryComponent = () => {
   const [transactionData, setTransactionData] = useState([] as Salary[]);
   const [transactionFormOpen, setTransactionFormOpen] =
     useState<boolean>(false);
-  const [type, setType] = useState<"create" | "edit" | "">("");
+  const [type, setType] = useState<"create" | "edit" | undefined>(undefined);
   const [selectedTransaction, setSelectedTransaction] = useState<Salary>();
 
   // handles for modals
@@ -52,21 +53,11 @@ const SalaryComponent = () => {
           setRefreshData={setRefreshData}
         />
       )}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          margin: "1rem 0rem",
-          justifyContent: "center",
-        }}
-        data-testid="income-button-container"
-      >
-        <CustomButton
-          handleClick={() => handleOpenTransactionCreate()}
-          text="Add Transaction"
-          customClass=""
-        />
-      </div>
+      <PageActionBar data-testid="income-button-container">
+        <Button variant="contained" onClick={handleOpenTransactionCreate}>
+          Add Transaction
+        </Button>
+      </PageActionBar>
       <div>
         <LineGraph monthlyData={transactionData} />
       </div>

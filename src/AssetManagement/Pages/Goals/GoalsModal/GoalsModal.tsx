@@ -1,14 +1,12 @@
-import { styled, ThemeProvider } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
-import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import InputAdornment from "@mui/material/InputAdornment";
 import LinearProgress from "@mui/material/LinearProgress";
 import { useEffect, useState, forwardRef } from "react";
-import { Theme } from "../../../../core/MUI/Theme";
 import { CreateGoalsDTO, GoalsDTO } from "../../../../../server/types";
 import { ModalTypes } from "../../../../shared/Constants";
+import { GlassTextField } from "../../../../core/MUI/styles";
 
 interface GoalsFormProps {
   open: boolean;
@@ -20,32 +18,6 @@ interface GoalsFormProps {
 export interface GoalsFormRef {
   getFormData: () => CreateGoalsDTO;
 }
-
-const GlassTextField = styled(TextField)(({ theme }) => ({
-  "& .MuiOutlinedInput-root": {
-    borderRadius: theme.spacing(1.5),
-    background: "rgba(255, 255, 255, 0.1)",
-    backdropFilter: "blur(10px)",
-    border: "1px solid rgba(255, 255, 255, 0.2)",
-    color: "rgba(255, 255, 255, 0.9)",
-    "& fieldset": {
-      border: "none",
-    },
-    "&:hover": {
-      background: "rgba(255, 255, 255, 0.15)",
-    },
-    "&.Mui-focused": {
-      background: "rgba(255, 255, 255, 0.15)",
-      border: "1px solid rgba(255, 255, 255, 0.4)",
-    },
-  },
-  "& .MuiInputLabel-root": {
-    color: "rgba(255, 255, 255, 0.7)",
-    "&.Mui-focused": {
-      color: "rgba(255, 255, 255, 0.9)",
-    },
-  },
-}));
 
 const GoalsForm = forwardRef<GoalsFormRef, GoalsFormProps>(
   ({ modalType, goals }, ref) => {
@@ -97,7 +69,7 @@ const GoalsForm = forwardRef<GoalsFormRef, GoalsFormProps>(
     }, [modalType, goals]);
 
     return (
-      <ThemeProvider theme={Theme}>
+      <>
         {/* Progress Indicator for Edit Mode */}
         {modalType === ModalTypes.edit && goalsData?.targetAmount > 0 && (
           <Box
@@ -223,7 +195,7 @@ const GoalsForm = forwardRef<GoalsFormRef, GoalsFormProps>(
             </Grid>
           </Grid>
         </Box>
-      </ThemeProvider>
+      </>
     );
   }
 );

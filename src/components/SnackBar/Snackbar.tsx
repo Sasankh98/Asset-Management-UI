@@ -7,13 +7,12 @@ export default function CustomSnackbar() {
   const { snackBarOptions, setSnackBarOptions } = useAssetManagementContext();
 
   const handleClose = (
-    event?: SyntheticEvent | Event,
+    _event?: SyntheticEvent | Event,
     reason?: SnackbarCloseReason
   ) => {
     if (reason === "clickaway") {
       return;
     }
-    console.log(event);
     setSnackBarOptions({ ...snackBarOptions, open: false });
   };
 

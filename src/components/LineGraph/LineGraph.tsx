@@ -13,6 +13,7 @@ import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
+import { formatCurrency } from "../../utils/currencyConverter";
 
 interface DataPoint {
   date: string;
@@ -30,12 +31,68 @@ interface LineGraphProps {
   }[];
 }
 
+interface TooltipEntry {
+  name?: string;
+  value?: number;
+  color?: string;
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: TooltipEntry[];
+  label?: string;
+}
+
+function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
+  const theme = useTheme();
+
+  if (!active || !payload?.length) return null;
+
+  return (
+    <Paper
+      elevation={3}
+      sx={{
+        bgcolor: "background.paper",
+        p: 2,
+        border: `1px solid ${theme.palette.divider}`,
+        borderRadius: 1,
+      }}
+    >
+      <Typography variant="subtitle2" sx={{ mb: 1 }}>
+        {new Date(label ?? "").toLocaleDateString("en-IN", {
+          day: "numeric",
+          month: "short",
+        })}
+      </Typography>
+      {payload.map((entry, index) => (
+        <Box
+          key={index}
+          sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}
+        >
+          <Box
+            sx={{
+              width: 12,
+              height: 12,
+              borderRadius: "50%",
+              bgcolor: entry.color,
+            }}
+          />
+          <Typography variant="body2">
+            {entry.name}:{" "}
+            {formatCurrency(
+              Number(Number.parseFloat(String(entry.value ?? 0)).toFixed(2))
+            )}
+          </Typography>
+        </Box>
+      ))}
+    </Paper>
+  );
+}
+
 export default function LineGraph({ monthlyData }: LineGraphProps) {
   const theme = useTheme();
 
-  // Memoize the processed data to prevent recalculation on every render
   const processedData = useMemo(() => {
-    // Sort data by date
     const sortedData = [...monthlyData].sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
@@ -44,7 +101,6 @@ export default function LineGraph({ monthlyData }: LineGraphProps) {
     let cumulativeExpenses = 0;
     const dailyData = new Map<string, DataPoint>();
 
-    // Initialize with zero values for each day of the month
     const currentDate = new Date();
     const startOfMonth = new Date(
       currentDate.getFullYear(),
@@ -64,7 +120,6 @@ export default function LineGraph({ monthlyData }: LineGraphProps) {
       .toISOString()
       .split("T")[0];
 
-    // Initialize all days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(
         startOfMonth.getFullYear(),
@@ -74,34 +129,23 @@ export default function LineGraph({ monthlyData }: LineGraphProps) {
         .toISOString()
         .split("T")[0];
 
-      // For dates after today, set null values to break the line
-      if (date > today) {
-        dailyData.set(date, {
-          date,
-          expenses: null,
-          cumulativeExpenses: null,
-          income: null,
-          balance: null,
-        });
-      } else {
-        dailyData.set(date, {
-          date,
-          expenses: 0,
-          cumulativeExpenses: 0,
-          income: 0,
-          balance: 0,
-        });
-      }
+      dailyData.set(date, {
+        date,
+        expenses: date > today ? null : 0,
+        cumulativeExpenses: date > today ? null : 0,
+        income: date > today ? null : 0,
+        balance: date > today ? null : 0,
+      });
     }
 
-    // First pass: Calculate total income for days up to today
+    // First pass: sum all income up to today
     sortedData.forEach((transaction) => {
       if (transaction.date <= today && transaction.type === "income") {
         totalIncome += Number(Number(transaction.amount).toFixed(2));
       }
     });
 
-    // Second pass: Process all transactions up to today
+    // Second pass: process expenses up to today
     sortedData.forEach((transaction) => {
       if (transaction.date <= today) {
         const existingData = dailyData.get(transaction.date) || {
@@ -130,21 +174,17 @@ export default function LineGraph({ monthlyData }: LineGraphProps) {
       }
     });
 
-    // Convert Map to array and sort by date
-    const finalData = Array.from(dailyData.values()).sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-    );
+    // Already sorted — convert Map to array in insertion order
+    const finalData = Array.from(dailyData.values());
 
-    // Update running values for days without transactions (only up to today)
+    // Fill forward cumulative values for days without transactions
     let lastCumulativeExpenses = 0;
     let lastBalance = totalIncome;
 
     finalData.forEach((data) => {
       if (data.date <= today) {
-        // Set income for all days up to today
         data.income = totalIncome;
 
-        // If no transaction on this day, use previous cumulative values
         if (data.expenses === 0 || data.expenses === null) {
           data.cumulativeExpenses = lastCumulativeExpenses;
           data.balance = lastBalance;
@@ -157,61 +197,8 @@ export default function LineGraph({ monthlyData }: LineGraphProps) {
     });
 
     return finalData;
-  }, [monthlyData]); // Only recalculate when monthlyData changes
+  }, [monthlyData]);
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-    }).format(value);
-  };
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <Paper
-          elevation={3}
-          sx={{
-            bgcolor: "background.paper",
-            p: 2,
-            border: `1px solid ${theme.palette.divider}`,
-            borderRadius: 1,
-          }}
-        >
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>
-            {new Date(label).toLocaleDateString("en-IN", {
-              day: "numeric",
-              month: "short",
-            })}
-          </Typography>
-          {payload.map((entry: any, index: number) => (
-            <Box
-              key={index}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-                mb: 0.5,
-              }}
-            >
-              <Box
-                sx={{
-                  width: 12,
-                  height: 12,
-                  borderRadius: "50%",
-                  bgcolor: entry.color,
-                }}
-              />
-              <Typography variant="body2">
-                {entry.name}:{" "}
-                {formatCurrency(Number(Number.parseFloat(entry.value).toFixed(2)))}
-              </Typography>
-            </Box>
-          ))}
-        </Paper>
-      );
-    }
-    return null;
-  };
   return (
     <Paper
       elevation={4}
@@ -260,12 +247,7 @@ export default function LineGraph({ monthlyData }: LineGraphProps) {
         <ResponsiveContainer>
           <LineChart
             data={processedData}
-            margin={{
-              top: 20,
-              right: 30,
-              left: 20,
-              bottom: 40, // Increased bottom margin for legend
-            }}
+            margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
           >
             <defs>
               <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
@@ -348,7 +330,6 @@ export default function LineGraph({ monthlyData }: LineGraphProps) {
               type="stepAfter"
               dataKey="income"
               stroke={theme.palette.success.main}
-              filter="drop-shadow(0 0 4px theme.palette.success.main)"
               strokeWidth={3}
               strokeLinecap="round"
               strokeLinejoin="round"

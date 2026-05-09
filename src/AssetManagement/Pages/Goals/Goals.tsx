@@ -1,8 +1,9 @@
 import { useCallback, useState, useRef, useEffect } from "react";
+import Button from "@mui/material/Button";
 import GoalsCard from "./GoalsCard/GoalsCard";
 import { type GoalsDTO } from "../../../../server/types";
-import CustomButton from "../../../core/CustomButton/CustomButton";
 import GoalsForm, { type GoalsFormRef } from "./GoalsModal/GoalsModal";
+import PageActionBar from "../../../components/PageActionBar/PageActionBar";
 import { useGoalsQuery } from "../../../hooks/queries";
 import { useDialog } from "../../ContextProvider/DialogContextProvider";
 import GoalFormTitle from "./GoalsTitle";
@@ -11,6 +12,8 @@ import { ModalTypes } from "../../../shared/Constants";
 import { useGoalsMutation } from "../../../hooks/mutations/useGoalsMutation";
 import ErrorBoundary from "../../../components/ErrorBoundary/ErrorBoundary";
 import { FeatureErrorFallback } from "../../../components/ErrorBoundary/FeatureErrorFallback";
+import { useAssetManagementContext } from "../../ContextProvider/ContextProvider";
+import CustomSnackbar from "../../../components/SnackBar/Snackbar";
 
 const Goals = () => {
   const [goalsOpen, setGoalsOpen] = useState<boolean>(false);
@@ -21,8 +24,9 @@ const Goals = () => {
   const selectedGoalRef = useRef<GoalsDTO>();
   const { onOpenChange, onTitleChange, onBodyChange, onActionsChange } =
     useDialog();
+  const { snackBarOptions, showSnackbar } = useAssetManagementContext();
   const goalsQuery = useGoalsQuery();
-  const { createGoal, updateGoal } = useGoalsMutation();
+  const { createGoal, updateGoal, deleteGoal } = useGoalsMutation();
 
   // Sync refs with state to break circular dependency
   useEffect(() => {
@@ -34,7 +38,7 @@ const Goals = () => {
     setGoalsOpen(false);
     onOpenChange(false);
   }, [onOpenChange]);
-  
+
   const handleGoals = useCallback(async () => {
     try {
       if (!formRef.current) {
@@ -43,9 +47,9 @@ const Goals = () => {
       }
       const goalsData = formRef.current.getFormData();
 
-      // Use refs instead of state to avoid circular dependencies
       if (modalTypeRef.current === ModalTypes.create) {
         await createGoal.mutateAsync({ data: goalsData });
+        showSnackbar("Goal created successfully.", "success");
       } else if (
         modalTypeRef.current === ModalTypes.edit &&
         selectedGoalRef.current
@@ -54,12 +58,24 @@ const Goals = () => {
           id: selectedGoalRef.current.id,
           data: goalsData,
         });
+        showSnackbar("Goal updated successfully.", "success");
       }
       handleCloseGoalsForm();
     } catch (error) {
       console.error("Error handling goal:", error);
     }
-  }, [createGoal, updateGoal, handleCloseGoalsForm]);
+  }, [createGoal, updateGoal, handleCloseGoalsForm, showSnackbar]);
+
+  const handleDeleteGoal = useCallback(
+    async (id: number) => {
+      try {
+        await deleteGoal.mutateAsync({ id });
+      } catch (error) {
+        console.error("Error deleting goal:", error);
+      }
+    },
+    [deleteGoal]
+  );
 
   const handleOpenDialogue = useCallback(
     (newModalType: ModalTypes, newSelectedGoal?: GoalsDTO) => {
@@ -102,6 +118,7 @@ const Goals = () => {
       handleGoals,
     ]
   );
+
   return (
     <ErrorBoundary
       level="feature"
@@ -113,32 +130,26 @@ const Goals = () => {
         />
       }
     >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          marginTop: "1rem",
-          justifyContent: "center",
-        }}
-        data-testid="goals-container"
-      >
-        <CustomButton
-          handleClick={() =>
-            handleOpenDialogue(ModalTypes.create, selectedGoal)
-          }
-          text="Add Goal"
-          customClass=""
-        />
+      {snackBarOptions.open && <CustomSnackbar />}
+      <div data-testid="goals-container">
+        <PageActionBar>
+          <Button
+            variant="contained"
+            onClick={() => handleOpenDialogue(ModalTypes.create, undefined)}
+          >
+            Add Goal
+          </Button>
+        </PageActionBar>
       </div>
       <div
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
           gap: "2rem",
-          justifyContent: "center", // centers the grid inside its wrapper
-          maxWidth: "1080px", // adjust as needed for your page
+          justifyContent: "center",
+          maxWidth: "1080px",
           width: "100%",
-          margin: "1rem auto", // center at page level if needed
+          margin: "1rem auto",
         }}
       >
         {goalsQuery?.data?.map((goal: GoalsDTO) => (
@@ -148,6 +159,7 @@ const Goals = () => {
             setGoalsOpen={setGoalsOpen}
             setSelectedGoal={setSelectedGoal}
             handleOpenDialogue={handleOpenDialogue}
+            handleDeleteGoal={handleDeleteGoal}
           />
         ))}
       </div>
