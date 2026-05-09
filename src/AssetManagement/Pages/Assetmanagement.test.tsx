@@ -13,7 +13,7 @@ vi.mock("react-router", async (importOriginal) => {
   const original = await importOriginal<typeof RouterTypes>();
   return {
     ...original,
-    useParams: () => ({ displayContent: DisplayContentEnum.calculator }),
+    useParams: () => ({ displayContent: DisplayContentEnum.dashboard }),
   };
 });
 

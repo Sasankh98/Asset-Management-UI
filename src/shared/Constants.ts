@@ -69,13 +69,22 @@ export const enum Icons {
 }
 
 export const MutualFundTypes = [
-  { name: "Small Cap", value: "Small Cap" },
-  { name: "Mid Cap", value: "Mid Cap" },
   { name: "Large Cap", value: "Large Cap" },
+  { name: "Mid Cap", value: "Mid Cap" },
+  { name: "Small Cap", value: "Small Cap" },
+  { name: "Multi Cap", value: "Multi Cap" },
   { name: "Flexi Cap", value: "Flexi Cap" },
+  { name: "ELSS (Tax Saving)", value: "ELSS" },
+  { name: "Index Fund", value: "Index Fund" },
+  { name: "ETF", value: "ETF" },
+  { name: "Sectoral / Thematic", value: "Sectoral" },
+  { name: "Hybrid / Balanced", value: "Hybrid" },
+  { name: "Balanced Advantage", value: "Balanced Advantage" },
+  { name: "Arbitrage", value: "Arbitrage" },
   { name: "Debt", value: "Debt" },
   { name: "Liquid", value: "Liquid" },
-  { name: "Hybrid", value: "Hybrid" },
+  { name: "International / FOF", value: "International" },
+  { name: "Other", value: "Other" },
 ];
 
 export const enum ModalTypes {

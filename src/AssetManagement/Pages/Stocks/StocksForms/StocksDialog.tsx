@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -12,6 +12,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { type Stock } from "../../../../../server/types";
 import StocksService from "../../../../services/StocksService/StocksService";
 import { useAssetManagementContext } from "../../../ContextProvider/ContextProvider";
@@ -21,7 +23,7 @@ const AV_KEY = import.meta.env.VITE_ALPHA_VANTAGE_KEY as string | undefined;
 interface StockOption {
   symbol: string;
   name: string;
-  region: string;
+  exchange: string;
 }
 
 async function searchStocks(query: string): Promise<StockOption[]> {
@@ -31,14 +33,40 @@ async function searchStocks(query: string): Promise<StockOption[]> {
   );
   const json = await res.json() as { bestMatches?: Record<string, string>[] };
   if (!json.bestMatches) return [];
-  return json.bestMatches.map((m) => ({
-    symbol: m["1. symbol"],
-    name:   m["2. name"],
-    region: m["4. region"],
-  }));
+
+  const results = json.bestMatches.map((m) => {
+    const symbol = m["1. symbol"];
+    const exchange = symbol.endsWith(".NSE") ? "NSE"
+      : symbol.endsWith(".BSE") ? "BSE"
+      : m["4. region"] ?? "";
+    return { symbol, name: m["2. name"], exchange };
+  });
+
+  // NSE first, BSE second, rest after
+  const rank = (e: string) => e === "NSE" ? 0 : e === "BSE" ? 1 : 2;
+  return results.sort((a, b) => rank(a.exchange) - rank(b.exchange));
 }
 
 const STATUS_OPTIONS = ["active", "sold", "archived"];
+type InvestType = "lumpsum" | "sip";
+type SipFreq    = "monthly" | "quarterly" | "yearly";
+
+function addPeriod(d: Date, freq: SipFreq): Date {
+  const n = new Date(d);
+  if (freq === "monthly")    n.setMonth(n.getMonth() + 1);
+  else if (freq === "quarterly") n.setMonth(n.getMonth() + 3);
+  else n.setFullYear(n.getFullYear() + 1);
+  return n;
+}
+
+function countInstallments(start: string, end: string, freq: SipFreq): number {
+  if (!start) return 0;
+  let cur = new Date(start);
+  const endDate = end ? new Date(end) : new Date();
+  let count = 0;
+  while (cur <= endDate) { count++; cur = addPeriod(cur, freq); }
+  return count;
+}
 
 interface Props {
   open: boolean;
@@ -67,6 +95,14 @@ export default function StocksDialog({ open, type, selectedStock, handleClose }:
   const [inputVal, setInputVal]     = useState("");
   const [searching, setSearching]   = useState(false);
 
+  // SIP state
+  const [investType, setInvestType] = useState<InvestType>("lumpsum");
+  const [sipAmount, setSipAmount]   = useState(5000);
+  const [sipFreq, setSipFreq]       = useState<SipFreq>("monthly");
+  const [sipStart, setSipStart]     = useState("");
+  const [sipEnd, setSipEnd]         = useState("");
+  const [sipBrokPerInstall, setSipBrokPerInstall] = useState(0);
+
   const { setRefreshData, showSnackbar } = useAssetManagementContext();
 
   // Reset / populate form when dialog opens
@@ -90,6 +126,8 @@ export default function StocksDialog({ open, type, selectedStock, handleClose }:
       setInputVal("");
       setOptions([]);
     }
+    setInvestType("lumpsum");
+    setSipStart(""); setSipEnd("");
   }, [type, selectedStock, open]);
 
   // Debounced Alpha Vantage symbol search
@@ -107,6 +145,27 @@ export default function StocksDialog({ open, type, selectedStock, handleClose }:
 
   const set = (k: keyof typeof EMPTY_FORM, v: string | number) =>
     setForm((f) => ({ ...f, [k]: v }));
+
+  // SIP-derived values (real-time)
+  const sipCalc = useMemo(() => {
+    if (investType !== "sip" || !sipStart) return null;
+    const installments = countInstallments(sipStart, sipEnd, sipFreq);
+    const totalInvested = sipAmount * installments;
+    const totalBrok = sipBrokPerInstall * installments;
+    const avgPrice = form.quantity > 0 ? totalInvested / form.quantity : 0;
+    return { installments, totalInvested, totalBrok, avgPrice };
+  }, [investType, sipAmount, sipFreq, sipStart, sipEnd, sipBrokPerInstall, form.quantity]);
+
+  // Push SIP calc into main form fields whenever it updates
+  useEffect(() => {
+    if (!sipCalc) return;
+    setForm((f) => ({
+      ...f,
+      avg:    parseFloat(sipCalc.avgPrice.toFixed(2)),
+      buyTax: parseFloat(sipCalc.totalBrok.toFixed(2)),
+      buyDate: sipStart,
+    }));
+  }, [sipCalc, sipStart]);
 
   const handleSubmit = async () => {
     if (!form.stockName || !form.buyDate) {
@@ -184,8 +243,9 @@ export default function StocksDialog({ open, type, selectedStock, handleClose }:
                   <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
                     <Typography variant="body2" fontWeight={700}>{opt.symbol}</Typography>
                     <Chip
-                      label={opt.region.split("/")[0]?.trim() ?? opt.region}
+                      label={opt.exchange}
                       size="small"
+                      color={opt.exchange === "NSE" ? "primary" : opt.exchange === "BSE" ? "default" : "default"}
                       sx={{ height: 16, fontSize: 10, px: 0.5 }}
                     />
                   </Box>
@@ -213,22 +273,81 @@ export default function StocksDialog({ open, type, selectedStock, handleClose }:
           />
 
           {/* Status */}
-          <TextField
-            select
-            label="Status"
-            value={form.status}
-            onChange={(e) => set("status", e.target.value)}
-            size="small"
-          >
+          <TextField select label="Status" value={form.status}
+            onChange={(e) => set("status", e.target.value)} size="small">
             {STATUS_OPTIONS.map((s) => (
               <MenuItem key={s} value={s} sx={{ textTransform: "capitalize" }}>{s}</MenuItem>
             ))}
           </TextField>
 
+          {/* Investment type */}
+          <Box>
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: "block" }}>
+              Investment Type
+            </Typography>
+            <ToggleButtonGroup
+              value={investType} exclusive size="small"
+              onChange={(_, v) => { if (v) setInvestType(v as InvestType); }}
+            >
+              <ToggleButton value="lumpsum" sx={{ px: 3 }}>Lumpsum</ToggleButton>
+              <ToggleButton value="sip" sx={{ px: 3 }}>SIP</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+
+          {/* ── SIP inputs ──────────────────────────────────────────────── */}
+          {investType === "sip" && (
+            <>
+              <Divider>
+                <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: 1 }}>SIP DETAILS</Typography>
+              </Divider>
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+                <TextField label="SIP Amount (₹)" type="number" value={sipAmount}
+                  onChange={(e) => setSipAmount(Number(e.target.value))} size="small"
+                  slotProps={{ input: { inputProps: { min: 1 } } }} />
+                <TextField select label="Frequency" value={sipFreq}
+                  onChange={(e) => setSipFreq(e.target.value as SipFreq)} size="small">
+                  <MenuItem value="monthly">Monthly</MenuItem>
+                  <MenuItem value="quarterly">Quarterly</MenuItem>
+                  <MenuItem value="yearly">Yearly</MenuItem>
+                </TextField>
+              </Box>
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+                <TextField label="SIP Start Date" type="date" value={sipStart}
+                  onChange={(e) => setSipStart(e.target.value)} size="small"
+                  slotProps={{ inputLabel: { shrink: true } }} />
+                <TextField label="End Date (blank = today)" type="date" value={sipEnd}
+                  onChange={(e) => setSipEnd(e.target.value)} size="small"
+                  slotProps={{ inputLabel: { shrink: true } }} />
+              </Box>
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+                <TextField label="Total Shares Accumulated" type="number" value={form.quantity || ""}
+                  onChange={(e) => set("quantity", Number(e.target.value))} size="small"
+                  slotProps={{ input: { inputProps: { min: 0 } } }} />
+                <TextField label="Brokerage / SIP (₹)" type="number" value={sipBrokPerInstall}
+                  onChange={(e) => setSipBrokPerInstall(Number(e.target.value))} size="small"
+                  slotProps={{ input: { inputProps: { min: 0 } } }} />
+              </Box>
+              {sipCalc && (
+                <Box sx={{ bgcolor: "action.hover", borderRadius: 2, p: 1.5, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 1 }}>
+                  {[
+                    { label: "Installments",    value: String(sipCalc.installments) },
+                    { label: "Total Invested",  value: `₹${sipCalc.totalInvested.toLocaleString("en-IN", { maximumFractionDigits: 0 })}` },
+                    { label: "Avg Buy Price",   value: sipCalc.avgPrice > 0 ? `₹${sipCalc.avgPrice.toFixed(2)}` : "—" },
+                  ].map((r) => (
+                    <Box key={r.label}>
+                      <Typography variant="caption" color="text.secondary">{r.label}</Typography>
+                      <Typography variant="body2" fontWeight={700}>{r.value}</Typography>
+                    </Box>
+                  ))}
+                </Box>
+              )}
+            </>
+          )}
+
           {/* ── Buy details ─────────────────────────────────────────────── */}
           <Divider>
             <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: 1 }}>
-              BUY DETAILS
+              {investType === "sip" ? "CALCULATED VALUES (EDITABLE)" : "BUY DETAILS"}
             </Typography>
           </Divider>
 
