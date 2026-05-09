@@ -1,12 +1,11 @@
 ﻿# .github/workflows/deploy.yml
-name: Build and deploy to GitHub Pages (with PAT)
+name: Build and deploy to GitHub Pages
 
 on:
   push:
     branches:
       - main
 
-# give the job basic push permissions (PAT is also used)
 permissions:
   contents: write
 
@@ -27,16 +26,18 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          VITE_API_BASE_URL: https://asset-management-api-40nt.onrender.com/api
 
       - name: Create 404 fallback for SPA
         run: cp dist/index.html dist/404.html
            
 
-      - name: Deploy to GitHub Pages (using PAT)
+      - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          branch: gh-pages          # target branch
-          folder: dist              # folder to deploy
+          branch: gh-pages
+          folder: dist
           clean: true
           commit-message: "Deploy site from ${{ github.repository }}@${{ github.sha }}"
-          token: ${{ secrets.ASSET_MANAGEMENT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
