@@ -14,7 +14,6 @@ import LinearProgress from "@mui/material/LinearProgress";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import Divider from "@mui/material/Divider";
-import { useTheme } from "@mui/material/styles";
 import PhoneAndroidIcon from "@mui/icons-material/PhoneAndroid";
 import LaptopIcon from "@mui/icons-material/Laptop";
 import TvIcon from "@mui/icons-material/Tv";
@@ -96,7 +95,6 @@ let nextId = SEED_EMIS.length + 1;
 // ── Calendar view ─────────────────────────────────────────────────────────────
 
 function PaymentCalendar({ emis }: { emis: Emi[] }) {
-  const theme = useTheme();
   const today = new Date();
   const year = today.getFullYear();
   const month = today.getMonth();
