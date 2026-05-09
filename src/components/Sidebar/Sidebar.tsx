@@ -2,6 +2,14 @@ import * as React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import { createTheme } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
+import Avatar from "@mui/material/Avatar";
+import Chip from "@mui/material/Chip";
+
+import DashboardIcon from "@mui/icons-material/Dashboard";
 import FlagCircleIcon from "@mui/icons-material/FlagCircle";
 import WaterfallChartIcon from "@mui/icons-material/WaterfallChart";
 import ShowChartIcon from "@mui/icons-material/ShowChart";
@@ -16,14 +24,42 @@ import PaymentIcon from "@mui/icons-material/Payment";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import SettingsIcon from "@mui/icons-material/Settings";
 import SavingsIcon from "@mui/icons-material/Savings";
+import LogoutIcon from "@mui/icons-material/Logout";
+
 import { AppProvider, type Navigation } from "@toolpad/core/AppProvider";
 import { DashboardLayout } from "@toolpad/core/DashboardLayout";
+
+// ── helpers ────────────────────────────────────────────────────────────────────
+
+function getEmailFromToken(): string {
+  try {
+    const token = sessionStorage.getItem("token");
+    if (!token) return "";
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.email ?? payload.sub ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function initials(email: string): string {
+  return email.slice(0, 2).toUpperCase();
+}
+
+// ── navigation ─────────────────────────────────────────────────────────────────
 
 const NAVIGATION: Navigation = [
   {
     segment: "Asset-Management-UI/netWorth",
     title: "Net Worth",
     icon: <AccountBalanceWalletIcon />,
+  },
+  {
+    kind: "divider",
+  },
+  {
+    kind: "header",
+    title: "Investments",
   },
   {
     segment: "Asset-Management-UI/investments",
@@ -53,6 +89,18 @@ const NAVIGATION: Navigation = [
     ],
   },
   {
+    kind: "divider",
+  },
+  {
+    kind: "header",
+    title: "Finance",
+  },
+  {
+    segment: "Asset-Management-UI/salary",
+    title: "Income & Salary",
+    icon: <MoneyIcon />,
+  },
+  {
     segment: "Asset-Management-UI/liabilities",
     title: "Liabilities",
     icon: <HomeIcon />,
@@ -64,15 +112,17 @@ const NAVIGATION: Navigation = [
       },
       {
         segment: "emis",
-        title: "EMIs & Installments",
+        title: "EMIs",
         icon: <PaymentIcon />,
       },
     ],
   },
   {
-    segment: "Asset-Management-UI/calculator",
-    title: "Calculator",
-    icon: <CalculateIcon />,
+    kind: "divider",
+  },
+  {
+    kind: "header",
+    title: "Tools",
   },
   {
     segment: "Asset-Management-UI/goals",
@@ -85,9 +135,9 @@ const NAVIGATION: Navigation = [
     icon: <AssessmentIcon />,
   },
   {
-    segment: "Asset-Management-UI/salary",
-    title: "Salary",
-    icon: <MoneyIcon />,
+    segment: "Asset-Management-UI/calculator",
+    title: "Calculator",
+    icon: <CalculateIcon />,
   },
   {
     kind: "divider",
@@ -99,51 +149,119 @@ const NAVIGATION: Navigation = [
   },
 ];
 
-const demoTheme = createTheme({
+// ── theme ──────────────────────────────────────────────────────────────────────
+
+const sidebarTheme = createTheme({
   cssVariables: {
     colorSchemeSelector: "data-toolpad-color-scheme",
   },
   colorSchemes: { light: true, dark: true },
   breakpoints: {
-    values: {
-      xs: 0,
-      sm: 600,
-      md: 600,
-      lg: 1200,
-      xl: 1536,
-    },
+    values: { xs: 0, sm: 600, md: 600, lg: 1200, xl: 1536 },
   },
 });
 
-const session = {
-  user: {
-    name: "Sasankh",
-    email: "sasankh1805@gmail.com",
-  },
-};
+// ── toolbar actions ────────────────────────────────────────────────────────────
 
-export default function DashboardLayoutCustomPageItems({
+function ToolbarActions() {
+  const navigate = useNavigate();
+  const email = getEmailFromToken();
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("token");
+    navigate("/Asset-Management-UI/");
+  };
+
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mr: 1 }}>
+      {email && (
+        <Chip
+          avatar={
+            <Avatar sx={{ bgcolor: "primary.main", fontSize: 11, fontWeight: 700 }}>
+              {initials(email)}
+            </Avatar>
+          }
+          label={
+            <Typography variant="caption" sx={{ fontWeight: 500 }}>
+              {email}
+            </Typography>
+          }
+          variant="outlined"
+          size="small"
+          sx={{ maxWidth: 220 }}
+        />
+      )}
+      <Tooltip title="Logout">
+        <IconButton size="small" onClick={handleLogout} color="inherit">
+          <LogoutIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    </Box>
+  );
+}
+
+// ── component ──────────────────────────────────────────────────────────────────
+
+export default function MiniDrawer({
   children,
 }: {
   children?: React.ReactNode;
 }) {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const email = getEmailFromToken();
+
+  const session = {
+    user: {
+      name: email.split("@")[0] ?? "User",
+      email,
+      image: "",
+    },
+  };
+
   const router = {
-    push: (path: string) => {
-      navigate(path);
-    },
-   navigate: (url: string | URL) => {
-      navigate(typeof url === 'string' ? url : url.pathname + url.search);
-    },
+    push: (path: string) => navigate(path),
+    navigate: (url: string | URL) =>
+      navigate(typeof url === "string" ? url : url.pathname + url.search),
     currentPath: location.pathname,
     pathname: location.pathname,
     searchParams: new URLSearchParams(location.search),
   };
+
   return (
     <div data-testid="side-bar-component">
-      <AppProvider navigation={NAVIGATION} router={router} theme={demoTheme} session={session}>
-        <DashboardLayout>{children}</DashboardLayout>
+      <AppProvider
+        navigation={NAVIGATION}
+        router={router}
+        theme={sidebarTheme}
+        session={session}
+        branding={{
+          title: "Asset Manager",
+          logo: (
+            <Box
+              sx={{
+                width: 32,
+                height: 32,
+                borderRadius: 1.5,
+                bgcolor: "primary.main",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <AccountBalanceWalletIcon sx={{ color: "#fff", fontSize: 18 }} />
+            </Box>
+          ),
+        }}
+      >
+        <DashboardLayout
+          slots={{
+            toolbarActions: ToolbarActions,
+          }}
+        >
+          {children}
+        </DashboardLayout>
       </AppProvider>
     </div>
   );
