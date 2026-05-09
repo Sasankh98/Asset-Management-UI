@@ -3,7 +3,7 @@ import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
-import CircularProgress from "@mui/material/CircularProgress";
+import Skeleton from "@mui/material/Skeleton";
 import { useTheme } from "@mui/material/styles";
 import {
   PieChart,
@@ -69,8 +69,30 @@ const Dashboard: FC = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 300 }}>
-        <CircularProgress />
+      <Box sx={{ p: 2, maxWidth: 960, mx: "auto" }}>
+        <Paper elevation={2} sx={{ p: 3, mb: 2, borderRadius: 2 }}>
+          <Skeleton variant="text" width="40%" height={40} />
+          <Skeleton variant="text" width="25%" height={64} sx={{ mt: 1 }} />
+          <Skeleton variant="text" width="30%" height={20} sx={{ mt: 0.5 }} />
+        </Paper>
+        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2, mb: 2 }}>
+          {[...Array(4)].map((_, i) => (
+            <Paper key={i} elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
+              <Skeleton variant="text" width="60%" />
+              <Skeleton variant="text" width="80%" height={36} sx={{ mt: 0.5 }} />
+            </Paper>
+          ))}
+        </Box>
+        <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2, mb: 2 }}>
+          <Paper elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
+            <Skeleton variant="text" width="50%" sx={{ mb: 1 }} />
+            <Skeleton variant="rectangular" height={220} sx={{ borderRadius: 1 }} />
+          </Paper>
+          <Paper elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
+            <Skeleton variant="text" width="50%" sx={{ mb: 1 }} />
+            <Skeleton variant="circular" width={160} height={160} sx={{ mx: "auto", mt: 2 }} />
+          </Paper>
+        </Box>
       </Box>
     );
   }

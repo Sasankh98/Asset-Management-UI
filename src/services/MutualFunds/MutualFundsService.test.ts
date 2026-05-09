@@ -12,7 +12,7 @@ const mockRequest: CreateMutualFundsDTO = {
   currentValue: 10000,
   nav: 10000,
   units: 10000,
-  targetProgress: 100000,
+  targetAmount: 100000,
   user: "sasankh",
 };
 

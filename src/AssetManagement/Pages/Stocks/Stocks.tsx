@@ -6,6 +6,7 @@ import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
+import Skeleton from "@mui/material/Skeleton";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import {
@@ -63,6 +64,7 @@ function buildRow(s: Stock): TableRow {
 export default function Stocks() {
   const [stocks, setStocks]             = useState<Stock[]>([]);
   const [rows, setRows]                 = useState<TableRow[]>([]);
+  const [loading, setLoading]           = useState(true);
   const [dialogOpen, setDialogOpen]     = useState(false);
   const [dialogType, setDialogType]     = useState<"create" | "edit">("create");
   const [selectedStock, setSelectedStock] = useState<Stock | undefined>();
@@ -71,12 +73,12 @@ export default function Stocks() {
   const { refreshData, snackBarOptions } = useAssetManagementContext();
 
   useEffect(() => {
+    setLoading(true);
     StocksService()
       .getStocksDetails()
-      .then((res) => {
-        if (res?.data) setStocks(res.data);
-      })
-      .catch(() => {});
+      .then((res) => { if (res?.data) setStocks(res.data); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [refreshData.refreshStocks]);
 
   const filtered = filter === "all" ? stocks : stocks.filter((s) => s.status === filter);
@@ -108,6 +110,38 @@ export default function Stocks() {
     const stock = stocks.find((s) => s.stockName === row[0] && String(s.avg) === String(row[1]));
     if (stock) { setSelectedStock(stock); setDialogType("edit"); setDialogOpen(true); }
   };
+
+  if (loading) {
+    return (
+      <Box sx={{ p: 2, maxWidth: 1100, mx: "auto" }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
+          <Box><Skeleton variant="text" width={180} height={36} /><Skeleton variant="text" width={260} height={20} /></Box>
+          <Skeleton variant="rounded" width={120} height={36} />
+        </Box>
+        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2, mb: 3 }}>
+          {[...Array(4)].map((_, i) => (
+            <Paper key={i} elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
+              <Skeleton variant="text" width="55%" />
+              <Skeleton variant="text" width="75%" height={36} sx={{ mt: 0.5 }} />
+            </Paper>
+          ))}
+        </Box>
+        <Paper elevation={2} sx={{ p: 2.5, borderRadius: 2, mb: 3 }}>
+          <Skeleton variant="rectangular" height={250} sx={{ borderRadius: 1 }} />
+        </Paper>
+        <Paper elevation={2} sx={{ p: 2, borderRadius: 2 }}>
+          {[...Array(6)].map((_, i) => (
+            <Box key={i} sx={{ display: "flex", gap: 2, py: 1.5, borderBottom: "1px solid", borderColor: "divider" }}>
+              <Skeleton variant="text" width="20%" /><Skeleton variant="text" width="10%" />
+              <Skeleton variant="text" width="8%" /><Skeleton variant="text" width="12%" />
+              <Skeleton variant="text" width="12%" /><Skeleton variant="text" width="10%" />
+              <Skeleton variant="rounded" width={60} height={22} />
+            </Box>
+          ))}
+        </Paper>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ p: 2, maxWidth: 1100, mx: "auto" }} data-testid="stocks-wrapper">

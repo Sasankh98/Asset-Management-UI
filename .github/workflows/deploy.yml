@@ -28,6 +28,7 @@ jobs:
         run: npm run build
         env:
           VITE_API_BASE_URL: https://asset-management-api-40nt.onrender.com/api
+          VITE_ALPHA_VANTAGE_KEY: Y6ZGNM36NIYQ7VY0
 
       - name: Create 404 fallback for SPA
         run: cp dist/index.html dist/404.html

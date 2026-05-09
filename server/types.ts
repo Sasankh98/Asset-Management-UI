@@ -165,7 +165,7 @@ export interface CreateMutualFundsDTO {
   currentValue: number;
   units: number;
   nav: number;
-  targetProgress: number;
+  targetAmount: number;
   user: string;
 }
 
@@ -274,6 +274,9 @@ export interface PfConfig {
   currentAge: number;
   retirementAge: number;
   currentBalance: number;
+  vpfPct: number;
+  salaryIncrementPct: number;
+  joiningMonth: number;
   user: string;
   createdAt: string;
   updatedAt: string;
@@ -288,6 +291,9 @@ export interface CreatePfConfigDTO {
   currentAge: number;
   retirementAge: number;
   currentBalance: number;
+  vpfPct: number;
+  salaryIncrementPct: number;
+  joiningMonth: number;
   user: string;
 }
 
