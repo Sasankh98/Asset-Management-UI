@@ -12,6 +12,7 @@ import Calculator from "./Calculator/Calculator";
 import LIC from "./LIC/LIC";
 import ProvidentFund from "./ProvidentFund/ProvidentFund";
 import Stocks from "./Stocks/Stocks";
+import Settings from "./Settings/Settings";
 import { DialogProvider } from "../ContextProvider/DialogContextProvider";
 
 const AssetManagement = () => {
@@ -47,7 +48,7 @@ const AssetManagement = () => {
               case DisplayContentEnum.reports:
                 return <Reports />;
               case DisplayContentEnum.settings:
-                return null;
+                return <Settings />;
               default:
                 return null;
             }
