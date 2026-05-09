@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -7,6 +7,10 @@ import TextField from "@mui/material/TextField";
 import Slider from "@mui/material/Slider";
 import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import SaveIcon from "@mui/icons-material/Save";
+import ProvidentFundService from "../../../services/ProvidentFundService/ProvidentFundService";
 import {
   BarChart,
   Bar,
@@ -93,6 +97,8 @@ function projectCorpus(
 
 // ── main ──────────────────────────────────────────────────────────────────────
 
+const USER = "Sasankh";
+
 export default function ProvidentFund() {
   const currentYear = new Date().getFullYear();
   const [monthlyBasic, setMonthlyBasic] = useState(60000);
@@ -102,6 +108,33 @@ export default function ProvidentFund() {
   const [yearsWorked, setYearsWorked] = useState(5);
   const [retirementAge, setRetirementAge] = useState(60);
   const [currentAge, setCurrentAge] = useState(30);
+  const [saving, setSaving] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    ProvidentFundService().getConfig(USER).then((cfg) => {
+      if (cfg) {
+        setMonthlyBasic(Number(cfg.monthlyBasic));
+        setEmpPct(Number(cfg.empPct));
+        setErPct(Number(cfg.erPct));
+        setRate(Number(cfg.rate));
+        setYearsWorked(Number(cfg.yearsWorked));
+        setCurrentAge(Number(cfg.currentAge));
+        setRetirementAge(Number(cfg.retirementAge));
+      }
+    }).catch(() => {}).finally(() => setLoaded(true));
+  }, []);
+
+  const handleSave = useCallback(async () => {
+    setSaving(true);
+    await ProvidentFundService().upsert({
+      monthlyBasic, empPct, erPct, rate,
+      yearsWorked, currentAge, retirementAge,
+      currentBalance: 0,
+      user: USER,
+    }).catch(() => {});
+    setSaving(false);
+  }, [monthlyBasic, empPct, erPct, rate, yearsWorked, currentAge, retirementAge]);
 
   const history = useMemo(
     () => buildHistory(currentYear - yearsWorked, monthlyBasic, empPct, erPct, rate, yearsWorked),
@@ -131,6 +164,14 @@ export default function ProvidentFund() {
     Balance: r.balance,
   }));
 
+  if (!loaded) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 300 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ p: 2, maxWidth: 1000, mx: "auto" }}>
       {/* Header */}
@@ -141,7 +182,18 @@ export default function ProvidentFund() {
             EPF balance, contributions, interest, and retirement projection.
           </Typography>
         </Box>
-        <Chip label={`EPF Rate: ${EPF_RATE}%`} color="primary" variant="outlined" />
+        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+          <Chip label={`EPF Rate: ${EPF_RATE}%`} color="primary" variant="outlined" />
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<SaveIcon />}
+            onClick={handleSave}
+            disabled={saving}
+          >
+            {saving ? "Saving…" : "Save"}
+          </Button>
+        </Box>
       </Box>
 
       {/* KPI cards */}

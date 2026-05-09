@@ -1,4 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import LicService from "../../../services/LicService/LicService";
+import type { LicPolicy as ApiLicPolicy } from "../../../../server/types";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -247,38 +249,7 @@ const EMPTY_POLICY: Omit<LicPolicy, "id"> = {
   maturityBonus: 1500000,
 };
 
-// ── Sample seed data ──────────────────────────────────────────────────────────
-
-const SEED_POLICIES: LicPolicy[] = [
-  {
-    id: 1,
-    name: "LIC Jeevan Umang",
-    policyNumber: "123456789",
-    startDate: "2020-04-01",
-    policyTerm: 30,
-    premiumPayTerm: 15,
-    premiumFreq: "monthly",
-    premium: 8500,
-    sumAssured: 2000000,
-    returnType: "annual",
-    returnAmount: 160000, // 8% of SA per year after premium term
-    maturityBonus: 2800000,
-  },
-  {
-    id: 2,
-    name: "LIC New Endowment",
-    policyNumber: "987654321",
-    startDate: "2018-07-01",
-    policyTerm: 20,
-    premiumPayTerm: 20,
-    premiumFreq: "yearly",
-    premium: 60000,
-    sumAssured: 1000000,
-    returnType: "lump_sum",
-    returnAmount: 0,
-    maturityBonus: 1600000,
-  },
-];
+const USER = "Sasankh";
 
 // ── Add / Edit Dialog ─────────────────────────────────────────────────────────
 
@@ -684,12 +655,28 @@ function PortfolioSummary({ policies }: { policies: LicPolicy[] }) {
 
 // ── Main LIC page ─────────────────────────────────────────────────────────────
 
-let nextId = SEED_POLICIES.length + 1;
+function coerce(p: ApiLicPolicy): LicPolicy {
+  return {
+    ...p,
+    premiumFreq: p.premiumFreq as PremiumFreq,
+    returnType: p.returnType as ReturnType,
+    policyTerm: Number(p.policyTerm),
+    premiumPayTerm: Number(p.premiumPayTerm),
+    premium: Number(p.premium),
+    sumAssured: Number(p.sumAssured),
+    returnAmount: Number(p.returnAmount),
+    maturityBonus: Number(p.maturityBonus),
+  };
+}
 
 export default function LIC() {
-  const [policies, setPolicies] = useState<LicPolicy[]>(SEED_POLICIES);
+  const [policies, setPolicies] = useState<LicPolicy[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<LicPolicy | null>(null);
+
+  useEffect(() => {
+    LicService().getPolicies().then((data) => setPolicies(data.map(coerce))).catch(() => {});
+  }, []);
 
   const handleAdd = () => {
     setEditTarget(null);
@@ -701,14 +688,19 @@ export default function LIC() {
     setDialogOpen(true);
   };
 
-  const handleDelete = (id: number) =>
+  const handleDelete = async (id: number) => {
+    await LicService().deletePolicy(id).catch(() => {});
     setPolicies((prev) => prev.filter((p) => p.id !== id));
+  };
 
-  const handleSave = (form: Omit<LicPolicy, "id">) => {
+  const handleSave = async (form: Omit<LicPolicy, "id">) => {
+    const payload = { ...form, user: USER };
     if (editTarget) {
-      setPolicies((prev) => prev.map((p) => (p.id === editTarget.id ? { ...form, id: p.id } : p)));
+      await LicService().updatePolicy(editTarget.id, payload).catch(() => {});
+      setPolicies((prev) => prev.map((p) => p.id === editTarget.id ? { ...form, id: p.id } : p));
     } else {
-      setPolicies((prev) => [...prev, { ...form, id: nextId++ }]);
+      const created = await LicService().createPolicy(payload).catch(() => null);
+      if (created) setPolicies((prev) => [...prev, coerce(created)]);
     }
     setDialogOpen(false);
   };

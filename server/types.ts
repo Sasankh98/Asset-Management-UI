@@ -168,3 +168,170 @@ export interface CreateMutualFundsDTO {
   targetProgress: number;
   user: string;
 }
+
+// ── Loans ─────────────────────────────────────────────────────────────────────
+
+export interface Loan {
+  id: number;
+  name: string;
+  kind: string;
+  totalAmt: number;
+  paidAmt: number;
+  emi: number;
+  interestRate: number;
+  dueDate: string;
+  tenureLeft: string;
+  user: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateLoanDTO {
+  name: string;
+  kind: string;
+  totalAmt: number;
+  paidAmt: number;
+  emi: number;
+  interestRate: number;
+  dueDate: string;
+  tenureLeft: string;
+  user: string;
+}
+
+// ── EMIs ──────────────────────────────────────────────────────────────────────
+
+export interface Emi {
+  id: number;
+  name: string;
+  kind: string;
+  totalAmt: number;
+  emiAmount: number;
+  totalInstallments: number;
+  paidInstallments: number;
+  nextDueDay: number;
+  startDate: string;
+  user: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateEmiDTO {
+  name: string;
+  kind: string;
+  totalAmt: number;
+  emiAmount: number;
+  totalInstallments: number;
+  paidInstallments: number;
+  nextDueDay: number;
+  startDate: string;
+  user: string;
+}
+
+// ── LIC ───────────────────────────────────────────────────────────────────────
+
+export interface LicPolicy {
+  id: number;
+  name: string;
+  policyNumber: string;
+  startDate: string;
+  policyTerm: number;
+  premiumPayTerm: number;
+  premiumFreq: string;
+  premium: number;
+  sumAssured: number;
+  returnType: string;
+  returnAmount: number;
+  maturityBonus: number;
+  user: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateLicPolicyDTO {
+  name: string;
+  policyNumber: string;
+  startDate: string;
+  policyTerm: number;
+  premiumPayTerm: number;
+  premiumFreq: string;
+  premium: number;
+  sumAssured: number;
+  returnType: string;
+  returnAmount: number;
+  maturityBonus: number;
+  user: string;
+}
+
+// ── Provident Fund ────────────────────────────────────────────────────────────
+
+export interface PfConfig {
+  id: number;
+  monthlyBasic: number;
+  empPct: number;
+  erPct: number;
+  rate: number;
+  yearsWorked: number;
+  currentAge: number;
+  retirementAge: number;
+  currentBalance: number;
+  user: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreatePfConfigDTO {
+  monthlyBasic: number;
+  empPct: number;
+  erPct: number;
+  rate: number;
+  yearsWorked: number;
+  currentAge: number;
+  retirementAge: number;
+  currentBalance: number;
+  user: string;
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+
+export interface DashboardData {
+  totalNetWorth: number;
+  totalAssets: number;
+  totalLiabilities: number;
+  totalMonthlyEmi: number;
+  savingsRate: number;
+  allocation: {
+    mutualFunds: number;
+    stocks: number;
+    pfAndLic: number;
+    liabilities: number;
+  };
+}
+
+// ── Reports / Snapshots ───────────────────────────────────────────────────────
+
+export interface NetWorthSnapshot {
+  id: number;
+  snapshotDate: string;
+  totalNetWorth: number;
+  mutualFunds: number;
+  stocks: number;
+  realEstate: number;
+  pfAndLic: number;
+  other: number;
+  totalLiabilities: number;
+  user: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateSnapshotDTO {
+  snapshotDate: string;
+  totalNetWorth: number;
+  mutualFunds: number;
+  stocks: number;
+  realEstate: number;
+  pfAndLic: number;
+  other: number;
+  totalLiabilities: number;
+  user: string;
+}

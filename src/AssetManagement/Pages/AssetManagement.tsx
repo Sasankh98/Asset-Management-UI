@@ -11,6 +11,7 @@ import Reports from "./Reports/Reports";
 import Calculator from "./Calculator/Calculator";
 import LIC from "./LIC/LIC";
 import ProvidentFund from "./ProvidentFund/ProvidentFund";
+import Stocks from "./Stocks/Stocks";
 import { DialogProvider } from "../ContextProvider/DialogContextProvider";
 
 const AssetManagement = () => {
@@ -26,7 +27,7 @@ const AssetManagement = () => {
               case DisplayContentEnum.dashboard:
                 return <Dashboard />;
               case DisplayContentEnum.stocks:
-                return null;
+                return <Stocks />;
               case DisplayContentEnum.salary:
                 return <Salary />;
               case DisplayContentEnum.mutualFunds:

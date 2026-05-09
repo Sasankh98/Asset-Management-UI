@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import LoansService from "../../../services/LoansService/LoansService";
+import type { Loan as ApiLoan } from "../../../../server/types";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -58,13 +60,7 @@ const EMPTY_LOAN: Omit<Loan, "id"> = {
   emi: 0, dueDate: "", tenureLeft: "", interestRate: 0,
 };
 
-const SEED_LOANS: Loan[] = [
-  { id: 1, name: "Home Loan · HDFC",  kind: "home",     totalAmt: 3200000, paidAmt: 840000,  emi: 28400, dueDate: "5 Jun", tenureLeft: "14y left",   interestRate: 8.5 },
-  { id: 2, name: "Vehicle Loan · SUV",kind: "vehicle",  totalAmt: 540000,  paidAmt: 210000,  emi: 12200, dueDate: "7 Jun", tenureLeft: "2y 3m left", interestRate: 9.0 },
-  { id: 3, name: "Personal Loan",     kind: "personal", totalAmt: 150000,  paidAmt: 110000,  emi: 9500,  dueDate: "15 Jun",tenureLeft: "5m left",    interestRate: 12.5 },
-];
-
-let nextId = SEED_LOANS.length + 1;
+const USER = "Sasankh";
 
 // ── Loan Dialog ───────────────────────────────────────────────────────────────
 
@@ -188,10 +184,25 @@ function LoanCard({ loan, onEdit, onDelete }: { loan: Loan; onEdit: () => void; 
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 
+function coerce(l: ApiLoan): Loan {
+  return {
+    ...l,
+    kind: l.kind as LoanKind,
+    totalAmt: Number(l.totalAmt),
+    paidAmt: Number(l.paidAmt),
+    emi: Number(l.emi),
+    interestRate: Number(l.interestRate),
+  };
+}
+
 export default function Loans() {
-  const [loans, setLoans] = useState<Loan[]>(SEED_LOANS);
+  const [loans, setLoans] = useState<Loan[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Loan | null>(null);
+
+  useEffect(() => {
+    LoansService().getLoans().then((data) => setLoans(data.map(coerce))).catch(() => {});
+  }, []);
 
   const totalDebt    = loans.reduce((s, l) => s + l.totalAmt, 0);
   const totalPaid    = loans.reduce((s, l) => s + l.paidAmt, 0);
@@ -200,12 +211,20 @@ export default function Loans() {
 
   const openAdd  = () => { setEditTarget(null); setDialogOpen(true); };
   const openEdit = (l: Loan) => { setEditTarget(l); setDialogOpen(true); };
-  const handleDelete = (id: number) => setLoans((p) => p.filter((l) => l.id !== id));
-  const handleSave = (form: Omit<Loan, "id">) => {
+
+  const handleDelete = async (id: number) => {
+    await LoansService().deleteLoan(id).catch(() => {});
+    setLoans((p) => p.filter((l) => l.id !== id));
+  };
+
+  const handleSave = async (form: Omit<Loan, "id">) => {
+    const payload = { ...form, user: USER };
     if (editTarget) {
+      await LoansService().updateLoan(editTarget.id, payload).catch(() => {});
       setLoans((p) => p.map((l) => l.id === editTarget.id ? { ...form, id: l.id } : l));
     } else {
-      setLoans((p) => [...p, { ...form, id: nextId++ }]);
+      const created = await LoansService().createLoan(payload).catch(() => null);
+      if (created) setLoans((p) => [...p, coerce(created)]);
     }
     setDialogOpen(false);
   };

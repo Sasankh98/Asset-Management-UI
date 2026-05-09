@@ -1,71 +1,248 @@
-// import { useEffect, useState } from "react";
-// import StocksTable from "./StocksTable/StocksTable";
-// import CustomButton from "../../../core/CustomButton/CustomButton";
-// import StocksModal from "./StocksForms/StocksModal";
-// import { useAssetManagementContext } from "../../ContextProvider/ContextProvider";
-// import StocksService from "../../../services/StocksService/StocksService";
-// import { Stock } from "../../../../server/types";
+import { useEffect, useState } from "react";
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as ChartTooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+import { type Stock } from "../../../../server/types";
+import StocksService from "../../../services/StocksService/StocksService";
+import SortableDataTable from "../../../components/SortableDataTable/SortableDataTable";
+import { type TableRow } from "../../../hooks/useTableSort";
+import { useAssetManagementContext } from "../../ContextProvider/ContextProvider";
+import CustomSnackbar from "../../../components/SnackBar/Snackbar";
+import StocksDialog from "./StocksForms/StocksDialog";
 
-// const Stocks = () => {
-//   const [stocksData, setStocksData] = useState<Stock[] | undefined>([]);
-//   const [addStocksOpen, setAddStocksOpen] = useState(false);
-//   const [type, setType] = useState<"create" | "edit" | "info" | "">("");
-//   const { setRefreshData } = useAssetManagementContext();
+// ── helpers ───────────────────────────────────────────────────────────────────
 
-//   useEffect(() => {
-//     (async () => {
-//       try {
-//         const res: any = await StocksService().getStocksDetails();
-//         setStocksData(res?.data);
-//       } catch (err) {
-//         console.error("Failed to fetch stocks:", err);
-//       }
-//     })();
-//   }, []);
+function fmtInr(val: number | null | undefined): string {
+  if (val == null) return "—";
+  if (Math.abs(val) >= 1e7) return `₹${(val / 1e7).toFixed(2)} Cr`;
+  if (Math.abs(val) >= 1e5) return `₹${(val / 1e5).toFixed(2)} L`;
+  return `₹${Math.round(val).toLocaleString("en-IN")}`;
+}
 
-//   useEffect(() => {
-//     (async () => {
-//       try {
-//         const res: any =
-//           await StocksService().getDailyStocksDetails("BPCL.BSE");
-//         console.log("Daily Stock Data:", res);
-//       } catch (err) {
-//         console.error("Failed to fetch daily stock data:", err);
-//       }
-//     })();
-//   }, []);
+const TABLE_COLS = [
+  { name: "Stock",        colId: "stockName",          id: 0 },
+  { name: "Avg Price",    colId: "avg",                id: 1 },
+  { name: "Qty",          colId: "quantity",           id: 2 },
+  { name: "Invested",     colId: "totalInvested",      id: 3 },
+  { name: "Mkt Price",    colId: "marketPrice",        id: 4 },
+  { name: "Curr Value",   colId: "currentValue",       id: 5 },
+  { name: "P&L",          colId: "profitLoss",         id: 6 },
+  { name: "P&L %",        colId: "netProfitLossPercent", id: 7 },
+  { name: "Status",       colId: "status",             id: 8 },
+  { name: "Edit",         colId: "edit" },
+];
 
-//   const handleAddStocksOpen = () => {
-//     setAddStocksOpen(true);
-//     setType("create");
-//   };
-//   const handleAddStocksClose = () => {
-//     setAddStocksOpen(false);
-//   };
+const COL_IDS = TABLE_COLS.map((c) => c.colId);
 
-//   return (
-//     <div data-testid="stocks-wrapper">
-//       {/* <Details /> */}
-//       {addStocksOpen ? (
-//         // <CreateStocks open={addStocksOpen} handleClose={handleAddStocksClose} />
-//         <StocksModal
-//           open={addStocksOpen}
-//           handleClose={handleAddStocksClose}
-//           type={type}
-//           setRefreshData={setRefreshData}
-//         />
-//       ) : null}
+function buildRow(s: Stock): TableRow {
+  return COL_IDS.map((col) => {
+    if (col === "edit") return "";
+    const val = s[col as keyof Stock];
+    return val ?? "";
+  });
+}
 
-//       <div>
-//         <CustomButton
-//           text={"Add Stocks"}
-//           customClass={"login-btn"}
-//           handleClick={handleAddStocksOpen}
-//         />
-//       </div>
-//       <StocksTable stocksData={stocksData} />
-//     </div>
-//   );
-// };
+// ── component ─────────────────────────────────────────────────────────────────
 
-// export default Stocks;
+export default function Stocks() {
+  const [stocks, setStocks]             = useState<Stock[]>([]);
+  const [rows, setRows]                 = useState<TableRow[]>([]);
+  const [dialogOpen, setDialogOpen]     = useState(false);
+  const [dialogType, setDialogType]     = useState<"create" | "edit">("create");
+  const [selectedStock, setSelectedStock] = useState<Stock | undefined>();
+  const [filter, setFilter]             = useState<"all" | "active" | "sold">("all");
+
+  const { refreshData, snackBarOptions } = useAssetManagementContext();
+
+  useEffect(() => {
+    StocksService()
+      .getStocksDetails()
+      .then((res) => {
+        if (res?.data) setStocks(res.data);
+      })
+      .catch(() => {});
+  }, [refreshData.refreshStocks]);
+
+  const filtered = filter === "all" ? stocks : stocks.filter((s) => s.status === filter);
+
+  useEffect(() => {
+    setRows(filtered.map(buildRow));
+  }, [filtered]);
+
+  // ── KPIs ────────────────────────────────────────────────────────────────────
+
+  const active = stocks.filter((s) => s.status === "active");
+  const totalInvested   = active.reduce((s, x) => s + (x.totalInvested ?? 0), 0);
+  const totalCurrent    = active.reduce((s, x) => s + (x.currentValue   ?? 0), 0);
+  const totalPL         = active.reduce((s, x) => s + (x.profitLoss     ?? 0), 0);
+  const returnPct       = totalInvested ? (totalPL / totalInvested) * 100 : 0;
+
+  // ── Chart data ───────────────────────────────────────────────────────────────
+
+  const chartData = active.slice(0, 10).map((s) => ({
+    name: s.stockName.length > 12 ? s.stockName.slice(0, 11) + "…" : s.stockName,
+    Invested: s.totalInvested ?? 0,
+    "Current Value": s.currentValue ?? 0,
+  }));
+
+  // ── handlers ─────────────────────────────────────────────────────────────────
+
+  const openAdd  = () => { setDialogType("create"); setSelectedStock(undefined); setDialogOpen(true); };
+  const openEdit = (row: TableRow) => {
+    const stock = stocks.find((s) => s.stockName === row[0] && String(s.avg) === String(row[1]));
+    if (stock) { setSelectedStock(stock); setDialogType("edit"); setDialogOpen(true); }
+  };
+
+  return (
+    <Box sx={{ p: 2, maxWidth: 1100, mx: "auto" }} data-testid="stocks-wrapper">
+      {snackBarOptions.open && <CustomSnackbar />}
+
+      <StocksDialog
+        open={dialogOpen}
+        type={dialogType}
+        selectedStock={selectedStock}
+        handleClose={() => setDialogOpen(false)}
+      />
+
+      {/* Header */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
+        <Box>
+          <Typography variant="h5" fontWeight={700}>Stock Portfolio</Typography>
+          <Typography variant="body2" color="text.secondary">
+            Track your equity investments, returns, and P&amp;L.
+          </Typography>
+        </Box>
+        <Button variant="contained" startIcon={<AddIcon />} onClick={openAdd}>
+          Add Stock
+        </Button>
+      </Box>
+
+      {/* KPI strip */}
+      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2, mb: 3 }}>
+        {[
+          { label: "Total Invested",  value: fmtInr(totalInvested), color: "text.primary"  },
+          { label: "Current Value",   value: fmtInr(totalCurrent),  color: "primary.main"  },
+          { label: "Total P&L",       value: fmtInr(totalPL),       color: totalPL >= 0 ? "success.main" : "error.main" },
+          { label: "Portfolio Return", value: `${returnPct >= 0 ? "+" : ""}${returnPct.toFixed(2)}%`, color: returnPct >= 0 ? "success.main" : "error.main" },
+        ].map((k) => (
+          <Paper key={k.label} elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ textTransform: "uppercase", letterSpacing: 1 }}>
+              {k.label}
+            </Typography>
+            <Typography variant="h6" fontWeight={700} color={k.color} sx={{ mt: 0.5 }}>
+              {k.value}
+            </Typography>
+          </Paper>
+        ))}
+      </Box>
+
+      {/* Chart */}
+      {active.length > 0 && (
+        <Paper elevation={2} sx={{ p: 2.5, borderRadius: 2, mb: 3 }}>
+          <Typography variant="subtitle1" fontWeight={600} mb={2}>
+            Invested vs Current Value (Active Holdings)
+          </Typography>
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis tickFormatter={(v: number) => `₹${(v / 1000).toFixed(0)}k`} />
+              <ChartTooltip formatter={(v: number) => fmtInr(v)} />
+              <Legend />
+              <Bar dataKey="Invested" fill="#90caf9" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Current Value" fill="#1976d2" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Paper>
+      )}
+
+      {/* Filter chips + table */}
+      <Paper elevation={2} sx={{ borderRadius: 2, overflow: "hidden" }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, px: 2.5, pt: 2, pb: 1 }}>
+          <Typography variant="subtitle1" fontWeight={600} sx={{ mr: 1 }}>Holdings</Typography>
+          {(["all", "active", "sold"] as const).map((f) => (
+            <Chip
+              key={f}
+              label={f.charAt(0).toUpperCase() + f.slice(1)}
+              size="small"
+              variant={filter === f ? "filled" : "outlined"}
+              color={filter === f ? "primary" : "default"}
+              onClick={() => setFilter(f)}
+              sx={{ textTransform: "capitalize" }}
+            />
+          ))}
+          <Typography variant="caption" color="text.secondary" sx={{ ml: "auto" }}>
+            {filtered.length} stock{filtered.length !== 1 ? "s" : ""}
+          </Typography>
+        </Box>
+
+        <SortableDataTable
+          columns={TABLE_COLS}
+          rows={rows}
+          renderCell={(value, colIndex, row) => {
+            // P&L column (index 6)
+            if (colIndex === 6) {
+              const num = Number(value);
+              return (
+                <span style={{ color: num >= 0 ? "#2e7d32" : "#c62828", fontWeight: 600 }}>
+                  {fmtInr(num)}
+                </span>
+              );
+            }
+            // P&L % column (index 7)
+            if (colIndex === 7) {
+              const num = Number(value);
+              return (
+                <Chip
+                  label={`${num >= 0 ? "+" : ""}${num.toFixed ? num.toFixed(2) : num}%`}
+                  size="small"
+                  color={num >= 0 ? "success" : "error"}
+                  sx={{ fontWeight: 700 }}
+                />
+              );
+            }
+            // Status chip (index 8)
+            if (colIndex === 8) {
+              return (
+                <Chip
+                  label={String(value)}
+                  size="small"
+                  color={value === "active" ? "success" : value === "sold" ? "default" : "warning"}
+                  variant="outlined"
+                  sx={{ textTransform: "capitalize" }}
+                />
+              );
+            }
+            // Edit button (last col)
+            if (colIndex === TABLE_COLS.length - 1) {
+              return (
+                <Tooltip title="Edit">
+                  <IconButton size="small" onClick={() => openEdit(row)}>
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              );
+            }
+            return undefined;
+          }}
+        />
+      </Paper>
+    </Box>
+  );
+}

@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import ReportsService from "../../../services/ReportsService/ReportsService";
+import { type NetWorthSnapshot } from "../../../../server/types";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -27,56 +29,6 @@ import DownloadIcon from "@mui/icons-material/Download";
 const PERIODS = ["1M", "3M", "1Y", "5Y", "All"] as const;
 type Period = (typeof PERIODS)[number];
 
-const NET_WORTH_DATA: Record<Period, { m: string; value: number }[]> = {
-  "1M": [
-    { m: "Apr 26", value: 82 },
-    { m: "May 26", value: 84.7 },
-  ],
-  "3M": [
-    { m: "Mar 26", value: 79 },
-    { m: "Apr 26", value: 82 },
-    { m: "May 26", value: 84.7 },
-  ],
-  "1Y": [
-    { m: "Jun", value: 62 },
-    { m: "Jul", value: 64 },
-    { m: "Aug", value: 63 },
-    { m: "Sep", value: 67 },
-    { m: "Oct", value: 70 },
-    { m: "Nov", value: 71 },
-    { m: "Dec", value: 73 },
-    { m: "Jan", value: 76 },
-    { m: "Feb", value: 75 },
-    { m: "Mar", value: 79 },
-    { m: "Apr", value: 82 },
-    { m: "May", value: 84.7 },
-  ],
-  "5Y": [
-    { m: "2022", value: 40 },
-    { m: "2023", value: 52 },
-    { m: "2024", value: 68 },
-    { m: "2025", value: 76 },
-    { m: "2026", value: 84.7 },
-  ],
-  All: [
-    { m: "2020", value: 18 },
-    { m: "2021", value: 28 },
-    { m: "2022", value: 40 },
-    { m: "2023", value: 52 },
-    { m: "2024", value: 68 },
-    { m: "2025", value: 76 },
-    { m: "2026", value: 84.7 },
-  ],
-};
-
-const ALLOCATION_HISTORY = [
-  { m: "Jun", mf: 20, stocks: 16, re: 22, pf: 10, other: 8 },
-  { m: "Aug", mf: 21, stocks: 17, re: 22, pf: 10, other: 8 },
-  { m: "Oct", mf: 22, stocks: 18, re: 22, pf: 11, other: 9 },
-  { m: "Dec", mf: 23, stocks: 18, re: 22, pf: 11, other: 9 },
-  { m: "Feb", mf: 24, stocks: 19, re: 22, pf: 11, other: 9 },
-  { m: "Apr", mf: 24.5, stocks: 18.2, re: 22, pf: 11.3, other: 8.7 },
-];
 
 const ALLOCATION_LEGEND = [
   { label: "Mutual Funds", color: "#1976d2", key: "mf" },
@@ -85,18 +37,6 @@ const ALLOCATION_LEGEND = [
   { label: "PF + LIC", color: "#d32f2f", key: "pf" },
   { label: "Other", color: "#757575", key: "other" },
 ];
-
-// Option B — monthly statements
-const MONTHS = ["Dec 25", "Jan 26", "Feb 26", "Mar 26", "Apr 26", "May 26"];
-const STATEMENT_ROWS = [
-  [62.0, 8.4, 18.2, 22.0, 11.0],
-  [64.2, 9.1, 18.9, 22.0, 11.2],
-  [63.8, 9.6, 17.8, 22.0, 11.4],
-  [67.3, 10.8, 19.4, 22.5, 11.6],
-  [70.1, 11.5, 20.8, 22.5, 11.8],
-  [84.7, 12.5, 24.5, 22.5, 11.9],
-];
-const STATEMENT_COLS = ["Net Worth", "MFs", "Stocks", "Real Estate", "Other"];
 
 // Option C — insight cards
 const INSIGHTS = [
@@ -142,9 +82,48 @@ const INSIGHTS = [
   },
 ];
 
+function toL(val: number) { return (Number(val) / 1e5).toFixed(1); }
+
+function snapshotsToTrend(snaps: NetWorthSnapshot[]) {
+  return snaps.map((s) => ({
+    m: new Date(s.snapshotDate).toLocaleDateString("en-IN", { month: "short", year: "2-digit" }),
+    value: parseFloat(toL(Number(s.totalNetWorth))),
+  }));
+}
+
+function snapshotsToAlloc(snaps: NetWorthSnapshot[]) {
+  return snaps.map((s) => ({
+    m: new Date(s.snapshotDate).toLocaleDateString("en-IN", { month: "short" }),
+    mf: parseFloat(toL(Number(s.mutualFunds))),
+    stocks: parseFloat(toL(Number(s.stocks))),
+    re: parseFloat(toL(Number(s.realEstate))),
+    pf: parseFloat(toL(Number(s.pfAndLic))),
+    other: parseFloat(toL(Number(s.other))),
+  }));
+}
+
 export default function Reports() {
   const [period, setPeriod] = useState<Period>("1Y");
+  const [trendData, setTrendData] = useState<{ m: string; value: number }[]>([]);
+  const [allocData, setAllocData] = useState<{ m: string; mf: number; stocks: number; re: number; pf: number; other: number }[]>([]);
+  const [statements, setStatements] = useState<NetWorthSnapshot[]>([]);
   const theme = useTheme();
+
+  useEffect(() => {
+    ReportsService().getNetWorthTrend(period).then((data) => {
+      if (data.length > 0) setTrendData(snapshotsToTrend(data));
+    }).catch(() => {});
+  }, [period]);
+
+  useEffect(() => {
+    ReportsService().getAllocationHistory().then((data) => {
+      if (data.length > 0) setAllocData(snapshotsToAlloc(data));
+    }).catch(() => {});
+
+    ReportsService().getStatements(12).then((data) => {
+      setStatements(data);
+    }).catch(() => {});
+  }, []);
 
   return (
     <Box sx={{ p: 2, maxWidth: 960, mx: "auto" }} data-testid="reports-container">
@@ -229,9 +208,14 @@ export default function Reports() {
         >
           Net Worth · {period}
         </Typography>
+        {trendData.length < 2 ? (
+          <Typography color="text.secondary" sx={{ py: 4, textAlign: "center" }}>
+            No snapshot data for this period. Record a snapshot below to start tracking.
+          </Typography>
+        ) : (
         <ResponsiveContainer width="100%" height={200}>
           <LineChart
-            data={NET_WORTH_DATA[period]}
+            data={trendData}
             margin={{ top: 5, right: 10, bottom: 5, left: 10 }}
           >
             <CartesianGrid
@@ -258,6 +242,7 @@ export default function Reports() {
             />
           </LineChart>
         </ResponsiveContainer>
+        )}
       </Paper>
 
       {/* Allocation shift stacked bar chart */}
@@ -269,9 +254,15 @@ export default function Reports() {
         >
           Allocation Shift (₹L)
         </Typography>
+        {allocData.length < 2 ? (
+          <Typography color="text.secondary" sx={{ py: 4, textAlign: "center" }}>
+            Not enough snapshots to show allocation shift.
+          </Typography>
+        ) : (
+        <>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart
-            data={ALLOCATION_HISTORY}
+            data={allocData}
             margin={{ top: 5, right: 10, bottom: 5, left: 10 }}
           >
             <CartesianGrid
@@ -302,6 +293,8 @@ export default function Reports() {
             </Box>
           ))}
         </Box>
+        </>
+        )}
       </Paper>
 
       <Divider sx={{ mb: 4 }} />
@@ -329,79 +322,41 @@ export default function Reports() {
       </Box>
 
       <Paper elevation={2} sx={{ borderRadius: 2, overflow: "hidden", mb: 4 }}>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "100px repeat(5, 1fr)",
-            px: 2,
-            py: 1,
-            bgcolor: "action.hover",
-            borderBottom: `1px solid ${theme.palette.divider}`,
-          }}
-        >
-          <Typography variant="caption" fontFamily="monospace" color="text.secondary">
-            MONTH
+        {statements.length === 0 ? (
+          <Typography color="text.secondary" sx={{ py: 4, textAlign: "center" }}>
+            No statements yet. Record monthly snapshots to see your history here.
           </Typography>
-          {STATEMENT_COLS.map((col) => (
-            <Typography
-              key={col}
-              variant="caption"
-              fontFamily="monospace"
-              color="text.secondary"
-              align="right"
-            >
-              {col.toUpperCase()}
-            </Typography>
-          ))}
-        </Box>
-
-        {MONTHS.map((month, i) => (
-          <Box
-            key={month}
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "100px repeat(5, 1fr)",
-              px: 2,
-              py: 1.5,
-              borderBottom:
-                i < MONTHS.length - 1
-                  ? `1px solid ${theme.palette.divider}`
-                  : "none",
-              "&:hover": { bgcolor: "action.hover" },
-            }}
-          >
-            <Typography variant="body2">{month}</Typography>
-            {STATEMENT_ROWS[i].map((val, j) => (
-              <Typography
-                key={j}
-                variant="body2"
-                fontFamily="monospace"
-                align="right"
-                fontWeight={j === 0 ? 600 : 400}
-              >
-                {val}L
-              </Typography>
+        ) : (
+          <>
+            <Box sx={{ display: "grid", gridTemplateColumns: "120px repeat(5, 1fr)", px: 2, py: 1, bgcolor: "action.hover", borderBottom: `1px solid ${theme.palette.divider}` }}>
+              {["MONTH", "NET WORTH", "MFs", "STOCKS", "PF+LIC", "LIABILITIES"].map((col) => (
+                <Typography key={col} variant="caption" fontFamily="monospace" color="text.secondary" align={col === "MONTH" ? "left" : "right"}>{col}</Typography>
+              ))}
+            </Box>
+            {statements.map((s, i) => (
+              <Box key={s.id} sx={{ display: "grid", gridTemplateColumns: "120px repeat(5, 1fr)", px: 2, py: 1.5, borderBottom: i < statements.length - 1 ? `1px solid ${theme.palette.divider}` : "none", "&:hover": { bgcolor: "action.hover" } }}>
+                <Typography variant="body2">{new Date(s.snapshotDate).toLocaleDateString("en-IN", { month: "short", year: "2-digit" })}</Typography>
+                {[s.totalNetWorth, s.mutualFunds, s.stocks, s.pfAndLic, s.totalLiabilities].map((val, j) => (
+                  <Typography key={j} variant="body2" fontFamily="monospace" align="right" fontWeight={j === 0 ? 600 : 400}>{toL(Number(val))}L</Typography>
+                ))}
+              </Box>
             ))}
-          </Box>
-        ))}
-
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            px: 2,
-            py: 1.5,
-            borderTop: `2px solid ${theme.palette.divider}`,
-            bgcolor: "action.hover",
-          }}
-        >
-          <Typography variant="body2" color="text.secondary" fontFamily="monospace">
-            6-MONTH CHANGE
-          </Typography>
-          <Typography variant="body2" fontFamily="monospace" color="success.main" fontWeight={600}>
-            + ₹22.7L (+36.6%)
-          </Typography>
-        </Box>
+            {statements.length >= 2 && (() => {
+              const first = Number(statements[0].totalNetWorth);
+              const last  = Number(statements[statements.length - 1].totalNetWorth);
+              const diff  = last - first;
+              const pct   = first ? ((diff / first) * 100).toFixed(1) : "0";
+              return (
+                <Box sx={{ display: "flex", justifyContent: "space-between", px: 2, py: 1.5, borderTop: `2px solid ${theme.palette.divider}`, bgcolor: "action.hover" }}>
+                  <Typography variant="body2" color="text.secondary" fontFamily="monospace">{statements.length}-MONTH CHANGE</Typography>
+                  <Typography variant="body2" fontFamily="monospace" color={diff >= 0 ? "success.main" : "error.main"} fontWeight={600}>
+                    {diff >= 0 ? "+" : ""}₹{toL(Math.abs(diff))}L ({diff >= 0 ? "+" : ""}{pct}%)
+                  </Typography>
+                </Box>
+              );
+            })()}
+          </>
+        )}
       </Paper>
 
       <Divider sx={{ mb: 4 }} />

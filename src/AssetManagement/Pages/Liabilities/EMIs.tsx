@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import EmisService from "../../../services/EmisService/EmisService";
+import type { Emi as ApiEmi } from "../../../../server/types";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -83,14 +85,7 @@ const EMPTY_EMI: Omit<Emi, "id"> = {
   startDate: new Date().toISOString().slice(0, 10),
 };
 
-const SEED_EMIS: Emi[] = [
-  { id: 1, name: "iPhone 15 Pro",       kind: "phone",     totalAmt: 92000,  emiAmount: 7800,  totalInstallments: 12, paidInstallments: 6,  nextDueDay: 12, startDate: "2024-11-01" },
-  { id: 2, name: "MacBook Air M3",       kind: "laptop",    totalAmt: 130000, emiAmount: 10900, totalInstallments: 12, paidInstallments: 3,  nextDueDay: 5,  startDate: "2025-02-01" },
-  { id: 3, name: "Samsung OLED TV 55\"", kind: "tv",        totalAmt: 85000,  emiAmount: 4250,  totalInstallments: 20, paidInstallments: 14, nextDueDay: 20, startDate: "2023-10-01" },
-  { id: 4, name: "HDFC Credit Card",     kind: "credit_card", totalAmt: 45000, emiAmount: 9000, totalInstallments: 5,  paidInstallments: 2,  nextDueDay: 25, startDate: "2025-01-01" },
-];
-
-let nextId = SEED_EMIS.length + 1;
+const USER = "Sasankh";
 
 // ── Calendar view ─────────────────────────────────────────────────────────────
 
@@ -368,10 +363,26 @@ function EmiCard({ emi, onEdit, onDelete }: { emi: Emi; onEdit: () => void; onDe
 
 // ── Main EMIs page ────────────────────────────────────────────────────────────
 
+function coerce(e: ApiEmi): Emi {
+  return {
+    ...e,
+    kind: e.kind as EmiKind,
+    totalAmt: Number(e.totalAmt),
+    emiAmount: Number(e.emiAmount),
+    totalInstallments: Number(e.totalInstallments),
+    paidInstallments: Number(e.paidInstallments),
+    nextDueDay: Number(e.nextDueDay),
+  };
+}
+
 export default function EMIs() {
-  const [emis, setEmis] = useState<Emi[]>(SEED_EMIS);
+  const [emis, setEmis] = useState<Emi[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Emi | null>(null);
+
+  useEffect(() => {
+    EmisService().getEmis().then((data) => setEmis(data.map(coerce))).catch(() => {});
+  }, []);
 
   const activeEmis = emis.filter((e) => e.paidInstallments < e.totalInstallments);
   const completedEmis = emis.filter((e) => e.paidInstallments >= e.totalInstallments);
@@ -380,12 +391,20 @@ export default function EMIs() {
 
   const openAdd  = () => { setEditTarget(null); setDialogOpen(true); };
   const openEdit = (e: Emi) => { setEditTarget(e); setDialogOpen(true); };
-  const handleDelete = (id: number) => setEmis((p) => p.filter((e) => e.id !== id));
-  const handleSave = (form: Omit<Emi, "id">) => {
+
+  const handleDelete = async (id: number) => {
+    await EmisService().deleteEmi(id).catch(() => {});
+    setEmis((p) => p.filter((e) => e.id !== id));
+  };
+
+  const handleSave = async (form: Omit<Emi, "id">) => {
+    const payload = { ...form, user: USER };
     if (editTarget) {
+      await EmisService().updateEmi(editTarget.id, payload).catch(() => {});
       setEmis((p) => p.map((e) => e.id === editTarget.id ? { ...form, id: e.id } : e));
     } else {
-      setEmis((p) => [...p, { ...form, id: nextId++ }]);
+      const created = await EmisService().createEmi(payload).catch(() => null);
+      if (created) setEmis((p) => [...p, coerce(created)]);
     }
     setDialogOpen(false);
   };
