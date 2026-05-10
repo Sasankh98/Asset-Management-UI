@@ -43,7 +43,7 @@ const TABLE_COLS = [
   { name: "Invested",     colId: "totalInvested",      id: 3 },
   { name: "Mkt Price",    colId: "marketPrice",        id: 4 },
   { name: "Curr Value",   colId: "currentValue",       id: 5 },
-  { name: "P&L",          colId: "profitLoss",         id: 6 },
+  { name: "P&L",          colId: "netProfitLoss",      id: 6 },
   { name: "P&L %",        colId: "netProfitLossPercent", id: 7 },
   { name: "Status",       colId: "status",             id: 8 },
   { name: "Edit",         colId: "edit" },
@@ -92,7 +92,7 @@ export default function Stocks() {
   const active = stocks.filter((s) => s.status === "active");
   const totalInvested   = active.reduce((s, x) => s + (x.totalInvested ?? 0), 0);
   const totalCurrent    = active.reduce((s, x) => s + (x.currentValue   ?? 0), 0);
-  const totalPL         = active.reduce((s, x) => s + (x.profitLoss     ?? 0), 0);
+  const totalPL         = active.reduce((s, x) => s + (x.netProfitLoss  ?? 0), 0);
   const returnPct       = totalInvested ? (totalPL / totalInvested) * 100 : 0;
 
   // ── Chart data ───────────────────────────────────────────────────────────────
