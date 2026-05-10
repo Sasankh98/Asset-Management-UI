@@ -371,12 +371,12 @@ const Dashboard: FC = () => {
             {data ? fmtInr(Number(data.totalLiabilities)) : "—"}
           </Typography>
         </Paper>
-        <Paper elevation={2} sx={{ p: 2.5, borderRadius: 2, bgcolor: "success.light" }}>
+        <Paper elevation={2} sx={{ p: 2.5, borderRadius: 2, borderTop: "3px solid", borderColor: "success.main" }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-            <SavingsIcon sx={{ fontSize: 18, color: "success.dark" }} />
-            <Typography variant="caption" sx={{ color: "success.dark", letterSpacing: 0.8, textTransform: "uppercase" }}>Savings Rate</Typography>
+            <SavingsIcon sx={{ fontSize: 18, color: "success.main" }} />
+            <Typography variant="caption" sx={{ color: "text.secondary", letterSpacing: 0.8, textTransform: "uppercase" }}>Savings Rate</Typography>
           </Box>
-          <Typography variant="h5" fontWeight={700} color="success.dark">
+          <Typography variant="h5" fontWeight={700} color="success.main">
             {data ? `${data.savingsRate}%` : "—"}
           </Typography>
         </Paper>

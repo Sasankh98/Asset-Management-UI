@@ -45,7 +45,6 @@ const INSIGHTS = [
     title: "Best month yet",
     desc: "May 2026 added ₹2.0L to net worth — your highest single-month gain.",
     color: "success.main",
-    bgcolor: "success.light",
     action: "View",
   },
   {
@@ -53,7 +52,6 @@ const INSIGHTS = [
     title: "SBI Small Cap dragging",
     desc: "Down 3.4% over 6 months while peers gained 8%+. Review or exit?",
     color: "warning.main",
-    bgcolor: "warning.light",
     action: "Review",
   },
   {
@@ -61,7 +59,6 @@ const INSIGHTS = [
     title: "Crossed ₹50L liquid",
     desc: "Excluding real estate, your liquid net worth is now ₹62L.",
     color: "primary.main",
-    bgcolor: "primary.light",
     action: "Share",
   },
   {
@@ -69,7 +66,6 @@ const INSIGHTS = [
     title: "Top mover: Parag Parikh",
     desc: "+18.4% YTD. Single-handedly contributed ₹2.4L to gains.",
     color: "success.main",
-    bgcolor: "success.light",
     action: "Open",
   },
   {
@@ -77,7 +73,6 @@ const INSIGHTS = [
     title: "Cash sitting idle",
     desc: "₹4.2L in savings >2 months. Consider sweep-FD or liquid fund.",
     color: "error.main",
-    bgcolor: "error.light",
     action: "Move",
   },
 ];
@@ -385,12 +380,11 @@ export default function Reports() {
         {INSIGHTS.map((ins, i) => (
           <Paper
             key={i}
-            elevation={0}
+            elevation={2}
             sx={{
               p: 2,
               borderRadius: 2,
-              bgcolor: ins.bgcolor,
-              border: `1px solid`,
+              borderLeft: "4px solid",
               borderColor: ins.color,
               display: "flex",
               alignItems: "flex-start",

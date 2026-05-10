@@ -143,8 +143,8 @@ function PaymentCalendar({ emis }: { emis: Emi[] }) {
                 minHeight: 52,
                 borderRadius: 1,
                 border: "1px solid",
-                borderColor: isToday ? "primary.main" : hasDue ? "error.light" : "divider",
-                bgcolor: hasDue ? "error.light" : isToday ? "primary.light" : "transparent",
+                borderColor: isToday ? "primary.main" : hasDue ? "error.main" : "divider",
+                bgcolor: hasDue ? "rgba(211,47,47,0.08)" : isToday ? "rgba(25,118,210,0.08)" : "transparent",
                 p: 0.5,
                 display: "flex",
                 flexDirection: "column",
@@ -205,7 +205,7 @@ function UpcomingPayments({ emis }: { emis: Emi[] }) {
                     flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "center",
-                    bgcolor: urgency === "error" ? "error.light" : urgency === "warning" ? "warning.light" : "action.hover",
+                    bgcolor: urgency === "error" ? "rgba(211,47,47,0.08)" : urgency === "warning" ? "rgba(249,168,37,0.08)" : "action.hover",
                   }}
                 >
                   <Typography variant="caption" fontWeight={700} color={`${urgency}.main`} sx={{ lineHeight: 1 }}>

@@ -58,12 +58,10 @@ const MutualFundCard = ({
           </div>
         ) : (
           <div style={{ textAlign: "left" }}>
-            <Typography
-              sx={value.includes("-") ? { color: "red" } : { color: "#22BB33" }}
-            >
+            <Typography sx={{ color: value.includes("-") ? "error.main" : "success.main" }}>
               {value}
             </Typography>
-            <Typography variant="body2" sx={value.includes("-") ? { color: "red" } : { color: "#22BB33" }}>{content}</Typography>
+            <Typography variant="body2" sx={{ color: value.includes("-") ? "error.main" : "success.main" }}>{content}</Typography>
           </div>
         )}
       </CardContent>

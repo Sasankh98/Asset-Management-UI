@@ -276,8 +276,8 @@ export default function ProvidentFund() {
 
       {/* Actual balance banner */}
       {actualBalance > 0 && (
-        <Paper elevation={0} sx={{ p: 1.5, mb: 2.5, borderRadius: 2, bgcolor: "success.light", border: "1px solid", borderColor: "success.main", display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Typography variant="body2" color="success.dark" fontWeight={600}>
+        <Paper elevation={0} sx={{ p: 1.5, mb: 2.5, borderRadius: 2, bgcolor: "action.hover", borderLeft: "4px solid", borderColor: "success.main", display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Typography variant="body2" color="success.main" fontWeight={600}>
             Using passbook balance: <b>{fmtInr(actualBalance)}</b> — projections are based on your actual EPF balance.
           </Typography>
           <Tooltip title="The calculated balance is shown in the historical section for reference only.">

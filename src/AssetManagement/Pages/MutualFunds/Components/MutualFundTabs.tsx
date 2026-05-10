@@ -4,27 +4,27 @@ import Tab from "@mui/material/Tab";
 import { SyntheticEvent } from "react";
 import { styled } from "@mui/material/styles";
 
-const CustomTabs = styled(Tabs)({
-  padding: "0.2rem 0rem",
+const CustomTabs = styled(Tabs)(({ theme }) => ({
+  padding: "0.2rem",
   borderRadius: "3rem",
-  backgroundColor: "#ada7a7ff",
+  backgroundColor: theme.palette.action.selected,
   display: "flex",
-  color: "#000",
-  minHeight:"1rem",
-  height:"3rem",
+  minHeight: "1rem",
+  height: "3rem",
   justifyContent: "space-around",
   "& .MuiTabs-indicator": {
     display: "none",
   },
-});
+}));
 
-const CustomTab = styled(Tab)({
+const CustomTab = styled(Tab)(({ theme }) => ({
   borderRadius: "3rem",
   display: "flex",
   flex: 1,
-  minHeight:"1.5rem",
-  outline: "none", // remove outline
-  boxShadow: "none", // remove box-shadow
+  minHeight: "1.5rem",
+  outline: "none",
+  boxShadow: "none",
+  color: theme.palette.text.secondary,
   "&.Mui-focusVisible": {
     outline: "none",
     boxShadow: "none",
@@ -32,15 +32,17 @@ const CustomTab = styled(Tab)({
   "&.Mui-selected": {
     outline: "none",
     boxShadow: "none",
-    backgroundColor: "#f3ececff",
-    width:"99%",
+    backgroundColor: theme.palette.background.paper,
+    color: theme.palette.text.primary,
+    width: "99%",
     minHeight: "1.5rem",
+    boxShadow: theme.shadows[1],
   },
   "&:focus": {
     outline: "none",
     boxShadow: "none",
   },
-});
+}));
 
 interface MutualFundTabsProps {
   value: number;

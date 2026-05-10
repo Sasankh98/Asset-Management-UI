@@ -8,6 +8,8 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import Skeleton from "@mui/material/Skeleton";
 import CircularProgress from "@mui/material/CircularProgress";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import SyncIcon from "@mui/icons-material/Sync";
@@ -46,8 +48,11 @@ const TABLE_COLS = [
 const COL_IDS = TABLE_COLS.map((c) => c.colId);
 
 function buildRow(s: Stock): TableRow {
+  const mp  = Number(s.marketPrice ?? 0);
+  const qty = Number(s.quantity    ?? 0);
   return COL_IDS.map((col) => {
     if (col === "edit") return "";
+    if (col === "currentValue") return mp > 0 ? mp * qty : Number(s.currentValue ?? 0);
     const val = s[col as keyof Stock];
     return val ?? "";
   });
@@ -63,6 +68,7 @@ export default function Stocks() {
   const [dialogType, setDialogType]     = useState<"create" | "edit">("create");
   const [selectedStock, setSelectedStock] = useState<Stock | undefined>();
   const [filter, setFilter]             = useState<"all" | "active" | "sold">("all");
+  const [tab, setTab]                   = useState(0);
   const [refreshingPrices, setRefreshingPrices] = useState(false);
 
   const { refreshData, snackBarOptions, setRefreshData, showSnackbar } = useAssetManagementContext();
@@ -241,9 +247,9 @@ export default function Stocks() {
       {/* KPI strip */}
       <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2, mb: 3 }}>
         {[
-          { label: "Total Invested",  value: fmtInr(totalInvested), color: "text.primary"  },
-          { label: "Current Value",   value: fmtInr(totalCurrent),  color: "primary.main"  },
-          { label: "Total P&L",       value: fmtInr(totalPL),       color: totalPL >= 0 ? "success.main" : "error.main" },
+          { label: "Total Invested",   value: fmtInr(totalInvested), color: "text.primary"  },
+          { label: "Current Value",    value: fmtInr(totalCurrent),  color: "primary.main"  },
+          { label: "Total P&L",        value: fmtInr(totalPL),       color: totalPL >= 0 ? "success.main" : "error.main" },
           { label: "Portfolio Return", value: `${returnPct >= 0 ? "+" : ""}${returnPct.toFixed(2)}%`, color: returnPct >= 0 ? "success.main" : "error.main" },
         ].map((k) => (
           <Paper key={k.label} elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
@@ -257,96 +263,126 @@ export default function Stocks() {
         ))}
       </Box>
 
-      {/* Chart */}
-      {active.length > 0 && (
-        <Paper elevation={2} sx={{ p: 2.5, borderRadius: 2, mb: 3 }}>
-          <Typography variant="subtitle1" fontWeight={600} mb={2}>
-            Invested vs Current Value (Active Holdings)
-          </Typography>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-              <YAxis tickFormatter={(v: number) => `₹${(v / 1000).toFixed(0)}k`} />
-              <ChartTooltip formatter={(v: number) => fmtInr(v)} />
-              <Legend />
-              <Bar dataKey="Invested" fill="#90caf9" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="Current Value" fill="#1976d2" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </Paper>
-      )}
-
-      {/* Filter chips + table */}
+      {/* Tabs */}
       <Paper elevation={2} sx={{ borderRadius: 2, overflow: "hidden" }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, px: 2.5, pt: 2, pb: 1 }}>
-          <Typography variant="subtitle1" fontWeight={600} sx={{ mr: 1 }}>Holdings</Typography>
-          {(["all", "active", "sold"] as const).map((f) => (
-            <Chip
-              key={f}
-              label={f.charAt(0).toUpperCase() + f.slice(1)}
-              size="small"
-              variant={filter === f ? "filled" : "outlined"}
-              color={filter === f ? "primary" : "default"}
-              onClick={() => setFilter(f)}
-              sx={{ textTransform: "capitalize" }}
-            />
-          ))}
-          <Typography variant="caption" color="text.secondary" sx={{ ml: "auto" }}>
-            {filtered.length} stock{filtered.length !== 1 ? "s" : ""}
-          </Typography>
-        </Box>
+        <Tabs
+          value={tab}
+          onChange={(_, v) => setTab(v)}
+          sx={{ px: 2, borderBottom: 1, borderColor: "divider" }}
+        >
+          <Tab label="Holdings" />
+          <Tab label="Analytics" />
+        </Tabs>
 
-        <SortableDataTable
-          columns={TABLE_COLS}
-          rows={rows}
-          renderCell={(value, colIndex, row) => {
-            // P&L column (index 6)
-            if (colIndex === 6) {
-              const num = Number(value);
-              return (
-                <span style={{ color: num >= 0 ? "#2e7d32" : "#c62828", fontWeight: 600 }}>
-                  {fmtInr(num)}
-                </span>
-              );
-            }
-            // P&L % column (index 7)
-            if (colIndex === 7) {
-              const num = Number(value);
-              return (
+        {/* Holdings tab */}
+        {tab === 0 && (
+          <>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, px: 2.5, pt: 2, pb: 1 }}>
+              {(["all", "active", "sold"] as const).map((f) => (
                 <Chip
-                  label={`${num >= 0 ? "+" : ""}${num.toFixed ? num.toFixed(2) : num}%`}
+                  key={f}
+                  label={f.charAt(0).toUpperCase() + f.slice(1)}
                   size="small"
-                  color={num >= 0 ? "success" : "error"}
-                  sx={{ fontWeight: 700 }}
-                />
-              );
-            }
-            // Status chip (index 8)
-            if (colIndex === 8) {
-              return (
-                <Chip
-                  label={String(value)}
-                  size="small"
-                  color={value === "active" ? "success" : value === "sold" ? "default" : "warning"}
-                  variant="outlined"
+                  variant={filter === f ? "filled" : "outlined"}
+                  color={filter === f ? "primary" : "default"}
+                  onClick={() => setFilter(f)}
                   sx={{ textTransform: "capitalize" }}
                 />
-              );
-            }
-            // Edit button (last col)
-            if (colIndex === TABLE_COLS.length - 1) {
-              return (
-                <Tooltip title="Edit">
-                  <IconButton size="small" onClick={() => openEdit(row)}>
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              );
-            }
-            return undefined;
-          }}
-        />
+              ))}
+              <Typography variant="caption" color="text.secondary" sx={{ ml: "auto" }}>
+                {filtered.length} stock{filtered.length !== 1 ? "s" : ""}
+              </Typography>
+            </Box>
+
+            <SortableDataTable
+              columns={TABLE_COLS}
+              rows={rows}
+              renderCell={(value, colIndex, row) => {
+                // Monetary: Avg Price (1), Invested (3), Curr Value (5)
+                if (colIndex === 1 || colIndex === 3 || colIndex === 5) {
+                  return <span>{fmtInr(Number(value))}</span>;
+                }
+                // Market Price (4) — show dash if zero
+                if (colIndex === 4) {
+                  const num = Number(value);
+                  return <span>{num > 0 ? fmtInr(num) : "—"}</span>;
+                }
+                // P&L (6)
+                if (colIndex === 6) {
+                  const num = Number(value);
+                  return (
+                    <Box component="span" sx={{ color: num >= 0 ? "success.dark" : "error.dark", fontWeight: 600 }}>
+                      {fmtInr(num)}
+                    </Box>
+                  );
+                }
+                // P&L % (7)
+                if (colIndex === 7) {
+                  const num = Number(value);
+                  return (
+                    <Chip
+                      label={`${num >= 0 ? "+" : ""}${num.toFixed ? num.toFixed(2) : num}%`}
+                      size="small"
+                      color={num >= 0 ? "success" : "error"}
+                      sx={{ fontWeight: 700 }}
+                    />
+                  );
+                }
+                // Status (8)
+                if (colIndex === 8) {
+                  return (
+                    <Chip
+                      label={String(value)}
+                      size="small"
+                      color={value === "active" ? "success" : value === "sold" ? "default" : "warning"}
+                      variant="outlined"
+                      sx={{ textTransform: "capitalize" }}
+                    />
+                  );
+                }
+                // Edit (last col)
+                if (colIndex === TABLE_COLS.length - 1) {
+                  return (
+                    <Tooltip title="Edit">
+                      <IconButton size="small" onClick={() => openEdit(row)}>
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  );
+                }
+                return undefined;
+              }}
+            />
+          </>
+        )}
+
+        {/* Analytics tab */}
+        {tab === 1 && (
+          <Box sx={{ p: 2.5 }}>
+            {active.length === 0 ? (
+              <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: "center" }}>
+                No active holdings to display.
+              </Typography>
+            ) : (
+              <>
+                <Typography variant="subtitle1" fontWeight={600} mb={2}>
+                  Invested vs Current Value — Top {Math.min(active.length, 10)} Holdings
+                </Typography>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                    <YAxis tickFormatter={(v: number) => `₹${(v / 1000).toFixed(0)}k`} />
+                    <ChartTooltip formatter={(v: number) => fmtInr(v)} />
+                    <Legend />
+                    <Bar dataKey="Invested" fill="#90caf9" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="Current Value" fill="#1976d2" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </>
+            )}
+          </Box>
+        )}
       </Paper>
     </Box>
   );

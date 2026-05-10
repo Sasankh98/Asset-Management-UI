@@ -83,9 +83,9 @@ const MutualFundTable = ({
         if (colIndex === 7) {
           const isNeg = String(value).includes("-");
           return (
-            <span style={{ color: isNeg ? "#c62828" : "#2e7d32", fontWeight: 600 }}>
+            <Box component="span" sx={{ color: isNeg ? "error.dark" : "success.dark", fontWeight: 600 }}>
               {value}
-            </span>
+            </Box>
           );
         }
         // Gain % (col 8)

@@ -258,9 +258,9 @@ const COMPARE_ALTS: Record<CatId, AltOption[]> = {
 };
 
 const VERDICT_COLORS = {
-  BEST:  { color: "success.main", bgcolor: "success.light" },
-  GOOD:  { color: "primary.main", bgcolor: "primary.light" },
-  MAYBE: { color: "warning.main", bgcolor: "warning.light" },
+  BEST:  { color: "success.main" },
+  GOOD:  { color: "primary.main" },
+  MAYBE: { color: "warning.main" },
 };
 
 // ── CategoryChips ─────────────────────────────────────────────────────────────
@@ -519,13 +519,12 @@ function TcoReveal() {
 
       {/* Verdict */}
       <Paper
-        elevation={0}
+        elevation={2}
         sx={{
           p: 2.5,
           borderRadius: 2,
-          border: "1px solid",
+          borderLeft: "4px solid",
           borderColor: `${verdictColor}.main`,
-          bgcolor: `${verdictColor}.light`,
           display: "flex",
           alignItems: "center",
           gap: 2,
@@ -638,7 +637,7 @@ function CategorySandbox() {
               auto-filled, editable
             </Typography>
           </Box>
-          <Paper elevation={0} sx={{ p: 2, bgcolor: "primary.light", borderRadius: 2 }}>
+          <Paper elevation={0} sx={{ p: 2, bgcolor: "action.hover", borderRadius: 2 }}>
             <RunningCostEditor items={runCosts} onChange={setRunCosts} />
           </Paper>
         </Box>
@@ -650,11 +649,11 @@ function CategorySandbox() {
           <Typography variant="caption" color="text.secondary">EMI</Typography>
           <Typography variant="h6" fontWeight={700} sx={{ mt: 0.5 }}>{fmtInr(emi)}</Typography>
         </Paper>
-        <Paper elevation={2} sx={{ p: 2, borderRadius: 2, textAlign: "center", bgcolor: "warning.light" }}>
+        <Paper elevation={2} sx={{ p: 2, borderRadius: 2, textAlign: "center", borderTop: "3px solid", borderColor: "warning.main" }}>
           <Typography variant="caption" color="text.secondary">RUNNING/MO</Typography>
           <Typography variant="h6" fontWeight={700} color="warning.main" sx={{ mt: 0.5 }}>{fmtInr(monthlyRunning)}</Typography>
         </Paper>
-        <Paper elevation={2} sx={{ p: 2, borderRadius: 2, textAlign: "center", bgcolor: fits ? "success.light" : "error.light" }}>
+        <Paper elevation={2} sx={{ p: 2, borderRadius: 2, textAlign: "center", borderTop: "3px solid", borderColor: fits ? "success.main" : "error.main" }}>
           <Typography variant="caption" color="text.secondary">TRUE MONTHLY</Typography>
           <Typography variant="h6" fontWeight={700} color={fits ? "success.main" : "error.main"} sx={{ mt: 0.5 }}>
             {fmtInr(trueMonthly)}
@@ -731,12 +730,11 @@ function CompareAlternatives() {
           return (
             <Paper
               key={i}
-              elevation={0}
+              elevation={2}
               sx={{
                 p: 2.5,
                 borderRadius: 2,
-                bgcolor: vc.bgcolor,
-                border: "1px solid",
+                borderTop: "3px solid",
                 borderColor: vc.color,
               }}
             >
