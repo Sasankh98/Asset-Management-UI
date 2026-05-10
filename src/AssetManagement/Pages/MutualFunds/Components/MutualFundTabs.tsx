@@ -7,7 +7,8 @@ import { styled } from "@mui/material/styles";
 const CustomTabs = styled(Tabs)(({ theme }) => ({
   padding: "0.2rem",
   borderRadius: "3rem",
-  backgroundColor: theme.palette.action.selected,
+  backgroundColor:
+    theme.palette.mode === "dark" ? theme.palette.grey[800] : theme.palette.grey[300],
   display: "flex",
   minHeight: "1rem",
   height: "3rem",
@@ -31,11 +32,12 @@ const CustomTab = styled(Tab)(({ theme }) => ({
   },
   "&.Mui-selected": {
     outline: "none",
+    boxShadow: "none",
     backgroundColor: theme.palette.background.paper,
     color: theme.palette.text.primary,
+    fontWeight: 700,
     width: "99%",
     minHeight: "1.5rem",
-    boxShadow: theme.shadows[1],
   },
   "&:focus": {
     outline: "none",
@@ -43,12 +45,17 @@ const CustomTab = styled(Tab)(({ theme }) => ({
   },
 }));
 
-interface MutualFundTabsProps {
+interface CenterTabsProps {
   value: number;
-  setValue: (value:number)=> void;
+  setValue: (value: number) => void;
+  labels?: [string, string, string];
 }
-const CenterTabs = ({value, setValue}: MutualFundTabsProps) => {
 
+const CenterTabs = ({
+  value,
+  setValue,
+  labels = ["Overview", "Performance", "Target & Allocation"],
+}: CenterTabsProps) => {
   const handleChange = (_event: SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
@@ -62,23 +69,13 @@ const CenterTabs = ({value, setValue}: MutualFundTabsProps) => {
         borderRadius: "3rem",
       }}
     >
-      <CustomTabs
-        value={value}
-        onChange={handleChange}
-        centered
-        textColor="inherit"
-      >
-        <CustomTab
-          label="Overview"
-        />
-        <CustomTab
-          label="Performance"
-        />
-        <CustomTab
-          label="Target & Allocation"
-        />
+      <CustomTabs value={value} onChange={handleChange} centered textColor="inherit">
+        <CustomTab label={labels[0]} />
+        <CustomTab label={labels[1]} />
+        <CustomTab label={labels[2]} />
       </CustomTabs>
     </Box>
   );
 };
+
 export default CenterTabs;

@@ -8,21 +8,9 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import Skeleton from "@mui/material/Skeleton";
 import CircularProgress from "@mui/material/CircularProgress";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import SyncIcon from "@mui/icons-material/Sync";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as ChartTooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
 import { type Stock } from "../../../../server/types";
 import StocksService from "../../../services/StocksService/StocksService";
 import SortableDataTable from "../../../components/SortableDataTable/SortableDataTable";
@@ -31,6 +19,9 @@ import { useAssetManagementContext } from "../../ContextProvider/ContextProvider
 import CustomSnackbar from "../../../components/SnackBar/Snackbar";
 import StocksDialog from "./StocksForms/StocksDialog";
 import { fmtInr } from "../../../utils/formatCurrency";
+import CenterTabs from "../MutualFunds/Components/MutualFundTabs";
+import StocksPerformance from "./StocksPerformance";
+import StocksAllocation from "./StocksAllocation";
 
 const TABLE_COLS = [
   { name: "Stock",        colId: "stockName",          id: 0 },
@@ -105,18 +96,6 @@ export default function Stocks() {
     return s + (mp > 0 ? (mp - avg) * qty - tax : Number(x.netProfitLoss ?? 0));
   }, 0);
   const returnPct = totalInvested ? (totalPL / totalInvested) * 100 : 0;
-
-  // ── Chart data ───────────────────────────────────────────────────────────────
-
-  const chartData = active.slice(0, 10).map((s) => {
-    const mp  = Number(s.marketPrice ?? 0);
-    const qty = Number(s.quantity    ?? 0);
-    return {
-      name: s.stockName.length > 12 ? s.stockName.slice(0, 11) + "…" : s.stockName,
-      Invested: Number(s.totalInvested ?? 0),
-      "Current Value": mp > 0 ? mp * qty : Number(s.currentValue ?? 0),
-    };
-  });
 
   // ── Batch price refresh ──────────────────────────────────────────────────────
 
@@ -264,19 +243,12 @@ export default function Stocks() {
       </Box>
 
       {/* Tabs */}
-      <Paper elevation={2} sx={{ borderRadius: 2, overflow: "hidden" }}>
-        <Tabs
-          value={tab}
-          onChange={(_, v) => setTab(v)}
-          sx={{ px: 2, borderBottom: 1, borderColor: "divider" }}
-        >
-          <Tab label="Holdings" />
-          <Tab label="Analytics" />
-        </Tabs>
+      <CenterTabs value={tab} setValue={setTab} labels={["Overview", "Performance", "Target & Allocation"]} />
 
-        {/* Holdings tab */}
+      <Box sx={{ mt: 2 }}>
+        {/* Overview tab */}
         {tab === 0 && (
-          <>
+          <Paper elevation={2} sx={{ borderRadius: 2, overflow: "hidden" }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, px: 2.5, pt: 2, pb: 1 }}>
               {(["all", "active", "sold"] as const).map((f) => (
                 <Chip
@@ -353,37 +325,15 @@ export default function Stocks() {
                 return undefined;
               }}
             />
-          </>
+          </Paper>
         )}
 
-        {/* Analytics tab */}
-        {tab === 1 && (
-          <Box sx={{ p: 2.5 }}>
-            {active.length === 0 ? (
-              <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: "center" }}>
-                No active holdings to display.
-              </Typography>
-            ) : (
-              <>
-                <Typography variant="subtitle1" fontWeight={600} mb={2}>
-                  Invested vs Current Value — Top {Math.min(active.length, 10)} Holdings
-                </Typography>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                    <YAxis tickFormatter={(v: number) => `₹${(v / 1000).toFixed(0)}k`} />
-                    <ChartTooltip formatter={(v: number) => fmtInr(v)} />
-                    <Legend />
-                    <Bar dataKey="Invested" fill="#90caf9" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="Current Value" fill="#1976d2" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </>
-            )}
-          </Box>
-        )}
-      </Paper>
+        {/* Performance tab */}
+        {tab === 1 && <StocksPerformance stocks={stocks} />}
+
+        {/* Target & Allocation tab */}
+        {tab === 2 && <StocksAllocation stocks={stocks} />}
+      </Box>
     </Box>
   );
 }
