@@ -1,4 +1,4 @@
-import { type NetWorthSnapshot, type CreateSnapshotDTO } from "../../../server/types";
+import type {  NetWorthSnapshot, CreateSnapshotDTO } from "../../../server/types";
 import { httpService, baseURL } from "../axiosConnection";
 
 function ReportsService() {
