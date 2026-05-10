@@ -66,30 +66,56 @@ type ValueMode = "current" | "invested";
 
 interface Slice { name: string; value: number; color: string; }
 
+function mfValue(f: MutualFund, mode: ValueMode): number {
+  return mode === "current" ? Number(f.currentValue ?? 0) : Number(f.invested ?? 0);
+}
+
+function stockValue(s: Stock, mode: ValueMode): number {
+  if (mode === "current") {
+    const mp = Number(s.marketPrice ?? 0);
+    return mp > 0 ? mp * Number(s.quantity ?? 0) : Number(s.currentValue ?? 0);
+  }
+  return Number(s.totalInvested ?? 0);
+}
+
+function mfAllocPcts(f: MutualFund) {
+  const eq  = Number(f.equityPct       ?? 0);
+  const heq = Number(f.hedgedEquityPct ?? 0);
+  const debt = Number(f.debtPct        ?? 0);
+  const cash = Number(f.cashPct        ?? 0);
+  const re   = Number(f.realEstatePct  ?? 0);
+  const hasAlloc = eq + heq + debt + cash + re > 0;
+  return { eq, heq, debt, cash, re, hasAlloc };
+}
+
 function buildAssetSlices(
   stocks: Stock[],
   mfs: MutualFund[],
   mode: ValueMode,
 ): Slice[] {
   const buckets: Partial<Record<AssetBucket, number>> = {};
+  const add = (b: AssetBucket, v: number) => { if (v > 0) buckets[b] = (buckets[b] ?? 0) + v; };
 
-  // Stocks: all active stocks → Equity bucket
+  // Stocks → Equity (using live market price when available)
   stocks
     .filter((s) => s.status === "active")
-    .forEach((s) => {
-      const v = mode === "current"
-        ? Number(s.currentValue ?? 0)
-        : Number(s.totalInvested ?? 0);
-      if (v > 0) buckets["Equity"] = (buckets["Equity"] ?? 0) + v;
-    });
+    .forEach((s) => add("Equity", stockValue(s, mode)));
 
-  // MFs: mapped by category
+  // MFs — use per-fund allocation breakdown when present, else category mapping
   mfs.forEach((f) => {
-    const bucket = MF_TO_ASSET_BUCKET[f.category] ?? "Cash/Other";
-    const v = mode === "current"
-      ? Number(f.currentValue ?? 0)
-      : Number(f.invested ?? 0);
-    if (v > 0) buckets[bucket] = (buckets[bucket] ?? 0) + v;
+    const val = mfValue(f, mode);
+    if (val <= 0) return;
+    const { eq, heq, debt, cash, re, hasAlloc } = mfAllocPcts(f);
+
+    if (hasAlloc) {
+      // Equity bucket = pure equity + hedged equity (both provide equity exposure)
+      add("Equity",      val * (eq + heq) / 100);
+      add("Debt/Liquid", val * debt        / 100);
+      add("Cash/Other",  val * cash        / 100);
+      add("Real Estate", val * re          / 100);
+    } else {
+      add(MF_TO_ASSET_BUCKET[f.category] ?? "Cash/Other", val);
+    }
   });
 
   const ORDER: AssetBucket[] = [
@@ -108,28 +134,34 @@ function buildEquitySubSlices(
   mode: ValueMode,
 ): Slice[] {
   const buckets: Partial<Record<EquitySubBucket, number>> = {};
+  const add = (b: EquitySubBucket, v: number) => { if (v > 0) buckets[b] = (buckets[b] ?? 0) + v; };
 
   // Stocks categorised by market cap
   stocks
     .filter((s) => s.status === "active")
     .forEach((s) => {
       const sub = (s.category as EquitySubBucket) ?? "Large Cap";
-      const v = mode === "current"
-        ? Number(s.currentValue ?? 0)
-        : Number(s.totalInvested ?? 0);
-      if (v > 0) buckets[sub] = (buckets[sub] ?? 0) + v;
+      add(sub, stockValue(s, mode));
     });
 
-  // MFs that are equity-type
-  mfs
-    .filter((f) => MF_TO_ASSET_BUCKET[f.category] === "Equity")
-    .forEach((f) => {
-      const sub = MF_TO_EQUITY_SUB[f.category] ?? "Diversified";
-      const v = mode === "current"
-        ? Number(f.currentValue ?? 0)
-        : Number(f.invested ?? 0);
-      if (v > 0) buckets[sub] = (buckets[sub] ?? 0) + v;
-    });
+  // MFs: extract only the equity portion
+  mfs.forEach((f) => {
+    const val = mfValue(f, mode);
+    if (val <= 0) return;
+    const { eq, heq, hasAlloc } = mfAllocPcts(f);
+
+    let equityVal: number;
+    if (hasAlloc) {
+      // Equity exposure = pure equity + hedged equity combined
+      equityVal = val * (eq + heq) / 100;
+    } else {
+      if (MF_TO_ASSET_BUCKET[f.category] !== "Equity") return;
+      equityVal = val;
+    }
+
+    const sub = MF_TO_EQUITY_SUB[f.category] ?? "Diversified";
+    add(sub, equityVal);
+  });
 
   const ORDER: EquitySubBucket[] = [
     "Large Cap", "Mid Cap", "Small Cap", "Diversified", "International",

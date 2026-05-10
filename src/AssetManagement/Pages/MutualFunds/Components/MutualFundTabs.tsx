@@ -31,7 +31,6 @@ const CustomTab = styled(Tab)(({ theme }) => ({
   },
   "&.Mui-selected": {
     outline: "none",
-    boxShadow: "none",
     backgroundColor: theme.palette.background.paper,
     color: theme.palette.text.primary,
     width: "99%",

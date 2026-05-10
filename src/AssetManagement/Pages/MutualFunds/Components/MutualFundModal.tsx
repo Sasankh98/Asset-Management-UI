@@ -15,6 +15,8 @@ import Divider from "@mui/material/Divider";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Alert from "@mui/material/Alert";
+import LinearProgress from "@mui/material/LinearProgress";
+import Tooltip from "@mui/material/Tooltip";
 import { type CreateMutualFundsDTO, type MutualFund } from "../../../../../server/types";
 import { type RefreshDataProps, useAssetManagementContext } from "../../../ContextProvider/ContextProvider";
 import MutualFundService from "../../../../services/MutualFunds/MutualFundsService";
@@ -128,6 +130,8 @@ interface Props {
 const EMPTY: CreateMutualFundsDTO = {
   fundName: "", category: "", invested: 0,
   currentValue: 0, units: 0, nav: 0, targetAmount: 0, user: "Sasankh",
+  equityPct: undefined, debtPct: undefined, cashPct: undefined,
+  realEstatePct: undefined, hedgedEquityPct: undefined,
 };
 
 const MutualFundModal = ({ open, type, handleClose, setRefreshData, selectedMutualFund }: Props) => {
@@ -155,14 +159,19 @@ const MutualFundModal = ({ open, type, handleClose, setRefreshData, selectedMutu
   useEffect(() => {
     if (type === "edit" && selectedMutualFund) {
       setForm({
-        fundName: selectedMutualFund.fundName ?? "",
-        category: selectedMutualFund.category ?? "",
-        invested: selectedMutualFund.invested ?? 0,
-        currentValue: selectedMutualFund.currentValue ?? 0,
-        units: selectedMutualFund.units ?? 0,
-        nav: selectedMutualFund.nav ?? 0,
-        targetAmount: selectedMutualFund.targetProgress ?? 0,
-        user: "Sasankh",
+        fundName:        selectedMutualFund.fundName        ?? "",
+        category:        selectedMutualFund.category        ?? "",
+        invested:        selectedMutualFund.invested        ?? 0,
+        currentValue:    selectedMutualFund.currentValue    ?? 0,
+        units:           selectedMutualFund.units           ?? 0,
+        nav:             selectedMutualFund.nav             ?? 0,
+        targetAmount:    selectedMutualFund.targetProgress  ?? 0,
+        user:            "Sasankh",
+        equityPct:       selectedMutualFund.equityPct       ?? undefined,
+        debtPct:         selectedMutualFund.debtPct         ?? undefined,
+        cashPct:         selectedMutualFund.cashPct         ?? undefined,
+        realEstatePct:   selectedMutualFund.realEstatePct   ?? undefined,
+        hedgedEquityPct: selectedMutualFund.hedgedEquityPct ?? undefined,
       });
       setInputVal(selectedMutualFund.fundName ?? "");
     } else {
@@ -470,6 +479,84 @@ const MutualFundModal = ({ open, type, handleClose, setRefreshData, selectedMutu
             onChange={(e) => set("targetAmount", Number(e.target.value))} size="small"
             helperText="Your goal corpus for this fund"
             slotProps={{ input: { inputProps: { min: 0 } } }} />
+
+          {/* ── Portfolio Allocation ──────────────────────────────────────── */}
+          <Divider>
+            <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: 1 }}>
+              PORTFOLIO ALLOCATION
+            </Typography>
+          </Divider>
+
+          <Typography variant="caption" color="text.secondary">
+            Updated monthly by the fund house — enter the % breakdown of this fund's holdings.
+            Leave blank to use category-based allocation in the dashboard.
+          </Typography>
+
+          {(() => {
+            const fields: { key: keyof CreateMutualFundsDTO; label: string; help: string }[] = [
+              { key: "equityPct",       label: "Equity %",        help: "Pure equity (long only)" },
+              { key: "hedgedEquityPct", label: "Hedged Equity %", help: "Equity with downside hedges" },
+              { key: "debtPct",         label: "Debt %",          help: "Bonds, NCDs, T-bills" },
+              { key: "cashPct",         label: "Cash %",          help: "Cash, money market, liquid funds" },
+              { key: "realEstatePct",   label: "Real Estate %",   help: "REITs, InvITs, direct RE" },
+            ];
+            const total = fields.reduce((s, f) => s + Number(form[f.key] ?? 0), 0);
+            const isGood = Math.abs(total - 100) < 1;
+            const hasAny = total > 0;
+
+            return (
+              <>
+                <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 2 }}>
+                  {fields.slice(0, 3).map(({ key, label, help }) => (
+                    <Tooltip title={help} placement="top" key={key}>
+                      <TextField
+                        label={label}
+                        type="number"
+                        value={form[key] ?? ""}
+                        onChange={(e) => set(key, e.target.value === "" ? undefined : Number(e.target.value))}
+                        size="small"
+                        slotProps={{ input: { inputProps: { min: 0, max: 100, step: 0.1 } } }}
+                      />
+                    </Tooltip>
+                  ))}
+                </Box>
+                <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+                  {fields.slice(3).map(({ key, label, help }) => (
+                    <Tooltip title={help} placement="top" key={key}>
+                      <TextField
+                        label={label}
+                        type="number"
+                        value={form[key] ?? ""}
+                        onChange={(e) => set(key, e.target.value === "" ? undefined : Number(e.target.value))}
+                        size="small"
+                        slotProps={{ input: { inputProps: { min: 0, max: 100, step: 0.1 } } }}
+                      />
+                    </Tooltip>
+                  ))}
+                </Box>
+
+                {hasAny && (
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                    <LinearProgress
+                      variant="determinate"
+                      value={Math.min(total, 100)}
+                      color={isGood ? "success" : total > 100 ? "error" : "warning"}
+                      sx={{ flex: 1, height: 6, borderRadius: 3 }}
+                    />
+                    <Typography
+                      variant="caption"
+                      fontWeight={600}
+                      color={isGood ? "success.main" : total > 100 ? "error.main" : "warning.main"}
+                      sx={{ whiteSpace: "nowrap" }}
+                    >
+                      {total.toFixed(1)}% total
+                      {!isGood && total <= 100 && ` · ${(100 - total).toFixed(1)}% unallocated`}
+                    </Typography>
+                  </Box>
+                )}
+              </>
+            );
+          })()}
         </Box>
       </DialogContent>
 
