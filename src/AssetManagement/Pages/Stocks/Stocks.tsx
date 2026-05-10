@@ -19,7 +19,7 @@ import SortableDataTable from "../../../components/SortableDataTable/SortableDat
 import { type TableRow } from "../../../hooks/useTableSort";
 import { useAssetManagementContext } from "../../ContextProvider/ContextProvider";
 import CustomSnackbar from "../../../components/SnackBar/Snackbar";
-import StocksDialog from "./StocksForms/StocksDialog";
+import StocksDialog from "./StocksDialog";
 import { fmtInr } from "../../../utils/formatCurrency";
 import CenterTabs from "../MutualFunds/Components/MutualFundTabs";
 import StocksPerformance from "./StocksPerformance";
