@@ -139,7 +139,7 @@ const MutualFundModal = ({ open, type, handleClose, setRefreshData, selectedMutu
   const [options, setOptions]     = useState<MfOption[]>([]);
   const [inputVal, setInputVal]   = useState("");
   const [searching, setSearching] = useState(false);
-  const [navFetching, setNavFetching] = useState(false);
+  const [_navFetching, setNavFetching] = useState(false);
   const [schemeCode, setSchemeCode]   = useState<number | null>(null);
   const [navSource, setNavSource]     = useState<"mfapi" | "manual">("manual");
 
