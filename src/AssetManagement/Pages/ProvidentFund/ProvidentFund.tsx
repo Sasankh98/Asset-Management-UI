@@ -1,4 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
+import { useProvidentFundQuery } from "../../../hooks/queries";
+import { useProvidentFundMutation } from "../../../hooks/mutations";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -13,7 +15,6 @@ import Tooltip from "@mui/material/Tooltip";
 import Skeleton from "@mui/material/Skeleton";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SaveIcon from "@mui/icons-material/Save";
-import ProvidentFundService from "../../../services/ProvidentFundService/ProvidentFundService";
 import {
   BarChart,
   Bar,
@@ -176,28 +177,27 @@ export default function ProvidentFund() {
   const [currentAge,        setCurrentAge]        = useState(30);
   const [retirementAge,     setRetirementAge]     = useState(60);
   const [actualBalance,     setActualBalance]     = useState(0);
-  const [saving,            setSaving]            = useState(false);
-  const [loaded,            setLoaded]            = useState(false);
   const [yearOverrides,     setYearOverrides]     = useState<Record<number, YearOverride>>({});
   const [showYearTable,     setShowYearTable]     = useState(false);
 
+  const { data: pfConfig, isLoading } = useProvidentFundQuery();
+  const { upsertConfig } = useProvidentFundMutation();
+
   useEffect(() => {
-    ProvidentFundService().getConfig(USER).then((cfg) => {
-      if (cfg) {
-        setMonthlyBasic(Number(cfg.monthlyBasic));
-        setEmpPct(Number(cfg.empPct));
-        setErPct(Number(cfg.erPct));
-        setVpfPct(Number(cfg.vpfPct ?? 0));
-        setRate(Number(cfg.rate));
-        setSalaryIncrementPct(Number(cfg.salaryIncrementPct ?? 10));
-        setYearsWorked(Number(cfg.yearsWorked));
-        setJoiningMonth(Number(cfg.joiningMonth ?? 1));
-        setCurrentAge(Number(cfg.currentAge));
-        setRetirementAge(Number(cfg.retirementAge));
-        setActualBalance(Number(cfg.currentBalance ?? 0));
-      }
-    }).catch(() => {}).finally(() => setLoaded(true));
-  }, []);
+    if (pfConfig) {
+      setMonthlyBasic(Number(pfConfig.monthlyBasic));
+      setEmpPct(Number(pfConfig.empPct));
+      setErPct(Number(pfConfig.erPct));
+      setVpfPct(Number(pfConfig.vpfPct ?? 0));
+      setRate(Number(pfConfig.rate));
+      setSalaryIncrementPct(Number(pfConfig.salaryIncrementPct ?? 10));
+      setYearsWorked(Number(pfConfig.yearsWorked));
+      setJoiningMonth(Number(pfConfig.joiningMonth ?? 1));
+      setCurrentAge(Number(pfConfig.currentAge));
+      setRetirementAge(Number(pfConfig.retirementAge));
+      setActualBalance(Number(pfConfig.currentBalance ?? 0));
+    }
+  }, [pfConfig]);
 
   const setBasicOverride = (year: number, value: string) => {
     setYearOverrides((prev) => {
@@ -243,16 +243,14 @@ export default function ProvidentFund() {
     });
 
   const handleSave = useCallback(async () => {
-    setSaving(true);
-    await ProvidentFundService().upsert({
+    await upsertConfig.mutateAsync({
       monthlyBasic, empPct, erPct, rate, vpfPct,
       salaryIncrementPct, yearsWorked, joiningMonth,
       currentAge, retirementAge,
       currentBalance: actualBalance,
       user: USER,
-    }).catch(() => {});
-    setSaving(false);
-  }, [monthlyBasic, empPct, erPct, rate, vpfPct, salaryIncrementPct,
+    });
+  }, [upsertConfig, monthlyBasic, empPct, erPct, rate, vpfPct, salaryIncrementPct,
       yearsWorked, joiningMonth, currentAge, retirementAge, actualBalance]);
 
   // ── Calculations ─────────────────────────────────────────────────────────────
@@ -298,7 +296,7 @@ export default function ProvidentFund() {
     Balance: r.balance,
   }));
 
-  if (!loaded) {
+  if (isLoading) {
     return (
       <Box sx={{ p: 2, maxWidth: 1040, mx: "auto" }}>
         {/* Header */}
@@ -350,9 +348,9 @@ export default function ProvidentFund() {
             size="small"
             startIcon={<SaveIcon />}
             onClick={handleSave}
-            disabled={saving}
+            disabled={upsertConfig.isPending}
           >
-            {saving ? "Saving…" : "Save"}
+            {upsertConfig.isPending ? "Saving…" : "Save"}
           </Button>
         </Box>
       </Box>

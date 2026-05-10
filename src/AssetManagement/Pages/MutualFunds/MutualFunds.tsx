@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -11,8 +11,8 @@ import CenterTabs from "./Components/MutualFundTabs";
 import MutualFundTable from "./Components/MutualFundTable";
 import MutualFundPerformance from "./Components/MutualFundPerformance";
 import MutualFundTargets from "./Components/MutualFundTargets";
-import { type MutualFund, type MutualFundsDashboard } from "../../../../server/types";
-import MutualFundsService from "../../../services/MutualFunds/MutualFundsService";
+import { type MutualFund } from "../../../../server/types";
+import { useMutualFundsQuery, useMutualFundsDashboardQuery } from "../../../hooks/queries";
 import CustomSnackbar from "../../../components/SnackBar/Snackbar";
 import { useAssetManagementContext } from "../../ContextProvider/ContextProvider";
 import { fmtInr } from "../../../utils/formatCurrency";
@@ -33,25 +33,16 @@ function KpiSkeleton() {
 
 const MutualFunds = () => {
   const [tab, setTab] = useState(0);
-  const [funds, setFunds] = useState<MutualFund[]>([]);
-  const [dashboard, setDashboard] = useState<MutualFundsDashboard | undefined>();
-  const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [type, setType] = useState<"create" | "edit" | undefined>();
   const [selectedFund, setSelectedFund] = useState<MutualFund | undefined>();
 
-  const { refreshData, setRefreshData, snackBarOptions } = useAssetManagementContext();
+  const { snackBarOptions } = useAssetManagementContext();
 
-  useEffect(() => {
-    setLoading(true);
-    Promise.all([
-      MutualFundsService().getMutualFundsDetails(),
-      MutualFundsService().getmutualFundsDashboardList(),
-    ]).then(([fundsRes, dashRes]) => {
-      if (fundsRes?.data) setFunds(fundsRes.data);
-      if (dashRes?.data) setDashboard(dashRes.data);
-    }).catch(() => {}).finally(() => setLoading(false));
-  }, [refreshData.refreshMutualFunds]);
+  const mutualFundsQuery = useMutualFundsQuery();
+  const { data: dashboard, isLoading: dashLoading } = useMutualFundsDashboardQuery();
+  const funds = useMemo(() => Array.isArray(mutualFundsQuery.data) ? mutualFundsQuery.data : [], [mutualFundsQuery.data]);
+  const loading = mutualFundsQuery.isLoading || dashLoading;
 
   const openAdd = () => { setType("create"); setSelectedFund(undefined); setModalOpen(true); };
 
@@ -76,7 +67,6 @@ const MutualFunds = () => {
         type={type}
         selectedMutualFund={selectedFund}
         handleClose={() => setModalOpen(false)}
-        setRefreshData={setRefreshData}
       />
 
       {/* Header */}

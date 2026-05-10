@@ -1,5 +1,6 @@
-import { useState, useMemo, useEffect } from "react";
-import LicService from "../../../services/LicService/LicService";
+import { useState, useMemo } from "react";
+import { useLicQuery } from "../../../hooks/queries";
+import { useLicMutation } from "../../../hooks/mutations";
 import type { LicPolicy as ApiLicPolicy } from "../../../../server/types";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
@@ -666,14 +667,13 @@ function coerce(p: ApiLicPolicy): LicPolicy {
 }
 
 export default function LIC() {
-  const [policies, setPolicies] = useState<LicPolicy[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<LicPolicy | null>(null);
-  const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => {
-    LicService().getPolicies().then((data) => setPolicies(data.map(coerce))).catch(() => {}).finally(() => setLoaded(true));
-  }, []);
+  const { data: rawPolicies, isLoading } = useLicQuery();
+  const { createPolicy, updatePolicy, deletePolicy } = useLicMutation();
+
+  const policies: LicPolicy[] = (rawPolicies ?? []).map(coerce);
 
   const handleAdd = () => {
     setEditTarget(null);
@@ -686,18 +686,15 @@ export default function LIC() {
   };
 
   const handleDelete = async (id: number) => {
-    await LicService().deletePolicy(id).catch(() => {});
-    setPolicies((prev) => prev.filter((p) => p.id !== id));
+    await deletePolicy.mutateAsync(id);
   };
 
   const handleSave = async (form: Omit<LicPolicy, "id">) => {
     const payload = { ...form, user: USER };
     if (editTarget) {
-      await LicService().updatePolicy(editTarget.id, payload).catch(() => {});
-      setPolicies((prev) => prev.map((p) => p.id === editTarget.id ? { ...form, id: p.id } : p));
+      await updatePolicy.mutateAsync({ id: editTarget.id, data: payload as never });
     } else {
-      const created = await LicService().createPolicy(payload).catch(() => null);
-      if (created) setPolicies((prev) => [...prev, coerce(created)]);
+      await createPolicy.mutateAsync(payload as never);
     }
     setDialogOpen(false);
   };
@@ -706,7 +703,7 @@ export default function LIC() {
     ? { ...editTarget }
     : EMPTY_POLICY;
 
-  if (!loaded) {
+  if (isLoading) {
     return (
       <Box sx={{ p: 2, maxWidth: 960, mx: "auto" }}>
         {/* Header */}

@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import EmisService from "../../../services/EmisService/EmisService";
+import { useState } from "react";
+import { useEmisQuery } from "../../../hooks/queries";
+import { useEmisMutation } from "../../../hooks/mutations";
 import type { Emi as ApiEmi } from "../../../../server/types";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
@@ -372,15 +373,13 @@ function coerce(e: ApiEmi): Emi {
 }
 
 export default function EMIs() {
-  const [emis, setEmis] = useState<Emi[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Emi | null>(null);
-  const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => {
-    EmisService().getEmis().then((data) => setEmis(data.map(coerce))).catch(() => {}).finally(() => setLoaded(true));
-  }, []);
+  const { data: rawEmis, isLoading } = useEmisQuery();
+  const { createEmi, updateEmi, deleteEmi } = useEmisMutation();
 
+  const emis: Emi[] = (rawEmis ?? []).map(coerce);
   const activeEmis = emis.filter((e) => e.paidInstallments < e.totalInstallments);
   const completedEmis = emis.filter((e) => e.paidInstallments >= e.totalInstallments);
   const totalMonthlyOut = activeEmis.reduce((s, e) => s + e.emiAmount, 0);
@@ -390,23 +389,20 @@ export default function EMIs() {
   const openEdit = (e: Emi) => { setEditTarget(e); setDialogOpen(true); };
 
   const handleDelete = async (id: number) => {
-    await EmisService().deleteEmi(id).catch(() => {});
-    setEmis((p) => p.filter((e) => e.id !== id));
+    await deleteEmi.mutateAsync(id);
   };
 
   const handleSave = async (form: Omit<Emi, "id">) => {
     const payload = { ...form, user: USER };
     if (editTarget) {
-      await EmisService().updateEmi(editTarget.id, payload).catch(() => {});
-      setEmis((p) => p.map((e) => e.id === editTarget.id ? { ...form, id: e.id } : e));
+      await updateEmi.mutateAsync({ id: editTarget.id, data: payload as never });
     } else {
-      const created = await EmisService().createEmi(payload).catch(() => null);
-      if (created) setEmis((p) => [...p, coerce(created)]);
+      await createEmi.mutateAsync(payload as never);
     }
     setDialogOpen(false);
   };
 
-  if (!loaded) {
+  if (isLoading) {
     return (
       <Box sx={{ p: 2, maxWidth: 960, mx: "auto" }}>
         {/* Header */}

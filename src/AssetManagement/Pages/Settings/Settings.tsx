@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -18,12 +18,7 @@ import InfoIcon from "@mui/icons-material/Info";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { useNavigate } from "react-router-dom";
 import { httpService, baseURL } from "../../../services/axiosConnection";
-
-interface UserProfile {
-  email: string;
-  id?: number;
-  createdAt?: string;
-}
+import { useSettingsQuery } from "../../../hooks/queries";
 
 function initials(email: string): string {
   return email.slice(0, 2).toUpperCase();
@@ -31,8 +26,7 @@ function initials(email: string): string {
 
 const Settings: FC = () => {
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: profile, isLoading: loading } = useSettingsQuery();
 
   // Change password form
   const [currentPw, setCurrentPw]   = useState("");
@@ -41,14 +35,6 @@ const Settings: FC = () => {
   const [pwSaving, setPwSaving]     = useState(false);
   const [pwMsg, setPwMsg]           = useState<{ text: string; sev: "success" | "error" } | null>(null);
   const [copied, setCopied]         = useState(false);
-
-  useEffect(() => {
-    httpService
-      .get<{ status: string; data: { user: UserProfile } }>(`${baseURL}/users/me`)
-      .then((res) => setProfile(res?.data?.user ?? null))
-      .catch(() => setProfile(null))
-      .finally(() => setLoading(false));
-  }, []);
 
   const handleLogout = () => {
     sessionStorage.removeItem("token");

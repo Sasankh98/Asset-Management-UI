@@ -2,13 +2,10 @@ import { SelectChangeEvent } from "@mui/material/Select";
 import Grid from "@mui/material/Grid";
 import FormControl from "@mui/material/FormControl";
 import InputAdornment from "@mui/material/InputAdornment";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { CreateSalaryDTO, Salary } from "../../../../../server/types";
-import {
-  RefreshDataProps,
-  useAssetManagementContext,
-} from "../../../ContextProvider/ContextProvider";
-import SalaryService from "../../../../services/SalaryService/SalaryService";
+import { useAssetManagementContext } from "../../../ContextProvider/ContextProvider";
+import { useSalaryMutation } from "../../../../hooks/mutations";
 import { TransactionTypesEnum, TypeEnum } from "../../../../shared/Constants";
 import {
   GlassInputLabel,
@@ -23,7 +20,6 @@ interface SalaryFormProps {
   open: boolean;
   type: "create" | "edit" | undefined;
   handleClose: () => void;
-  setRefreshData: Dispatch<SetStateAction<RefreshDataProps>>;
   selectedTransaction?: Salary;
 }
 
@@ -32,7 +28,6 @@ const SalaryForm = ({
   type,
   handleClose,
   selectedTransaction,
-  setRefreshData,
 }: SalaryFormProps) => {
   const [transactionData, setTransactionData] = useState<CreateSalaryDTO>({
     transactionType: "",
@@ -43,6 +38,7 @@ const SalaryForm = ({
   });
 
   const { setSnackBarOptions } = useAssetManagementContext();
+  const { createTransaction, updateTransaction } = useSalaryMutation();
 
   const handleTransactionData = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -68,25 +64,15 @@ const SalaryForm = ({
         alert("Please fill all fields");
         return;
       }
-      const response = await SalaryService().postSalaryDetails(transactionData);
-      if (response) {
-        handleClose();
-        setSnackBarOptions({
-          open: true,
-          message: "Created transaction successfully",
-          severity: "success",
-        });
-        setRefreshData((prev) => ({ ...prev, refreshSalary: true }));
-      }
+      await createTransaction.mutateAsync(transactionData);
+      handleClose();
     } else if (type === "edit" && transactionData) {
-      const response = await SalaryService().updateSalaryDetails(
-        selectedTransaction?.id,
-        transactionData
-      );
-      if (response) {
-        handleClose();
-        setRefreshData((prev) => ({ ...prev, refreshSalary: true }));
-      }
+      await updateTransaction.mutateAsync({
+        id: selectedTransaction?.id,
+        data: transactionData,
+      });
+      handleClose();
+      setSnackBarOptions({ open: true, message: "Updated transaction successfully", severity: "success" });
     }
   };
 

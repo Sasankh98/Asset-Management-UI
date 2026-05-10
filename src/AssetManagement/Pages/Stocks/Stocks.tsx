@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -11,6 +11,9 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import SyncIcon from "@mui/icons-material/Sync";
 import { type Stock } from "../../../../server/types";
+import { useStocksQuery } from "../../../hooks/queries";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "../../../react-query";
 import StocksService from "../../../services/StocksService/StocksService";
 import SortableDataTable from "../../../components/SortableDataTable/SortableDataTable";
 import { type TableRow } from "../../../hooks/useTableSort";
@@ -51,9 +54,7 @@ function buildRow(s: Stock): TableRow {
 // ── component ─────────────────────────────────────────────────────────────────
 
 export default function Stocks() {
-  const [stocks, setStocks]             = useState<Stock[]>([]);
   const [rows, setRows]                 = useState<TableRow[]>([]);
-  const [loading, setLoading]           = useState(true);
   const [dialogOpen, setDialogOpen]     = useState(false);
   const [dialogType, setDialogType]     = useState<"create" | "edit">("create");
   const [selectedStock, setSelectedStock] = useState<Stock | undefined>();
@@ -61,16 +62,10 @@ export default function Stocks() {
   const [tab, setTab]                   = useState(0);
   const [refreshingPrices, setRefreshingPrices] = useState(false);
 
-  const { refreshData, snackBarOptions, setRefreshData, showSnackbar } = useAssetManagementContext();
+  const { snackBarOptions, showSnackbar } = useAssetManagementContext();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    setLoading(true);
-    StocksService()
-      .getStocksDetails()
-      .then((res) => { if (res?.data) setStocks(res.data); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [refreshData.refreshStocks]);
+  const { data: stocks = [], isLoading: loading } = useStocksQuery();
 
   const filtered = filter === "all" ? stocks : stocks.filter((s) => s.status === filter);
 
@@ -136,7 +131,7 @@ export default function Stocks() {
         `Refreshed ${fetched.length} of ${targets.length} stock prices`,
         fetched.length > 0 ? "success" : "warning"
       );
-      setRefreshData((prev) => ({ ...prev, refreshStocks: !prev.refreshStocks }));
+      queryClient.invalidateQueries({ queryKey: queryKeys.stocks.all() });
     } catch {
       showSnackbar("Failed to refresh prices", "error");
     } finally {

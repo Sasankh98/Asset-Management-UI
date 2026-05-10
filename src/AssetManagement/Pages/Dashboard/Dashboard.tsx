@@ -1,4 +1,4 @@
-import { FC, useEffect, useState, useMemo } from "react";
+import { FC, useState, useMemo } from "react";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -23,15 +23,10 @@ import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import SavingsIcon from "@mui/icons-material/Savings";
 import {
-  type DashboardData,
-  type NetWorthSnapshot,
   type Stock,
   type MutualFund,
 } from "../../../../server/types";
-import DashboardService from "../../../services/DashboardService/DashboardService";
-import ReportsService from "../../../services/ReportsService/ReportsService";
-import StocksService from "../../../services/StocksService/StocksService";
-import MutualFundService from "../../../services/MutualFunds/MutualFundsService";
+import { useDashboardQuery, useNetWorthTrendQuery, useStocksQuery, useMutualFundsQuery } from "../../../hooks/queries";
 import {
   MF_TO_ASSET_BUCKET,
   MF_TO_EQUITY_SUB,
@@ -265,28 +260,19 @@ function DonutCard({
 
 const Dashboard: FC = () => {
   const theme = useTheme();
-  const [data, setData]     = useState<DashboardData | null>(null);
-  const [trend, setTrend]   = useState<NetWorthSnapshot[]>([]);
-  const [stocks, setStocks] = useState<Stock[]>([]);
-  const [mfs, setMfs]       = useState<MutualFund[]>([]);
-  const [loading, setLoading] = useState(true);
-
   const [assetMode, setAssetMode]   = useState<ValueMode>("current");
   const [equityMode, setEquityMode] = useState<ValueMode>("current");
 
-  useEffect(() => {
-    Promise.all([
-      DashboardService().getDashboard(),
-      ReportsService().getNetWorthTrend("1Y"),
-      StocksService().getStocksDetails(),
-      MutualFundService().getMutualFundsDetails(),
-    ]).then(([dash, snapshots, stocksRes, mfsRes]) => {
-      setData(dash);
-      setTrend(snapshots);
-      if (stocksRes?.data) setStocks(stocksRes.data);
-      if (mfsRes?.data)    setMfs(mfsRes.data);
-    }).finally(() => setLoading(false));
-  }, []);
+  const dashQuery   = useDashboardQuery();
+  const trendQuery  = useNetWorthTrendQuery("1Y");
+  const stocksQuery = useStocksQuery();
+  const mfsQuery    = useMutualFundsQuery();
+
+  const data   = dashQuery.data ?? null;
+  const trend  = useMemo(() => Array.isArray(trendQuery.data) ? trendQuery.data : [], [trendQuery.data]);
+  const stocks = useMemo(() => Array.isArray(stocksQuery.data) ? stocksQuery.data : [], [stocksQuery.data]);
+  const mfs    = useMemo(() => Array.isArray(mfsQuery.data)    ? mfsQuery.data    : [], [mfsQuery.data]);
+  const loading = dashQuery.isLoading || trendQuery.isLoading || stocksQuery.isLoading || mfsQuery.isLoading;
 
   const assetSlices  = useMemo(() => buildAssetSlices(stocks, mfs, assetMode),  [stocks, mfs, assetMode]);
   const equitySlices = useMemo(() => buildEquitySubSlices(stocks, mfs, equityMode), [stocks, mfs, equityMode]);

@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import ReportsService from "../../../services/ReportsService/ReportsService";
+import { useState } from "react";
 import { type NetWorthSnapshot } from "../../../../server/types";
+import { useNetWorthTrendQuery, useAllocationQuery, useStatementsQuery } from "../../../hooks/queries";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -100,29 +100,20 @@ function snapshotsToAlloc(snaps: NetWorthSnapshot[]) {
 
 export default function Reports() {
   const [period, setPeriod] = useState<Period>("1Y");
-  const [trendData, setTrendData] = useState<{ m: string; value: number }[]>([]);
-  const [allocData, setAllocData] = useState<{ m: string; mf: number; stocks: number; re: number; pf: number; other: number }[]>([]);
-  const [statements, setStatements] = useState<NetWorthSnapshot[]>([]);
-  const [loaded, setLoaded] = useState(false);
   const theme = useTheme();
 
-  useEffect(() => {
-    ReportsService().getNetWorthTrend(period).then((data) => {
-      if (data.length > 0) setTrendData(snapshotsToTrend(data));
-    }).catch(() => {}).finally(() => setLoaded(true));
-  }, [period]);
+  const trendQuery      = useNetWorthTrendQuery(period);
+  const allocQuery      = useAllocationQuery();
+  const statementsQuery = useStatementsQuery(12);
 
-  useEffect(() => {
-    ReportsService().getAllocationHistory().then((data) => {
-      if (data.length > 0) setAllocData(snapshotsToAlloc(data));
-    }).catch(() => {});
+  const trendRaw   = trendQuery.data ?? [];
+  const allocRaw   = allocQuery.data ?? [];
+  const statements = statementsQuery.data ?? [];
 
-    ReportsService().getStatements(12).then((data) => {
-      setStatements(data);
-    }).catch(() => {});
-  }, []);
+  const trendData = trendRaw.length > 0 ? snapshotsToTrend(trendRaw) : [];
+  const allocData = allocRaw.length > 0 ? snapshotsToAlloc(allocRaw) : [];
 
-  if (!loaded) {
+  if (trendQuery.isLoading) {
     return (
       <Box sx={{ p: 2, maxWidth: 960, mx: "auto" }}>
         {/* Header */}

@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import LoansService from "../../../services/LoansService/LoansService";
+import { useState } from "react";
+import { useLoansQuery } from "../../../hooks/queries";
+import { useLoansMutation } from "../../../hooks/mutations";
 import type { Loan as ApiLoan } from "../../../../server/types";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
@@ -192,14 +193,13 @@ function coerce(l: ApiLoan): Loan {
 }
 
 export default function Loans() {
-  const [loans, setLoans] = useState<Loan[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Loan | null>(null);
-  const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => {
-    LoansService().getLoans().then((data) => setLoans(data.map(coerce))).catch(() => {}).finally(() => setLoaded(true));
-  }, []);
+  const { data: rawLoans, isLoading } = useLoansQuery();
+  const { createLoan, updateLoan, deleteLoan } = useLoansMutation();
+
+  const loans: Loan[] = (rawLoans ?? []).map(coerce);
 
   const totalDebt    = loans.reduce((s, l) => s + l.totalAmt, 0);
   const totalPaid    = loans.reduce((s, l) => s + l.paidAmt, 0);
@@ -210,23 +210,20 @@ export default function Loans() {
   const openEdit = (l: Loan) => { setEditTarget(l); setDialogOpen(true); };
 
   const handleDelete = async (id: number) => {
-    await LoansService().deleteLoan(id).catch(() => {});
-    setLoans((p) => p.filter((l) => l.id !== id));
+    await deleteLoan.mutateAsync(id);
   };
 
   const handleSave = async (form: Omit<Loan, "id">) => {
     const payload = { ...form, user: USER };
     if (editTarget) {
-      await LoansService().updateLoan(editTarget.id, payload).catch(() => {});
-      setLoans((p) => p.map((l) => l.id === editTarget.id ? { ...form, id: l.id } : l));
+      await updateLoan.mutateAsync({ id: editTarget.id, data: payload as never });
     } else {
-      const created = await LoansService().createLoan(payload).catch(() => null);
-      if (created) setLoans((p) => [...p, coerce(created)]);
+      await createLoan.mutateAsync(payload as never);
     }
     setDialogOpen(false);
   };
 
-  if (!loaded) {
+  if (isLoading) {
     return (
       <Box sx={{ p: 2, maxWidth: 960, mx: "auto" }}>
         {/* Header */}

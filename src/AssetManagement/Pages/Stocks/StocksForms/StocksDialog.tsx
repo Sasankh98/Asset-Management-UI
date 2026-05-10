@@ -14,8 +14,8 @@ import Divider from "@mui/material/Divider";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { type Stock } from "../../../../../server/types";
-import StocksService from "../../../../services/StocksService/StocksService";
 import { useAssetManagementContext } from "../../../ContextProvider/ContextProvider";
+import { useStocksMutation } from "../../../../hooks/mutations";
 import { StockCategories } from "../../../../shared/Constants";
 
 const AV_KEY = import.meta.env.VITE_ALPHA_VANTAGE_KEY as string | undefined;
@@ -105,7 +105,8 @@ export default function StocksDialog({ open, type, selectedStock, handleClose }:
   const [sipEnd, setSipEnd]         = useState("");
   const [sipBrokPerInstall, setSipBrokPerInstall] = useState(0);
 
-  const { setRefreshData, showSnackbar } = useAssetManagementContext();
+  const { showSnackbar } = useAssetManagementContext();
+  const { createStock, updateStock } = useStocksMutation();
 
   // Reset / populate form when dialog opens
   useEffect(() => {
@@ -190,7 +191,7 @@ export default function StocksDialog({ open, type, selectedStock, handleClose }:
         user:        "Sasankh",
       };
       if (type === "create") {
-        await StocksService().postStockDetails(base);
+        await createStock.mutateAsync(base);
         showSnackbar("Stock added successfully", "success");
       } else {
         const updatePayload = {
@@ -200,10 +201,9 @@ export default function StocksDialog({ open, type, selectedStock, handleClose }:
           dividends: form.dividends || undefined,
           sellDate:  form.sellDate  || undefined,
         };
-        await StocksService().updateStockDetails(selectedStock?.id, updatePayload);
+        await updateStock.mutateAsync({ id: selectedStock?.id, data: updatePayload });
         showSnackbar("Stock updated successfully", "success");
       }
-      setRefreshData((prev) => ({ ...prev, refreshStocks: !prev.refreshStocks }));
       handleClose();
     } catch {
       showSnackbar("Failed to save stock", "error");

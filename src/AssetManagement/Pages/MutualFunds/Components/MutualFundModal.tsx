@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -17,8 +17,8 @@ import Alert from "@mui/material/Alert";
 import LinearProgress from "@mui/material/LinearProgress";
 import Tooltip from "@mui/material/Tooltip";
 import { type CreateMutualFundsDTO, type MutualFund } from "../../../../../server/types";
-import { type RefreshDataProps, useAssetManagementContext } from "../../../ContextProvider/ContextProvider";
-import MutualFundService from "../../../../services/MutualFunds/MutualFundsService";
+import { useAssetManagementContext } from "../../../ContextProvider/ContextProvider";
+import { useMutualFundsMutation } from "../../../../hooks/mutations";
 import { MutualFundTypes } from "../../../../shared/Constants";
 
 // ── MFAPI helpers ────────────────────────────────────────────────────────────
@@ -122,7 +122,6 @@ interface Props {
   open: boolean;
   type: "create" | "edit" | undefined;
   handleClose: () => void;
-  setRefreshData: Dispatch<SetStateAction<RefreshDataProps>>;
   selectedMutualFund?: MutualFund;
 }
 
@@ -133,7 +132,7 @@ const EMPTY: CreateMutualFundsDTO = {
   realEstatePct: undefined, hedgedEquityPct: undefined,
 };
 
-const MutualFundModal = ({ open, type, handleClose, setRefreshData, selectedMutualFund }: Props) => {
+const MutualFundModal = ({ open, type, handleClose, selectedMutualFund }: Props) => {
   const [form, setForm]           = useState<CreateMutualFundsDTO>(EMPTY);
   const [saving, setSaving]       = useState(false);
   const [options, setOptions]     = useState<MfOption[]>([]);
@@ -154,6 +153,7 @@ const MutualFundModal = ({ open, type, handleClose, setRefreshData, selectedMutu
   const [calcError, setCalcError]   = useState("");
 
   const { setSnackBarOptions } = useAssetManagementContext();
+  const { createFund, updateFund } = useMutualFundsMutation();
 
   useEffect(() => {
     if (type === "edit" && selectedMutualFund) {
@@ -257,13 +257,12 @@ const MutualFundModal = ({ open, type, handleClose, setRefreshData, selectedMutu
     setSaving(true);
     try {
       if (type === "create") {
-        await MutualFundService().postMutualFundDetails(form);
+        await createFund.mutateAsync(form);
         setSnackBarOptions({ open: true, message: "Mutual fund added successfully", severity: "success" });
       } else {
-        await MutualFundService().updateMutualFundDetails(selectedMutualFund?.id, form);
+        await updateFund.mutateAsync({ id: selectedMutualFund?.id, data: form });
         setSnackBarOptions({ open: true, message: "Mutual fund updated successfully", severity: "success" });
       }
-      setRefreshData((prev) => ({ ...prev, refreshMutualFunds: !prev.refreshMutualFunds }));
       handleClose();
     } catch {
       setSnackBarOptions({ open: true, message: "Failed to save fund", severity: "error" });

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -9,8 +9,8 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import AddIcon from "@mui/icons-material/Add";
 import TransactionTable from "./TransactionTable/TransactionTable";
-import SalaryService from "../../../services/SalaryService/SalaryService";
 import { type Salary } from "../../../../server/types";
+import { useSalaryQuery } from "../../../hooks/queries";
 import { useAssetManagementContext } from "../../ContextProvider/ContextProvider";
 import TransactionForm from "./TransactionForm/TransactionForm";
 import LineGraph from "../../../components/LineGraph/LineGraph";
@@ -18,23 +18,16 @@ import CustomSnackbar from "../../../components/SnackBar/Snackbar";
 import { fmtInr } from "../../../utils/formatCurrency";
 
 const SalaryComponent = () => {
-  const { refreshData, setRefreshData, snackBarOptions } = useAssetManagementContext();
-  const [transactionData, setTransactionData] = useState<Salary[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { snackBarOptions } = useAssetManagementContext();
   const [tab, setTab] = useState(0);
   const [transactionFormOpen, setTransactionFormOpen] = useState(false);
   const [type, setType] = useState<"create" | "edit" | undefined>();
   const [selectedTransaction, setSelectedTransaction] = useState<Salary>();
 
-  useEffect(() => {
-    setLoading(true);
-    SalaryService()
-      .getSalaryDetails()
-      .then((res) => setTransactionData(res?.data || []))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [refreshData.refreshSalary]);
 
+  const transactionQuery = useSalaryQuery();
+  const transactionData = useMemo(() => Array.isArray(transactionQuery.data) ? transactionQuery.data : [], [transactionQuery.data])
+  const loading = transactionQuery.isLoading;
   const handleOpenCreate = () => { setType("create"); setTransactionFormOpen(true); };
 
   const kpis = useMemo(() => {
@@ -71,7 +64,6 @@ const SalaryComponent = () => {
         type={type}
         handleClose={() => setTransactionFormOpen(false)}
         open={transactionFormOpen}
-        setRefreshData={setRefreshData}
       />
 
       {/* Header */}
