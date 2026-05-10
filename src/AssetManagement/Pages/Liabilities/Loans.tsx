@@ -23,6 +23,7 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { type ReactNode } from "react";
+import { fmtInr } from "../../../utils/formatCurrency";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -41,12 +42,6 @@ interface Loan {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function fmtInr(val: number): string {
-  if (val >= 1e7) return `₹${(val / 1e7).toFixed(2)} Cr`;
-  if (val >= 1e5) return `₹${(val / 1e5).toFixed(1)}L`;
-  return `₹${Math.round(val).toLocaleString("en-IN")}`;
-}
 
 const KIND_META: Record<LoanKind, { icon: ReactNode; color: string; label: string }> = {
   home:     { icon: <HomeIcon />,         color: "#1976d2", label: "Home Loan" },

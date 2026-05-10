@@ -68,6 +68,7 @@ export interface Stock {
   totalInvested: number;
   buyDate: string;
   status: string;
+  category: string;
   currentValue: number;
   marketPrice: number;
   sellPrice: number;
@@ -97,6 +98,7 @@ export interface CreateStocksDTO {
   buyTax: number;
   buyDate: string;
   status: string;
+  category?: string;
   marketPrice?: number;
   sellPrice?: number;
   sellTax?: number;

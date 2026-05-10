@@ -25,6 +25,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
+import { fmtInr } from "../../../utils/formatCurrency";
 
 // ── Historical EPF interest rates (financial year start) ──────────────────────
 
@@ -40,12 +41,6 @@ function rateForYear(year: number, futureRate: number): number {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function fmtInr(val: number): string {
-  if (val >= 1e7) return `₹${(val / 1e7).toFixed(2)} Cr`;
-  if (val >= 1e5) return `₹${(val / 1e5).toFixed(2)} L`;
-  return `₹${Math.round(val).toLocaleString("en-IN")}`;
-}
 
 const MONTHS = [
   "January","February","March","April","May","June",

@@ -20,6 +20,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { type Stock } from "../../../../../server/types";
 import StocksService from "../../../../services/StocksService/StocksService";
 import { useAssetManagementContext } from "../../../ContextProvider/ContextProvider";
+import { StockCategories } from "../../../../shared/Constants";
 
 const AV_KEY = import.meta.env.VITE_ALPHA_VANTAGE_KEY as string | undefined;
 
@@ -85,6 +86,7 @@ const EMPTY_FORM = {
   buyTax:           0,
   buyDate:          "",
   status:           "active",
+  category:         "Large Cap",
   marketPrice:      0,
   sellPrice:        0,
   sellTax:          0,
@@ -122,6 +124,7 @@ export default function StocksDialog({ open, type, selectedStock, handleClose }:
         buyTax:      selectedStock.buyTax       ?? 0,
         buyDate:     selectedStock.buyDate?.slice(0, 10) ?? "",
         status:      selectedStock.status       ?? "active",
+        category:    selectedStock.category     ?? "Large Cap",
         marketPrice: selectedStock.marketPrice  ?? 0,
         sellPrice:   selectedStock.sellPrice    ?? 0,
         sellTax:     selectedStock.sellTax      ?? 0,
@@ -206,6 +209,7 @@ export default function StocksDialog({ open, type, selectedStock, handleClose }:
         buyTax:      form.buyTax,
         buyDate:     form.buyDate,
         status:      form.status,
+        category:    form.category,
         marketPrice: form.marketPrice || undefined,
         user:        "Sasankh",
       };
@@ -299,13 +303,21 @@ export default function StocksDialog({ open, type, selectedStock, handleClose }:
             )}
           />
 
-          {/* Status */}
-          <TextField select label="Status" value={form.status}
-            onChange={(e) => set("status", e.target.value)} size="small">
-            {STATUS_OPTIONS.map((s) => (
-              <MenuItem key={s} value={s} sx={{ textTransform: "capitalize" }}>{s}</MenuItem>
-            ))}
-          </TextField>
+          {/* Status + Category */}
+          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+            <TextField select label="Status" value={form.status}
+              onChange={(e) => set("status", e.target.value)} size="small">
+              {STATUS_OPTIONS.map((s) => (
+                <MenuItem key={s} value={s} sx={{ textTransform: "capitalize" }}>{s}</MenuItem>
+              ))}
+            </TextField>
+            <TextField select label="Market Cap Category" value={form.category}
+              onChange={(e) => set("category", e.target.value)} size="small">
+              {StockCategories.map((c) => (
+                <MenuItem key={c.value} value={c.value}>{c.name}</MenuItem>
+              ))}
+            </TextField>
+          </Box>
 
           {/* Investment type */}
           <Box>
@@ -358,8 +370,8 @@ export default function StocksDialog({ open, type, selectedStock, handleClose }:
                 <Box sx={{ bgcolor: "action.hover", borderRadius: 2, p: 1.5, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 1 }}>
                   {[
                     { label: "Installments",    value: String(sipCalc.installments) },
-                    { label: "Total Invested",  value: `₹${sipCalc.totalInvested.toLocaleString("en-IN", { maximumFractionDigits: 0 })}` },
-                    { label: "Avg Buy Price",   value: sipCalc.avgPrice > 0 ? `₹${sipCalc.avgPrice.toFixed(2)}` : "—" },
+                    { label: "Total Invested",  value: sipCalc.totalInvested.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2, style: "currency", currency: "INR" }) },
+                    { label: "Avg Buy Price",   value: sipCalc.avgPrice > 0 ? sipCalc.avgPrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2, style: "currency", currency: "INR" }) : "—" },
                   ].map((r) => (
                     <Box key={r.label}>
                       <Typography variant="caption" color="text.secondary">{r.label}</Typography>
@@ -419,10 +431,10 @@ export default function StocksDialog({ open, type, selectedStock, handleClose }:
             <Box sx={{ display: "flex", gap: 2, px: 0.5 }}>
               <Typography variant="caption" color="text.secondary">
                 Total Invested:&nbsp;
-                <b>₹{(form.avg * form.quantity).toLocaleString("en-IN")}</b>
+                <b>{(form.avg * form.quantity).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2, style: "currency", currency: "INR" })}</b>
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                (incl. brokerage: ₹{(form.avg * form.quantity + form.buyTax).toLocaleString("en-IN")})
+                (incl. brokerage: {(form.avg * form.quantity + form.buyTax).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2, style: "currency", currency: "INR" })})
               </Typography>
             </Box>
           )}

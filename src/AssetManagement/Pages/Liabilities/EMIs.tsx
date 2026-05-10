@@ -27,6 +27,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { type ReactNode } from "react";
+import { fmtInr } from "../../../utils/formatCurrency";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -45,12 +46,6 @@ interface Emi {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function fmtInr(val: number): string {
-  if (val >= 1e5) return `₹${(val / 1e5).toFixed(1)}L`;
-  if (val >= 1000) return `₹${(val / 1000).toFixed(1)}k`;
-  return `₹${Math.round(val).toLocaleString("en-IN")}`;
-}
 
 const KIND_META: Record<EmiKind, { icon: ReactNode; color: string; label: string }> = {
   phone:       { icon: <PhoneAndroidIcon />, color: "#1976d2", label: "Phone" },

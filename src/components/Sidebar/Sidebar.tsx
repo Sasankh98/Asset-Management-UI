@@ -9,6 +9,7 @@ import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
 import Chip from "@mui/material/Chip";
 
+import DashboardIcon from "@mui/icons-material/Dashboard";
 import FlagCircleIcon from "@mui/icons-material/FlagCircle";
 import WaterfallChartIcon from "@mui/icons-material/WaterfallChart";
 import ShowChartIcon from "@mui/icons-material/ShowChart";
@@ -48,6 +49,7 @@ function initials(email: string): string {
 // ── navigation ─────────────────────────────────────────────────────────────────
 
 const NAVIGATION: Navigation = [
+
   {
     segment: "Asset-Management-UI/netWorth",
     title: "Net Worth",

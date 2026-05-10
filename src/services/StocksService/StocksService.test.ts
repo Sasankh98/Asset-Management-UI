@@ -16,6 +16,7 @@ const mockResponse: StocksDTO = {
       totalInvested: 1,
       buyDate: "2025-07-21",
       status: "Active",
+      category: "Large Cap",
       currentValue: 1,
       marketPrice: 1,
       sellPrice: 1,

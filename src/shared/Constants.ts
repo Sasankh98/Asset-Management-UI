@@ -69,6 +69,7 @@ export const enum Icons {
 }
 
 export const MutualFundTypes = [
+  // ── Equity ────────────────────────────────────────────────
   { name: "Large Cap", value: "Large Cap" },
   { name: "Mid Cap", value: "Mid Cap" },
   { name: "Small Cap", value: "Small Cap" },
@@ -76,16 +77,86 @@ export const MutualFundTypes = [
   { name: "Flexi Cap", value: "Flexi Cap" },
   { name: "ELSS (Tax Saving)", value: "ELSS" },
   { name: "Index Fund", value: "Index Fund" },
-  { name: "ETF", value: "ETF" },
+  { name: "ETF (Equity)", value: "ETF" },
   { name: "Sectoral / Thematic", value: "Sectoral" },
   { name: "Hybrid / Balanced", value: "Hybrid" },
   { name: "Balanced Advantage", value: "Balanced Advantage" },
-  { name: "Arbitrage", value: "Arbitrage" },
+  { name: "International / FOF", value: "International" },
+  // ── Debt & Liquid ─────────────────────────────────────────
   { name: "Debt", value: "Debt" },
   { name: "Liquid", value: "Liquid" },
-  { name: "International / FOF", value: "International" },
+  { name: "Arbitrage", value: "Arbitrage" },
+  // ── Commodities ───────────────────────────────────────────
+  { name: "Gold ETF / Fund", value: "Gold" },
+  { name: "Silver ETF / Fund", value: "Silver" },
+  // ── Real Estate ───────────────────────────────────────────
+  { name: "Real Estate / REIT", value: "Real Estate" },
+  // ── Bonds ─────────────────────────────────────────────────
+  { name: "Bond / Gilt", value: "Bond" },
+  // ── Emergency Fund ────────────────────────────────────────
+  { name: "Emergency Fund", value: "Emergency Fund" },
+  // ── Other ─────────────────────────────────────────────────
   { name: "Other", value: "Other" },
 ];
+
+export const StockCategories = [
+  { name: "Large Cap", value: "Large Cap" },
+  { name: "Mid Cap",   value: "Mid Cap"   },
+  { name: "Small Cap", value: "Small Cap" },
+  { name: "Other",     value: "Other"     },
+];
+
+/** Maps a MF category string → top-level asset allocation bucket */
+export type AssetBucket =
+  | "Equity"
+  | "Debt/Liquid"
+  | "Commodities"
+  | "Real Estate"
+  | "Bonds"
+  | "Emergency Fund"
+  | "Cash/Other";
+
+export const MF_TO_ASSET_BUCKET: Record<string, AssetBucket> = {
+  "Large Cap":          "Equity",
+  "Mid Cap":            "Equity",
+  "Small Cap":          "Equity",
+  "Multi Cap":          "Equity",
+  "Flexi Cap":          "Equity",
+  "ELSS":               "Equity",
+  "Index Fund":         "Equity",
+  "ETF":                "Equity",
+  "Sectoral":           "Equity",
+  "Hybrid":             "Equity",
+  "Balanced Advantage": "Equity",
+  "International":      "Equity",
+  "Debt":               "Debt/Liquid",
+  "Liquid":             "Debt/Liquid",
+  "Arbitrage":          "Debt/Liquid",
+  "Gold":               "Commodities",
+  "Silver":             "Commodities",
+  "Real Estate":        "Real Estate",
+  "Bond":               "Bonds",
+  "Emergency Fund":     "Emergency Fund",
+  "Other":              "Cash/Other",
+};
+
+/** Maps a MF category → equity sub-bucket (only relevant when bucket === "Equity") */
+export type EquitySubBucket = "Large Cap" | "Mid Cap" | "Small Cap" | "Diversified" | "International";
+
+export const MF_TO_EQUITY_SUB: Record<string, EquitySubBucket> = {
+  "Large Cap":          "Large Cap",
+  "Index Fund":         "Large Cap",
+  "ETF":                "Large Cap",
+  "Mid Cap":            "Mid Cap",
+  "Small Cap":          "Small Cap",
+  "Multi Cap":          "Diversified",
+  "Flexi Cap":          "Diversified",
+  "ELSS":               "Diversified",
+  "Sectoral":           "Diversified",
+  "Hybrid":             "Diversified",
+  "Balanced Advantage": "Diversified",
+  "International":      "International",
+};
 
 export const enum ModalTypes {
   create = "create",

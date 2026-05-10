@@ -389,12 +389,12 @@ const MutualFundModal = ({ open, type, handleClose, setRefreshData, selectedMutu
               {sipResult && (
                 <Box sx={{ bgcolor: "action.hover", borderRadius: 2, p: 2, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1 }}>
                   {[
-                    { label: "Installments", value: String(sipResult.installments) },
-                    { label: "Total Invested", value: `₹${sipResult.totalInvested.toLocaleString("en-IN", { maximumFractionDigits: 0 })}` },
-                    { label: "Total Units", value: sipResult.totalUnits.toFixed(3) },
-                    { label: "Avg NAV", value: `₹${sipResult.avgNav.toFixed(2)}` },
-                    { label: "Current NAV", value: `₹${sipResult.currentNav.toFixed(2)}` },
-                    { label: "Current Value", value: `₹${sipResult.currentValue.toLocaleString("en-IN", { maximumFractionDigits: 0 })}` },
+                    { label: "Installments",  value: String(sipResult.installments) },
+                    { label: "Total Invested", value: sipResult.totalInvested.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2, style: "currency", currency: "INR" }) },
+                    { label: "Total Units",    value: sipResult.totalUnits.toFixed(3) },
+                    { label: "Avg NAV",        value: sipResult.avgNav.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2, style: "currency", currency: "INR" }) },
+                    { label: "Current NAV",    value: sipResult.currentNav.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2, style: "currency", currency: "INR" }) },
+                    { label: "Current Value",  value: sipResult.currentValue.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2, style: "currency", currency: "INR" }) },
                   ].map((r) => (
                     <Box key={r.label}>
                       <Typography variant="caption" color="text.secondary">{r.label}</Typography>
@@ -403,7 +403,7 @@ const MutualFundModal = ({ open, type, handleClose, setRefreshData, selectedMutu
                   ))}
                   <Box sx={{ gridColumn: "1 / -1" }}>
                     <Chip
-                      label={`${sipResult.absReturn >= 0 ? "+" : ""}₹${Math.round(sipResult.absReturn).toLocaleString("en-IN")} (${sipResult.absReturnPct >= 0 ? "+" : ""}${sipResult.absReturnPct.toFixed(2)}%) absolute return`}
+                      label={`${sipResult.absReturn >= 0 ? "+" : ""}${sipResult.absReturn.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2, style: "currency", currency: "INR" })} (${sipResult.absReturnPct >= 0 ? "+" : ""}${sipResult.absReturnPct.toFixed(2)}%) absolute return`}
                       color={sipResult.absReturn >= 0 ? "success" : "error"}
                       size="small"
                       sx={{ fontWeight: 700 }}

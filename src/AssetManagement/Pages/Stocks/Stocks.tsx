@@ -26,15 +26,7 @@ import { type TableRow } from "../../../hooks/useTableSort";
 import { useAssetManagementContext } from "../../ContextProvider/ContextProvider";
 import CustomSnackbar from "../../../components/SnackBar/Snackbar";
 import StocksDialog from "./StocksForms/StocksDialog";
-
-// ── helpers ───────────────────────────────────────────────────────────────────
-
-function fmtInr(val: number | null | undefined): string {
-  if (val == null) return "—";
-  if (Math.abs(val) >= 1e7) return `₹${(val / 1e7).toFixed(2)} Cr`;
-  if (Math.abs(val) >= 1e5) return `₹${(val / 1e5).toFixed(2)} L`;
-  return `₹${Math.round(val).toLocaleString("en-IN")}`;
-}
+import { fmtInr } from "../../../utils/formatCurrency";
 
 const TABLE_COLS = [
   { name: "Stock",        colId: "stockName",          id: 0 },

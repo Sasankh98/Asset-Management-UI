@@ -34,6 +34,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import { fmtInr } from "../../../utils/formatCurrency";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -68,12 +69,6 @@ function addYears(date: Date, n: number): Date {
   return d;
 }
 
-function fmtInr(val: number): string {
-  if (val >= 1e7) return `₹${(val / 1e7).toFixed(2)} Cr`;
-  if (val >= 1e5) return `₹${(val / 1e5).toFixed(1)}L`;
-  if (val >= 1000) return `₹${(val / 1000).toFixed(1)}k`;
-  return `₹${Math.round(val)}`;
-}
 
 function fmtDate(d: Date): string {
   return d.toLocaleDateString("en-IN", { month: "short", year: "numeric" });

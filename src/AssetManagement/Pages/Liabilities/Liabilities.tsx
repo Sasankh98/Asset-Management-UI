@@ -180,7 +180,7 @@ export default function Liabilities() {
                 }}
               >
                 <Typography variant="body2" color="text.secondary">
-                  EMI ₹{loan.emi.toLocaleString("en-IN")} · due {loan.dueDate}
+                  EMI {loan.emi.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2, style: "currency", currency: "INR" })} · due {loan.dueDate}
                 </Typography>
                 <Chip label="Prepay" size="small" variant="outlined" />
               </Box>

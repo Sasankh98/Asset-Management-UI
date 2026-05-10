@@ -15,13 +15,7 @@ import { type MutualFund, type MutualFundsDashboard } from "../../../../server/t
 import MutualFundsService from "../../../services/MutualFunds/MutualFundsService";
 import CustomSnackbar from "../../../components/SnackBar/Snackbar";
 import { useAssetManagementContext } from "../../ContextProvider/ContextProvider";
-
-function fmtInr(val: number | null | undefined): string {
-  if (val == null) return "—";
-  if (Math.abs(val) >= 1e7) return `₹${(val / 1e7).toFixed(2)} Cr`;
-  if (Math.abs(val) >= 1e5) return `₹${(val / 1e5).toFixed(2)} L`;
-  return `₹${Math.round(val).toLocaleString("en-IN")}`;
-}
+import { fmtInr } from "../../../utils/formatCurrency";
 
 function KpiSkeleton() {
   return (
