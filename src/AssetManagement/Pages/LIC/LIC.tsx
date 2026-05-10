@@ -34,6 +34,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import Skeleton from "@mui/material/Skeleton";
 import { fmtInr } from "../../../utils/formatCurrency";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -668,9 +669,10 @@ export default function LIC() {
   const [policies, setPolicies] = useState<LicPolicy[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<LicPolicy | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    LicService().getPolicies().then((data) => setPolicies(data.map(coerce))).catch(() => {});
+    LicService().getPolicies().then((data) => setPolicies(data.map(coerce))).catch(() => {}).finally(() => setLoaded(true));
   }, []);
 
   const handleAdd = () => {
@@ -703,6 +705,27 @@ export default function LIC() {
   const dialogInitial: Omit<LicPolicy, "id"> = editTarget
     ? { ...editTarget }
     : EMPTY_POLICY;
+
+  if (!loaded) {
+    return (
+      <Box sx={{ p: 2, maxWidth: 960, mx: "auto" }}>
+        {/* Header */}
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
+          <Box>
+            <Skeleton variant="text" width={160} height={36} />
+            <Skeleton variant="text" width={300} height={20} sx={{ mt: 0.5 }} />
+          </Box>
+          <Skeleton variant="rounded" width={110} height={36} />
+        </Box>
+        {/* Portfolio summary */}
+        <Skeleton variant="rounded" height={100} sx={{ mb: 3 }} />
+        {/* Policy cards */}
+        {Array.from({ length: 2 }).map((_, i) => (
+          <Skeleton key={i} variant="rounded" height={200} sx={{ mb: 2 }} />
+        ))}
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ p: 2, maxWidth: 960, mx: "auto" }} data-testid="lic-container">

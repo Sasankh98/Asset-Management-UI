@@ -7,7 +7,6 @@ import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import Skeleton from "@mui/material/Skeleton";
-import CircularProgress from "@mui/material/CircularProgress";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import SyncIcon from "@mui/icons-material/Sync";
@@ -209,7 +208,7 @@ export default function Stocks() {
             <span>
               <Button
                 variant="outlined"
-                startIcon={refreshingPrices ? <CircularProgress size={16} color="inherit" /> : <SyncIcon />}
+                startIcon={refreshingPrices ? undefined : <SyncIcon />}
                 onClick={refreshAllPrices}
                 disabled={refreshingPrices || active.length === 0}
               >

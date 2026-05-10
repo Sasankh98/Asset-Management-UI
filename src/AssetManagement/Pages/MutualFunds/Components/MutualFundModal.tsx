@@ -8,7 +8,6 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import Autocomplete from "@mui/material/Autocomplete";
-import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
@@ -310,12 +309,6 @@ const MutualFundModal = ({ open, type, handleClose, setRefreshData, selectedMutu
                 placeholder="e.g. Parag Parikh, HDFC Mid Cap"
                 InputProps={{
                   ...params.InputProps,
-                  endAdornment: (
-                    <>
-                      {(searching || navFetching) && <CircularProgress size={14} sx={{ mr: 1 }} />}
-                      {params.InputProps.endAdornment}
-                    </>
-                  ),
                 }}
               />
             )}
@@ -384,7 +377,7 @@ const MutualFundModal = ({ open, type, handleClose, setRefreshData, selectedMutu
                 variant="outlined"
                 onClick={handleCalculateSip}
                 disabled={calculating || !isSipReady}
-                startIcon={calculating ? <CircularProgress size={14} /> : undefined}
+                startIcon={undefined}
               >
                 {calculating ? "Calculating SIP returns…" : "Calculate SIP Returns"}
               </Button>

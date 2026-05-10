@@ -23,6 +23,7 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { type ReactNode } from "react";
+import Skeleton from "@mui/material/Skeleton";
 import { fmtInr } from "../../../utils/formatCurrency";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -194,9 +195,10 @@ export default function Loans() {
   const [loans, setLoans] = useState<Loan[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Loan | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    LoansService().getLoans().then((data) => setLoans(data.map(coerce))).catch(() => {});
+    LoansService().getLoans().then((data) => setLoans(data.map(coerce))).catch(() => {}).finally(() => setLoaded(true));
   }, []);
 
   const totalDebt    = loans.reduce((s, l) => s + l.totalAmt, 0);
@@ -223,6 +225,31 @@ export default function Loans() {
     }
     setDialogOpen(false);
   };
+
+  if (!loaded) {
+    return (
+      <Box sx={{ p: 2, maxWidth: 960, mx: "auto" }}>
+        {/* Header */}
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
+          <Box>
+            <Skeleton variant="text" width={120} height={36} />
+            <Skeleton variant="text" width={280} height={20} sx={{ mt: 0.5 }} />
+          </Box>
+          <Skeleton variant="rounded" width={100} height={36} />
+        </Box>
+        {/* KPI strip */}
+        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2, mb: 3 }}>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} variant="rounded" height={80} />
+          ))}
+        </Box>
+        {/* Loan cards */}
+        {Array.from({ length: 2 }).map((_, i) => (
+          <Skeleton key={i} variant="rounded" height={160} sx={{ mb: 2 }} />
+        ))}
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ p: 2, maxWidth: 960, mx: "auto" }} data-testid="loans-container">

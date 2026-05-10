@@ -8,7 +8,6 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import Autocomplete from "@mui/material/Autocomplete";
-import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
@@ -268,12 +267,6 @@ export default function StocksDialog({ open, type, selectedStock, handleClose }:
                 placeholder="e.g. RELIANCE, TCS, INFY"
                 InputProps={{
                   ...params.InputProps,
-                  endAdornment: (
-                    <>
-                      {searching && <CircularProgress size={14} sx={{ mr: 1 }} />}
-                      {params.InputProps.endAdornment}
-                    </>
-                  ),
                 }}
               />
             )}

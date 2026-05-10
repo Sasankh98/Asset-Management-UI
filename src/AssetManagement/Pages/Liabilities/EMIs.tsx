@@ -27,6 +27,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { type ReactNode } from "react";
+import Skeleton from "@mui/material/Skeleton";
 import { fmtInr } from "../../../utils/formatCurrency";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -374,9 +375,10 @@ export default function EMIs() {
   const [emis, setEmis] = useState<Emi[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Emi | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    EmisService().getEmis().then((data) => setEmis(data.map(coerce))).catch(() => {});
+    EmisService().getEmis().then((data) => setEmis(data.map(coerce))).catch(() => {}).finally(() => setLoaded(true));
   }, []);
 
   const activeEmis = emis.filter((e) => e.paidInstallments < e.totalInstallments);
@@ -403,6 +405,36 @@ export default function EMIs() {
     }
     setDialogOpen(false);
   };
+
+  if (!loaded) {
+    return (
+      <Box sx={{ p: 2, maxWidth: 960, mx: "auto" }}>
+        {/* Header */}
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
+          <Box>
+            <Skeleton variant="text" width={200} height={36} />
+            <Skeleton variant="text" width={320} height={20} sx={{ mt: 0.5 }} />
+          </Box>
+          <Skeleton variant="rounded" width={100} height={36} />
+        </Box>
+        {/* KPI strip */}
+        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2, mb: 3 }}>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} variant="rounded" height={80} />
+          ))}
+        </Box>
+        {/* Calendar + upcoming */}
+        <Skeleton variant="rounded" height={120} sx={{ mb: 2 }} />
+        <Skeleton variant="rounded" height={100} sx={{ mb: 3 }} />
+        {/* EMI cards grid */}
+        <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} variant="rounded" height={160} />
+          ))}
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ p: 2, maxWidth: 960, mx: "auto" }} data-testid="emis-container">

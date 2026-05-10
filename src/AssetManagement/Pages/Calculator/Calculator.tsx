@@ -8,6 +8,7 @@ import Divider from "@mui/material/Divider";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
 import { useTheme } from "@mui/material/styles";
 import {
   LineChart,
@@ -31,6 +32,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import HelpIcon from "@mui/icons-material/Help";
 import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { type ReactNode } from "react";
 
 // ── Types & helpers ───────────────────────────────────────────────────────────
@@ -691,19 +693,54 @@ function CategorySandbox() {
 
 // ── Section C: Compare Alternatives ──────────────────────────────────────────
 
+const VERDICT_CYCLE: Record<AltOption["verdict"], AltOption["verdict"]> = {
+  BEST: "GOOD", GOOD: "MAYBE", MAYBE: "BEST",
+};
+
 function CompareAlternatives() {
   const theme = useTheme();
   const [catId, setCatId] = useState<CatId>("bike");
+  const [alts, setAlts] = useState<AltOption[]>(() =>
+    COMPARE_ALTS["bike"].map((a) => ({ ...a, runCosts: [...a.runCosts] }))
+  );
+  const [expandedAlt, setExpandedAlt] = useState<number | null>(null);
 
-  const handleCatChange = (id: CatId) => setCatId(id);
+  const handleCatChange = (id: CatId) => {
+    setCatId(id);
+    setAlts(COMPARE_ALTS[id].map((a) => ({ ...a, runCosts: [...a.runCosts] })));
+    setExpandedAlt(null);
+  };
 
-  const alts = COMPARE_ALTS[catId];
+  const updateAlt = (i: number, changes: Partial<AltOption>) =>
+    setAlts((prev) => prev.map((a, idx) => (idx === i ? { ...a, ...changes } : a)));
+
+  const removeAlt = (i: number) => {
+    setAlts((prev) => prev.filter((_, idx) => idx !== i));
+    setExpandedAlt(null);
+  };
+
+  const addAlt = () => {
+    const newIdx = alts.length;
+    setAlts((prev) => [
+      ...prev,
+      {
+        name: "Custom Option",
+        sub: "Edit name & price",
+        sticker: 0,
+        runCosts: RUN_COSTS_DEFAULT[catId].map((r) => ({ ...r })),
+        verdict: "MAYBE" as const,
+      },
+    ]);
+    setExpandedAlt(newIdx);
+  };
 
   const altData = alts.map((alt) => ({
     ...alt,
     running5y: calc5yRunning(alt.runCosts),
     tco: alt.sticker + calc5yRunning(alt.runCosts),
-    trueMonthly: calcEmi(alt.sticker * 0.8, 11.5, 36) + alt.runCosts.reduce((s, r) => s + toMonthly(r.amount, r.period), 0),
+    trueMonthly:
+      calcEmi(alt.sticker * 0.8, 11.5, 36) +
+      alt.runCosts.reduce((s, r) => s + toMonthly(r.amount, r.period), 0),
   }));
 
   const chartData = [0, 1, 2, 3, 4, 5].map((y) => {
@@ -714,7 +751,13 @@ function CompareAlternatives() {
     return pt;
   });
 
-  const lineColors = [theme.palette.warning.main, theme.palette.success.main, theme.palette.primary.main];
+  const lineColors = [
+    theme.palette.warning.main,
+    theme.palette.success.main,
+    theme.palette.primary.main,
+    theme.palette.error.main,
+    theme.palette.secondary.main,
+  ];
 
   return (
     <Box>
@@ -724,9 +767,10 @@ function CompareAlternatives() {
 
       <CategoryChips selected={catId} onChange={handleCatChange} size="small" />
 
-      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2, mt: 3 }}>
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 3 }}>
         {altData.map((alt, i) => {
           const vc = VERDICT_COLORS[alt.verdict];
+          const isExpanded = expandedAlt === i;
           return (
             <Paper
               key={i}
@@ -736,37 +780,90 @@ function CompareAlternatives() {
                 borderRadius: 2,
                 borderTop: "3px solid",
                 borderColor: vc.color,
+                flex: "1 1 260px",
+                minWidth: 240,
+                maxWidth: 360,
+                position: "relative",
               }}
             >
-              <Typography variant="subtitle1" fontWeight={700}>
-                {alt.name}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {alt.sub}
-              </Typography>
-              <Box sx={{ mt: 1.5 }}>
-                <Chip label={alt.verdict} size="small" sx={{ bgcolor: vc.color, color: "#fff", fontWeight: 700 }} />
+              <IconButton
+                size="small"
+                onClick={() => removeAlt(i)}
+                sx={{ position: "absolute", top: 6, right: 6, opacity: 0.5 }}
+                title="Remove"
+              >
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+
+              <TextField
+                variant="standard"
+                value={alt.name}
+                onChange={(e) => updateAlt(i, { name: e.target.value })}
+                inputProps={{ style: { fontSize: "1rem", fontWeight: 700, padding: 0 } }}
+                sx={{ width: "calc(100% - 32px)", mb: 0.25 }}
+              />
+              <TextField
+                variant="standard"
+                value={alt.sub}
+                onChange={(e) => updateAlt(i, { sub: e.target.value })}
+                inputProps={{ style: { fontSize: "0.75rem", color: theme.palette.text.secondary, padding: 0 } }}
+                sx={{ width: "100%", mb: 1 }}
+              />
+
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
+                <Chip
+                  label={alt.verdict}
+                  size="small"
+                  onClick={() => updateAlt(i, { verdict: VERDICT_CYCLE[alt.verdict] })}
+                  sx={{ bgcolor: vc.color, color: "#fff", fontWeight: 700, cursor: "pointer" }}
+                />
+                <TextField
+                  label="Sticker (₹)"
+                  type="number"
+                  value={alt.sticker}
+                  onChange={(e) => updateAlt(i, { sticker: Number(e.target.value) })}
+                  size="small"
+                  sx={{ width: 120 }}
+                  slotProps={{ input: { inputProps: { min: 0 } } }}
+                />
               </Box>
-              <Divider sx={{ my: 1.5 }} />
-              <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: 0.8, textTransform: "uppercase", display: "block", mb: 1 }}>
-                5-Year TCO Breakdown
-              </Typography>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, mb: 1.5 }}>
-                {alt.sticker > 0 && (
-                  <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                    <Typography variant="caption">Sticker</Typography>
-                    <Typography variant="caption" fontFamily="monospace">{fmtInr(alt.sticker)}</Typography>
-                  </Box>
-                )}
-                {alt.runCosts.map((r, j) => (
-                  <Box key={j} sx={{ display: "flex", justifyContent: "space-between" }}>
-                    <Typography variant="caption">{r.label}</Typography>
-                    <Typography variant="caption" fontFamily="monospace">
-                      {fmtInr(toMonthly(r.amount, r.period) * 60)}
-                    </Typography>
-                  </Box>
-                ))}
-              </Box>
+
+              <Divider sx={{ mb: 1 }} />
+
+              <Button
+                size="small"
+                onClick={() => setExpandedAlt(isExpanded ? null : i)}
+                sx={{ mb: isExpanded ? 1 : 0, fontSize: 11 }}
+              >
+                {isExpanded ? "▲ Hide" : "▼ Edit"} running costs
+              </Button>
+
+              {isExpanded ? (
+                <Paper elevation={0} sx={{ p: 1.5, bgcolor: "action.hover", borderRadius: 1, mb: 1 }}>
+                  <RunningCostEditor
+                    items={alt.runCosts}
+                    onChange={(rc) => updateAlt(i, { runCosts: rc })}
+                  />
+                </Paper>
+              ) : (
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, mb: 1.5 }}>
+                  {alt.sticker > 0 && (
+                    <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                      <Typography variant="caption">Sticker</Typography>
+                      <Typography variant="caption" fontFamily="monospace">{fmtInr(alt.sticker)}</Typography>
+                    </Box>
+                  )}
+                  {alt.runCosts.map((r, j) => (
+                    <Box key={j} sx={{ display: "flex", justifyContent: "space-between" }}>
+                      <Typography variant="caption">{r.label}</Typography>
+                      <Typography variant="caption" fontFamily="monospace">
+                        {fmtInr(toMonthly(r.amount, r.period) * 60)}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              )}
+
               <Divider sx={{ mb: 1.5 }} />
               <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -783,33 +880,41 @@ function CompareAlternatives() {
         })}
       </Box>
 
-      {/* Cumulative cost chart */}
-      <Box sx={{ mt: 3 }}>
-        <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: 1, textTransform: "uppercase", display: "block", mb: 1 }}>
-          Cumulative cost · all options · 5 years
-        </Typography>
-        <ResponsiveContainer width="100%" height={220}>
-          <LineChart data={chartData} margin={{ top: 5, right: 10, bottom: 5, left: 10 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} vertical={false} />
-            <XAxis dataKey="year" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} tickFormatter={(v) => fmtInr(v)} />
-            <RechartTooltip formatter={(v: number) => fmtInr(v)} />
-            <Legend />
-            {altData.map((alt, i) => (
-              <Line
-                key={i}
-                type="monotone"
-                dataKey={`opt${i}`}
-                name={alt.name}
-                stroke={lineColors[i]}
-                strokeWidth={2.5}
-                dot={false}
-                activeDot={{ r: 5 }}
-              />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+        <Button startIcon={<AddIcon />} variant="outlined" onClick={addAlt} size="small">
+          Add Alternative
+        </Button>
       </Box>
+
+      {/* Cumulative cost chart */}
+      {altData.length > 0 && (
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: 1, textTransform: "uppercase", display: "block", mb: 1 }}>
+            Cumulative cost · all options · 5 years
+          </Typography>
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={chartData} margin={{ top: 5, right: 10, bottom: 5, left: 10 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} vertical={false} />
+              <XAxis dataKey="year" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} tickFormatter={(v) => fmtInr(v)} />
+              <RechartTooltip formatter={(v: number) => fmtInr(v)} />
+              <Legend />
+              {altData.map((alt, i) => (
+                <Line
+                  key={i}
+                  type="monotone"
+                  dataKey={`opt${i}`}
+                  name={alt.name}
+                  stroke={lineColors[i % lineColors.length]}
+                  strokeWidth={2.5}
+                  dot={false}
+                  activeDot={{ r: 5 }}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </Box>
+      )}
     </Box>
   );
 }

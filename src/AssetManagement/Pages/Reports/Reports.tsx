@@ -25,6 +25,7 @@ import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import EmojiEventsOutlinedIcon from "@mui/icons-material/EmojiEventsOutlined";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import DownloadIcon from "@mui/icons-material/Download";
+import Skeleton from "@mui/material/Skeleton";
 
 const PERIODS = ["1M", "3M", "1Y", "5Y", "All"] as const;
 type Period = (typeof PERIODS)[number];
@@ -102,12 +103,13 @@ export default function Reports() {
   const [trendData, setTrendData] = useState<{ m: string; value: number }[]>([]);
   const [allocData, setAllocData] = useState<{ m: string; mf: number; stocks: number; re: number; pf: number; other: number }[]>([]);
   const [statements, setStatements] = useState<NetWorthSnapshot[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const theme = useTheme();
 
   useEffect(() => {
     ReportsService().getNetWorthTrend(period).then((data) => {
       if (data.length > 0) setTrendData(snapshotsToTrend(data));
-    }).catch(() => {});
+    }).catch(() => {}).finally(() => setLoaded(true));
   }, [period]);
 
   useEffect(() => {
@@ -119,6 +121,33 @@ export default function Reports() {
       setStatements(data);
     }).catch(() => {});
   }, []);
+
+  if (!loaded) {
+    return (
+      <Box sx={{ p: 2, maxWidth: 960, mx: "auto" }}>
+        {/* Header */}
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+          <Skeleton variant="text" width={160} height={36} />
+          <Box sx={{ display: "flex", gap: 1 }}>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} variant="rounded" width={40} height={28} />
+            ))}
+          </Box>
+        </Box>
+        {/* KPI boxes */}
+        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2, mb: 3 }}>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} variant="rounded" height={80} />
+          ))}
+        </Box>
+        {/* Charts */}
+        <Skeleton variant="rounded" height={260} sx={{ mb: 2 }} />
+        <Skeleton variant="rounded" height={260} sx={{ mb: 2 }} />
+        {/* Statements table */}
+        <Skeleton variant="rounded" height={200} />
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ p: 2, maxWidth: 960, mx: "auto" }} data-testid="reports-container">

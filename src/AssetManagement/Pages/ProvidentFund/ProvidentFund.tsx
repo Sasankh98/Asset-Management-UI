@@ -10,7 +10,7 @@ import Divider from "@mui/material/Divider";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import Tooltip from "@mui/material/Tooltip";
-import CircularProgress from "@mui/material/CircularProgress";
+import Skeleton from "@mui/material/Skeleton";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SaveIcon from "@mui/icons-material/Save";
 import ProvidentFundService from "../../../services/ProvidentFundService/ProvidentFundService";
@@ -64,6 +64,12 @@ interface YearRecord {
   vpfCumul: number;
 }
 
+// Per-year overrides: monthly basic (salary) and/or VPF monthly amount
+interface YearOverride {
+  monthlyBasic?: number;  // override computed salary for this year
+  vpfMonthly?: number;    // fixed monthly VPF amount (overrides global vpfPct for this year)
+}
+
 // ── Build history ─────────────────────────────────────────────────────────────
 // monthlyBasic = CURRENT salary; we back-calculate starting salary from increment.
 
@@ -77,6 +83,7 @@ function buildHistory(
   salaryIncrementPct: number,
   futureRate: number,
   yearsWorked: number,
+  yearOverrides: Record<number, YearOverride> = {},
 ): YearRecord[] {
   if (yearsWorked <= 0) return [];
 
@@ -95,12 +102,17 @@ function buildHistory(
     const year = startYear + i;
     // First year: only months from joiningMonth to December
     const months = i === 0 ? (12 - joiningMonth + 1) : 12;
-    const basic = startMonthlyBasic * Math.pow(1 + inc, i);
+    const computedBasic = startMonthlyBasic * Math.pow(1 + inc, i);
+    // Use override salary if provided, else use computed
+    const basic = yearOverrides[year]?.monthlyBasic ?? computedBasic;
     const rate  = rateForYear(year, futureRate);
 
     const emp = Math.round(basic * (empPct / 100) * months);
     const er  = Math.round(basic * (erPct  / 100) * months);
-    const vpf = Math.round(basic * (vpfPct / 100) * months);
+    // VPF: use override monthly amount if set, else derive from global vpfPct
+    const vpf = yearOverrides[year]?.vpfMonthly !== undefined
+      ? Math.round(yearOverrides[year].vpfMonthly! * months)
+      : Math.round(basic * (vpfPct / 100) * months);
 
     // EPF interest: monthly compounding approximation
     // Interest = opening balance * rate + half-year of new contributions * rate
@@ -166,6 +178,8 @@ export default function ProvidentFund() {
   const [actualBalance,     setActualBalance]     = useState(0);
   const [saving,            setSaving]            = useState(false);
   const [loaded,            setLoaded]            = useState(false);
+  const [yearOverrides,     setYearOverrides]     = useState<Record<number, YearOverride>>({});
+  const [showYearTable,     setShowYearTable]     = useState(false);
 
   useEffect(() => {
     ProvidentFundService().getConfig(USER).then((cfg) => {
@@ -185,6 +199,49 @@ export default function ProvidentFund() {
     }).catch(() => {}).finally(() => setLoaded(true));
   }, []);
 
+  const setBasicOverride = (year: number, value: string) => {
+    setYearOverrides((prev) => {
+      const current = { ...(prev[year] ?? {}) };
+      if (value === "") {
+        delete current.monthlyBasic;
+      } else {
+        current.monthlyBasic = Number(value);
+      }
+      const next = { ...prev };
+      if (Object.keys(current).length === 0) {
+        delete next[year];
+      } else {
+        next[year] = current;
+      }
+      return next;
+    });
+  };
+
+  const setVpfOverride = (year: number, value: string) => {
+    setYearOverrides((prev) => {
+      const current = { ...(prev[year] ?? {}) };
+      if (value === "") {
+        delete current.vpfMonthly;
+      } else {
+        current.vpfMonthly = Number(value);
+      }
+      const next = { ...prev };
+      if (Object.keys(current).length === 0) {
+        delete next[year];
+      } else {
+        next[year] = current;
+      }
+      return next;
+    });
+  };
+
+  const clearYearOverride = (year: number) =>
+    setYearOverrides((prev) => {
+      const next = { ...prev };
+      delete next[year];
+      return next;
+    });
+
   const handleSave = useCallback(async () => {
     setSaving(true);
     await ProvidentFundService().upsert({
@@ -201,8 +258,8 @@ export default function ProvidentFund() {
   // ── Calculations ─────────────────────────────────────────────────────────────
 
   const history = useMemo(
-    () => buildHistory(currentYear, joiningMonth, monthlyBasic, empPct, erPct, vpfPct, salaryIncrementPct, rate, yearsWorked),
-    [currentYear, joiningMonth, monthlyBasic, empPct, erPct, vpfPct, salaryIncrementPct, rate, yearsWorked],
+    () => buildHistory(currentYear, joiningMonth, monthlyBasic, empPct, erPct, vpfPct, salaryIncrementPct, rate, yearsWorked, yearOverrides),
+    [currentYear, joiningMonth, monthlyBasic, empPct, erPct, vpfPct, salaryIncrementPct, rate, yearsWorked, yearOverrides],
   );
 
   const latest = history[history.length - 1];
@@ -243,8 +300,34 @@ export default function ProvidentFund() {
 
   if (!loaded) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 300 }}>
-        <CircularProgress />
+      <Box sx={{ p: 2, maxWidth: 1040, mx: "auto" }}>
+        {/* Header */}
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
+          <Box>
+            <Skeleton variant="text" width={180} height={36} />
+            <Skeleton variant="text" width={320} height={20} sx={{ mt: 0.5 }} />
+          </Box>
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Skeleton variant="rounded" width={120} height={32} />
+            <Skeleton variant="rounded" width={80} height={32} />
+          </Box>
+        </Box>
+        {/* KPI cards */}
+        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2, mb: 3 }}>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} variant="rounded" height={80} />
+          ))}
+        </Box>
+        {/* Balance breakdown */}
+        <Skeleton variant="rounded" height={180} sx={{ mb: 3 }} />
+        {/* Charts */}
+        <Skeleton variant="rounded" height={300} sx={{ mb: 3 }} />
+        <Skeleton variant="rounded" height={240} sx={{ mb: 3 }} />
+        {/* Settings + projection */}
+        <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 3 }}>
+          <Skeleton variant="rounded" height={400} />
+          <Skeleton variant="rounded" height={400} />
+        </Box>
       </Box>
     );
   }
@@ -392,6 +475,79 @@ export default function ProvidentFund() {
               <Bar dataKey="Balance" fill="#1976d2" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
+        </Paper>
+      )}
+
+      {/* Year-by-year salary & VPF overrides */}
+      {history.length > 0 && (
+        <Paper elevation={2} sx={{ p: 2.5, borderRadius: 2, mb: 3 }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <Box>
+              <Typography variant="subtitle1" fontWeight={600}>Year-by-year Salary &amp; VPF Overrides</Typography>
+              <Typography variant="caption" color="text.secondary">
+                Override the computed salary or VPF for specific years. Leave blank to use global settings.
+                VPF field accepts a fixed monthly ₹ amount — covers both % and fixed-value cases.
+              </Typography>
+            </Box>
+            <Button size="small" onClick={() => setShowYearTable((v) => !v)} sx={{ ml: 2, flexShrink: 0 }}>
+              {showYearTable ? "Hide" : "Show"}
+            </Button>
+          </Box>
+
+          {showYearTable && (
+            <Box sx={{ mt: 2, overflowX: "auto" }}>
+              <Box sx={{ display: "grid", gridTemplateColumns: "80px 1fr 1fr auto", gap: 1, alignItems: "center", mb: 1 }}>
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>Year</Typography>
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>Monthly Basic (₹)</Typography>
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>VPF Monthly (₹)</Typography>
+                <Box />
+              </Box>
+              {history.map((r) => {
+                const ovr = yearOverrides[r.year] ?? {};
+                const hasOverride = ovr.monthlyBasic !== undefined || ovr.vpfMonthly !== undefined;
+                return (
+                  <Box
+                    key={r.year}
+                    sx={{ display: "grid", gridTemplateColumns: "80px 1fr 1fr auto", gap: 1, alignItems: "center", mb: 0.75 }}
+                  >
+                    <Typography
+                      variant="body2"
+                      fontWeight={hasOverride ? 700 : 400}
+                      color={hasOverride ? "primary.main" : "text.primary"}
+                    >
+                      {r.year}
+                      {r.months < 12 && (
+                        <Typography component="span" variant="caption" color="text.secondary"> ({r.months}m)</Typography>
+                      )}
+                    </Typography>
+                    <TextField
+                      size="small"
+                      type="number"
+                      placeholder={String(r.monthlyBasic)}
+                      value={ovr.monthlyBasic ?? ""}
+                      onChange={(e) => setBasicOverride(r.year, e.target.value)}
+                      slotProps={{ input: { inputProps: { min: 0 } } }}
+                    />
+                    <TextField
+                      size="small"
+                      type="number"
+                      placeholder={vpfPct > 0 ? String(Math.round(r.monthlyBasic * vpfPct / 100)) : "0"}
+                      value={ovr.vpfMonthly ?? ""}
+                      onChange={(e) => setVpfOverride(r.year, e.target.value)}
+                      slotProps={{ input: { inputProps: { min: 0 } } }}
+                    />
+                    {hasOverride ? (
+                      <Button size="small" onClick={() => clearYearOverride(r.year)} sx={{ minWidth: 0, px: 1, fontSize: 11 }}>
+                        Clear
+                      </Button>
+                    ) : (
+                      <Box sx={{ width: 52 }} />
+                    )}
+                  </Box>
+                );
+              })}
+            </Box>
+          )}
         </Paper>
       )}
 
