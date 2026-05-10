@@ -42,7 +42,7 @@ const MutualFundTable = ({
         keys.map((col) =>
           CURRENCY_COLS.has(col)
             ? formatCurrency(f[col as keyof MutualFund] as number)
-            : f[col as keyof MutualFund]
+            : (f[col as keyof MutualFund] ?? "")
         )
       )
     );
