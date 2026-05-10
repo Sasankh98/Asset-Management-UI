@@ -7,8 +7,10 @@ import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import Skeleton from "@mui/material/Skeleton";
+import CircularProgress from "@mui/material/CircularProgress";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
+import SyncIcon from "@mui/icons-material/Sync";
 import {
   BarChart,
   Bar,
@@ -61,8 +63,9 @@ export default function Stocks() {
   const [dialogType, setDialogType]     = useState<"create" | "edit">("create");
   const [selectedStock, setSelectedStock] = useState<Stock | undefined>();
   const [filter, setFilter]             = useState<"all" | "active" | "sold">("all");
+  const [refreshingPrices, setRefreshingPrices] = useState(false);
 
-  const { refreshData, snackBarOptions } = useAssetManagementContext();
+  const { refreshData, snackBarOptions, setRefreshData, showSnackbar } = useAssetManagementContext();
 
   useEffect(() => {
     setLoading(true);
@@ -82,18 +85,80 @@ export default function Stocks() {
   // ── KPIs ────────────────────────────────────────────────────────────────────
 
   const active = stocks.filter((s) => s.status === "active");
-  const totalInvested   = active.reduce((s, x) => s + (x.totalInvested ?? 0), 0);
-  const totalCurrent    = active.reduce((s, x) => s + (x.currentValue   ?? 0), 0);
-  const totalPL         = active.reduce((s, x) => s + (x.netProfitLoss  ?? 0), 0);
-  const returnPct       = totalInvested ? (totalPL / totalInvested) * 100 : 0;
+  const totalInvested = active.reduce((s, x) => s + Number(x.totalInvested ?? 0), 0);
+  const totalCurrent  = active.reduce((s, x) => {
+    const mp  = Number(x.marketPrice ?? 0);
+    const qty = Number(x.quantity    ?? 0);
+    return s + (mp > 0 ? mp * qty : Number(x.currentValue ?? 0));
+  }, 0);
+  const totalPL = active.reduce((s, x) => {
+    const mp  = Number(x.marketPrice ?? 0);
+    const avg = Number(x.avg         ?? 0);
+    const qty = Number(x.quantity    ?? 0);
+    const tax = Number(x.buyTax      ?? 0);
+    return s + (mp > 0 ? (mp - avg) * qty - tax : Number(x.netProfitLoss ?? 0));
+  }, 0);
+  const returnPct = totalInvested ? (totalPL / totalInvested) * 100 : 0;
 
   // ── Chart data ───────────────────────────────────────────────────────────────
 
-  const chartData = active.slice(0, 10).map((s) => ({
-    name: s.stockName.length > 12 ? s.stockName.slice(0, 11) + "…" : s.stockName,
-    Invested: s.totalInvested ?? 0,
-    "Current Value": s.currentValue ?? 0,
-  }));
+  const chartData = active.slice(0, 10).map((s) => {
+    const mp  = Number(s.marketPrice ?? 0);
+    const qty = Number(s.quantity    ?? 0);
+    return {
+      name: s.stockName.length > 12 ? s.stockName.slice(0, 11) + "…" : s.stockName,
+      Invested: Number(s.totalInvested ?? 0),
+      "Current Value": mp > 0 ? mp * qty : Number(s.currentValue ?? 0),
+    };
+  });
+
+  // ── Batch price refresh ──────────────────────────────────────────────────────
+
+  const refreshAllPrices = async () => {
+    const targets = active.filter((s) => s.stockName && s.id);
+    if (!targets.length) return;
+    setRefreshingPrices(true);
+    try {
+      const priceResults = await Promise.allSettled(
+        targets.map(async (s) => {
+          const res = await StocksService().getDailyStocksDetails(s.stockName) as { price?: { close?: number } } | null;
+          const close = res?.price?.close;
+          if (!close) throw new Error("no price");
+          return { stock: s, price: close };
+        })
+      );
+
+      const fetched = priceResults
+        .filter((r): r is PromiseFulfilledResult<{ stock: Stock; price: number }> => r.status === "fulfilled")
+        .map((r) => r.value);
+
+      await Promise.allSettled(
+        fetched.map(({ stock, price }) =>
+          StocksService().updateStockDetails(stock.id, {
+            stockName:   stock.stockName,
+            avg:         Number(stock.avg),
+            quantity:    Number(stock.quantity),
+            buyTax:      Number(stock.buyTax ?? 0),
+            buyDate:     stock.buyDate ?? "",
+            status:      stock.status,
+            category:    stock.category ?? "Large Cap",
+            marketPrice: price,
+            user:        "Sasankh",
+          })
+        )
+      );
+
+      showSnackbar(
+        `Refreshed ${fetched.length} of ${targets.length} stock prices`,
+        fetched.length > 0 ? "success" : "warning"
+      );
+      setRefreshData((prev) => ({ ...prev, refreshStocks: !prev.refreshStocks }));
+    } catch {
+      showSnackbar("Failed to refresh prices", "error");
+    } finally {
+      setRefreshingPrices(false);
+    }
+  };
 
   // ── handlers ─────────────────────────────────────────────────────────────────
 
@@ -154,9 +219,23 @@ export default function Stocks() {
             Track your equity investments, returns, and P&amp;L.
           </Typography>
         </Box>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={openAdd}>
-          Add Stock
-        </Button>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Tooltip title={active.length === 0 ? "No active stocks to refresh" : "Fetch latest market prices for all active stocks"}>
+            <span>
+              <Button
+                variant="outlined"
+                startIcon={refreshingPrices ? <CircularProgress size={16} color="inherit" /> : <SyncIcon />}
+                onClick={refreshAllPrices}
+                disabled={refreshingPrices || active.length === 0}
+              >
+                {refreshingPrices ? "Refreshing…" : "Refresh Prices"}
+              </Button>
+            </span>
+          </Tooltip>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={openAdd}>
+            Add Stock
+          </Button>
+        </Box>
       </Box>
 
       {/* KPI strip */}

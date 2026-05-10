@@ -12,9 +12,6 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
-import Tooltip from "@mui/material/Tooltip";
-import IconButton from "@mui/material/IconButton";
-import RefreshIcon from "@mui/icons-material/Refresh";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { type Stock } from "../../../../../server/types";
@@ -101,9 +98,6 @@ export default function StocksDialog({ open, type, selectedStock, handleClose }:
   const [inputVal, setInputVal]     = useState("");
   const [searching, setSearching]   = useState(false);
 
-  const [selectedSymbol, setSelectedSymbol] = useState("");
-  const [priceFetching, setPriceFetching]   = useState(false);
-
   // SIP state
   const [investType, setInvestType] = useState<InvestType>("lumpsum");
   const [sipAmount, setSipAmount]   = useState(5000);
@@ -132,12 +126,10 @@ export default function StocksDialog({ open, type, selectedStock, handleClose }:
         sellDate:    selectedStock.sellDate?.slice(0, 10) ?? "",
       });
       setInputVal(selectedStock.stockName ?? "");
-      setSelectedSymbol(selectedStock.stockName ?? "");
     } else {
       setForm(EMPTY_FORM);
       setInputVal("");
       setOptions([]);
-      setSelectedSymbol("");
     }
     setInvestType("lumpsum");
     setSipStart(""); setSipEnd("");
@@ -158,21 +150,6 @@ export default function StocksDialog({ open, type, selectedStock, handleClose }:
 
   const set = (k: keyof typeof EMPTY_FORM, v: string | number) =>
     setForm((f) => ({ ...f, [k]: v }));
-
-  const fetchLivePrice = async (symbol: string) => {
-    if (!symbol) return;
-    setPriceFetching(true);
-    try {
-      const res = await StocksService().getDailyStocksDetails(symbol) as { price?: { close?: number } } | null;
-      const close = res?.price?.close;
-      if (close) setForm((f) => ({ ...f, marketPrice: parseFloat(close.toFixed(2)) }));
-      else showSnackbar("Could not fetch price — check symbol or try again later", "warning");
-    } catch {
-      showSnackbar("Live price fetch failed (rate limit or network error)", "error");
-    } finally {
-      setPriceFetching(false);
-    }
-  };
 
   // SIP-derived values (real-time)
   const sipCalc = useMemo(() => {
@@ -264,7 +241,6 @@ export default function StocksDialog({ open, type, selectedStock, handleClose }:
               if (val && typeof val !== "string") {
                 set("stockName", val.symbol);
                 setInputVal(val.symbol);
-                setSelectedSymbol(val.symbol);
               }
             }}
             loading={searching}
@@ -446,48 +422,34 @@ export default function StocksDialog({ open, type, selectedStock, handleClose }:
             </Typography>
           </Divider>
 
-          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-            <TextField
-              label="Market Price (₹)"
-              type="number"
-              value={form.marketPrice || ""}
-              onChange={(e) => set("marketPrice", Number(e.target.value))}
-              size="small"
-              sx={{ flex: 1 }}
-              slotProps={{ input: { inputProps: { min: 0, step: 0.01 } } }}
-              helperText={
-                form.marketPrice > 0 && form.avg > 0 && form.quantity > 0
-                  ? (() => {
-                      const pl = (form.marketPrice - form.avg) * form.quantity;
-                      const pct = ((form.marketPrice - form.avg) / form.avg) * 100;
-                      return `P&L: ₹${Math.round(pl).toLocaleString("en-IN")} (${pct >= 0 ? "+" : ""}${pct.toFixed(2)}%)`;
-                    })()
-                  : "Used to compute current value and P&L"
-              }
-              FormHelperTextProps={{
-                sx: {
-                  color:
-                    form.marketPrice > 0 && form.avg > 0
-                      ? form.marketPrice >= form.avg
-                        ? "success.main"
-                        : "error.main"
-                      : "text.secondary",
-                },
-              }}
-            />
-            <Tooltip title={selectedSymbol ? `Fetch live price for ${selectedSymbol}` : "Select a stock symbol first"}>
-              <span>
-                <IconButton
-                  onClick={() => fetchLivePrice(selectedSymbol)}
-                  disabled={!selectedSymbol || priceFetching}
-                  size="small"
-                  sx={{ mt: 0.5, border: "1px solid", borderColor: "divider", borderRadius: 1 }}
-                >
-                  {priceFetching ? <CircularProgress size={16} /> : <RefreshIcon fontSize="small" />}
-                </IconButton>
-              </span>
-            </Tooltip>
-          </Box>
+          <TextField
+            label="Market Price (₹)"
+            type="number"
+            value={form.marketPrice || ""}
+            onChange={(e) => set("marketPrice", Number(e.target.value))}
+            size="small"
+            fullWidth
+            slotProps={{ input: { inputProps: { min: 0, step: 0.01 } } }}
+            helperText={
+              form.marketPrice > 0 && form.avg > 0 && form.quantity > 0
+                ? (() => {
+                    const pl = (form.marketPrice - form.avg) * form.quantity;
+                    const pct = ((form.marketPrice - form.avg) / form.avg) * 100;
+                    return `P&L: ₹${Math.round(pl).toLocaleString("en-IN")} (${pct >= 0 ? "+" : ""}${pct.toFixed(2)}%)`;
+                  })()
+                : "Used to compute current value and P&L"
+            }
+            FormHelperTextProps={{
+              sx: {
+                color:
+                  form.marketPrice > 0 && form.avg > 0
+                    ? form.marketPrice >= form.avg
+                      ? "success.main"
+                      : "error.main"
+                    : "text.secondary",
+              },
+            }}
+          />
 
           {/* ── Sell details (conditional) ──────────────────────────────── */}
           {isSold && (
