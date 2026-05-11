@@ -58,7 +58,7 @@ function addPeriod(d: Date, freq: SipFreq): Date {
   else n.setFullYear(n.getFullYear() + 1);
   return n;
 }
-
+// count installments
 function countInstallments(start: string, end: string, freq: SipFreq): number {
   if (!start) return 0;
   let cur = new Date(start);
