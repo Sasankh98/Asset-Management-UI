@@ -1,4 +1,4 @@
-import { FC, useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -267,7 +267,7 @@ function DonutCard({
 
 // ── main component ────────────────────────────────────────────────────────────
 
-const Dashboard: FC = () => {
+const Dashboard = () => {
   const theme = useTheme();
   const [assetMode, setAssetMode]   = useState<ValueMode>("current");
   const [equityMode, setEquityMode] = useState<ValueMode>("current");

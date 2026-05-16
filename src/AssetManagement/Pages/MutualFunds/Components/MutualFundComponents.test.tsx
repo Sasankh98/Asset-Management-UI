@@ -238,7 +238,7 @@ describe("Mutual funds Components", () => {
 
     it("fund search debounce covers searchFunds path without crash", async () => {
       vi.useFakeTimers();
-      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+      (globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
         ok: true,
         json: async () => [{ schemeCode: 120503, schemeName: "Axis Bluechip Fund" }],
       } as unknown as Response);

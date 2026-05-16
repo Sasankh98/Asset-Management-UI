@@ -3,24 +3,25 @@ import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import InputAdornment from "@mui/material/InputAdornment";
 import LinearProgress from "@mui/material/LinearProgress";
-import { useEffect, useState, forwardRef } from "react";
+import { useEffect, useState, useImperativeHandle } from "react";
+import type React from "react";
 import { CreateGoalsDTO, GoalsDTO } from "../../../../../server/types";
 import { ModalTypes } from "../../../../shared/Constants";
 import { GlassTextField } from "../../../../core/MUI/styles";
+
+export interface GoalsFormRef {
+  getFormData: () => CreateGoalsDTO;
+}
 
 interface GoalsFormProps {
   open: boolean;
   modalType: ModalTypes;
   handleClose: () => void;
   goals?: GoalsDTO;
+  ref?: React.Ref<GoalsFormRef>;
 }
 
-export interface GoalsFormRef {
-  getFormData: () => CreateGoalsDTO;
-}
-
-const GoalsForm = forwardRef<GoalsFormRef, GoalsFormProps>(
-  ({ modalType, goals }, ref) => {
+const GoalsForm = ({ modalType, goals, ref }: GoalsFormProps) => {
     const [goalsData, setGoalsData] = useState<CreateGoalsDTO>({
       goal: "",
       targetAmount: 0,
@@ -37,14 +38,9 @@ const GoalsForm = forwardRef<GoalsFormRef, GoalsFormProps>(
       setGoalsData({ ...goalsData, [name]: value });
     };
 
-    // Expose form data through ref
-    useEffect(() => {
-      if (ref && typeof ref === "object" && "current" in ref) {
-        ref.current = {
-          getFormData: () => goalsData,
-        };
-      }
-    }, [goalsData, ref]);
+    useImperativeHandle(ref, () => ({
+      getFormData: () => goalsData,
+    }), [goalsData]);
 
     useEffect(() => {
       if (modalType === ModalTypes.edit && goals) {
@@ -197,9 +193,6 @@ const GoalsForm = forwardRef<GoalsFormRef, GoalsFormProps>(
         </Box>
       </>
     );
-  }
-);
-
-GoalsForm.displayName = "GoalsForm";
+};
 
 export default GoalsForm;

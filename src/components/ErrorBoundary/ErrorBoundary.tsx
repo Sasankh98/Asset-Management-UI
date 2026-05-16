@@ -43,7 +43,7 @@ export class ErrorBoundary extends Component<
     this.setState({ errorInfo });
 
     // Log to console in development
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.error('Error caught by boundary:', error, errorInfo);
     }
 
@@ -135,7 +135,7 @@ function DefaultErrorFallback({
         {error?.message || 'An unexpected error occurred'}
       </p>
 
-      {process.env.NODE_ENV === 'development' && (
+      {import.meta.env.DEV && (
         <details
           style={{
             marginTop: '1rem',

@@ -21,7 +21,7 @@ const Goals = () => {
   const [modalType, setModalType] = useState<ModalTypes>(ModalTypes.create);
   const formRef = useRef<GoalsFormRef>(null);
   const modalTypeRef = useRef<ModalTypes>(ModalTypes.create);
-  const selectedGoalRef = useRef<GoalsDTO>();
+  const selectedGoalRef = useRef<GoalsDTO | undefined>(undefined);
   const { onOpenChange, onTitleChange, onBodyChange, onActionsChange } =
     useDialog();
   const { snackBarOptions, showSnackbar } = useAssetManagementContext();

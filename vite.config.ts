@@ -1,10 +1,11 @@
 import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 import cssInjectedByJsPlugin from "vite-plugin-css-injected-by-js";
 import { coverageConfigDefaults } from "vitest/config";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default defineConfig(({ mode }) => ({
-  plugins: [cssInjectedByJsPlugin()],
+  plugins: [react(), cssInjectedByJsPlugin()],
   server: {
     port: 5173,
     hmr: {

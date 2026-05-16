@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { useState } from "react";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -24,7 +24,7 @@ function initials(email: string): string {
   return email.slice(0, 2).toUpperCase();
 }
 
-const Settings: FC = () => {
+const Settings = () => {
   const navigate = useNavigate();
   const { data: profile, isLoading: loading } = useSettingsQuery();
 
