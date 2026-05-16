@@ -9,3 +9,4 @@ export * from './useLoansQuery';
 export * from './useEmisQuery';
 export * from './useProvidentFundQuery';
 export * from './useReportsQuery';
+export * from './useStagesDefaultsQuery';

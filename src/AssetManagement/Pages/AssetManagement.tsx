@@ -14,6 +14,7 @@ import ProvidentFund from "./ProvidentFund/ProvidentFund";
 import Stocks from "./Stocks/Stocks";
 import Settings from "./Settings/Settings";
 import Projections from "./Projections/Projections";
+import Stages from "./Stages/Stages";
 import { DialogProvider } from "../ContextProvider/DialogContextProvider";
 
 const AssetManagement = () => {
@@ -52,6 +53,8 @@ const AssetManagement = () => {
                 return <Settings />;
               case DisplayContentEnum.projections:
                 return <Projections />;
+              case DisplayContentEnum.stages:
+                return <Stages />;
               default:
                 return null;
             }

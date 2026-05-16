@@ -37,6 +37,9 @@ function createQueryKeys() {
       allocation: () => ["reports", "allocation"] as const,
       statements: (limit: number) => ["reports", "statements", limit] as const,
     },
+    stages: {
+      defaults: () => ["stages", "defaults"] as const,
+    },
   };
 }
 

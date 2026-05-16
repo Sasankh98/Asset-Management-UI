@@ -22,6 +22,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import PaymentIcon from "@mui/icons-material/Payment";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import TimelineIcon from "@mui/icons-material/Timeline";
+import RetirementIcon from "@mui/icons-material/Stairs";
 import SettingsIcon from "@mui/icons-material/Settings";
 import SavingsIcon from "@mui/icons-material/Savings";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -143,6 +144,11 @@ const NAVIGATION: Navigation = [
     segment: "Asset-Management-UI/projections",
     title: "Projections",
     icon: <TimelineIcon />,
+  },
+  {
+    segment: "Asset-Management-UI/stages",
+    title: "Stages",
+    icon: <RetirementIcon />,
   },
   {
     kind: "divider",

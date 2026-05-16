@@ -15,6 +15,7 @@ export const DisplayContentEnum = {
   reports: "reports",
   settings: "settings",
   projections: "projections",
+  stages: "stages",
 } as const;
 
 export type DisplayContent =
