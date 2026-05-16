@@ -12,12 +12,9 @@ export function fmtInr(val: number | null | undefined): string {
   if (val == null || isNaN(val)) return "—";
   const abs = Math.abs(val);
   const sign = val < 0 ? "-" : "";
-  if (abs >= 1e7) return `${sign}₹${(abs / 1e7).toFixed(2)} Cr`;
-  if (abs >= 1e5) return `${sign}₹${(abs / 1e5).toFixed(2)} L`;
-  return `${sign}₹${abs.toLocaleString("en-IN", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
+  if (abs >= 1e7) return `${sign}₹${(abs / 1e7).toFixed(2)}Cr`;
+  if (abs >= 1e5) return `${sign}₹${(abs / 1e5).toFixed(2)}L`;
+  return `${sign}₹${Math.round(abs).toLocaleString("en-IN")}`;
 }
 
 /**

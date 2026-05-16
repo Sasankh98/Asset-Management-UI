@@ -37,23 +37,13 @@ const SalaryComponent = () => {
     const totalExpenses = transactionData
       .filter((t) => t.type === "expense")
       .reduce((s, t) => s + Number(t.amount ?? 0), 0);
-    const net = totalIncome - totalExpenses;
-    const now = new Date();
-    const thisMonthIncome = transactionData
-      .filter((t) => {
-        const d = new Date(t.date);
-        return (
-          t.type === "income" &&
-          d.getMonth() === now.getMonth() &&
-          d.getFullYear() === now.getFullYear()
-        );
-      })
-      .reduce((s, t) => s + Number(t.amount ?? 0), 0);
-    return { totalIncome, totalExpenses, net, thisMonthIncome };
+    const saved = totalIncome - totalExpenses;
+    const savingsRate = totalIncome > 0 ? Math.round((saved / totalIncome) * 100) : 0;
+    return { totalIncome, totalExpenses, saved, savingsRate };
   }, [transactionData]);
 
-  const incomeCount   = transactionData.filter((t) => t.type === "income").length;
-  const expenseCount  = transactionData.filter((t) => t.type === "expense").length;
+  const incomeCount  = transactionData.filter((t) => t.type === "income").length;
+  const expenseCount = transactionData.filter((t) => t.type === "expense").length;
 
   return (
     <Box sx={{ p: 2, maxWidth: 1100, mx: "auto" }} data-testid="salary-container">
@@ -92,10 +82,10 @@ const SalaryComponent = () => {
       ) : (
         <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2, mb: 3 }}>
           {[
-            { label: "Total Income",      value: fmtInr(kpis.totalIncome),    color: "success.main", sub: `${incomeCount} credits` },
-            { label: "Total Expenses",    value: fmtInr(kpis.totalExpenses),  color: "error.main",   sub: `${expenseCount} debits` },
-            { label: "Net Balance",       value: fmtInr(kpis.net),            color: kpis.net >= 0 ? "success.main" : "error.main" },
-            { label: "This Month Income", value: fmtInr(kpis.thisMonthIncome), color: "primary.main" },
+            { label: "Income",        value: fmtInr(kpis.totalIncome),   color: "success.main", sub: `${incomeCount} credits` },
+            { label: "Expenses",      value: fmtInr(kpis.totalExpenses), color: "error.main",   sub: `${expenseCount} debits` },
+            { label: "Saved",         value: fmtInr(kpis.saved),         color: kpis.saved >= 0 ? "text.primary" : "error.main" },
+            { label: "Savings Rate",  value: `${kpis.savingsRate}%`,     color: kpis.savingsRate >= 30 ? "primary.main" : "warning.main", sub: "target 30%+" },
           ].map((k) => (
             <Paper key={k.label} elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
               <Typography variant="caption" color="text.secondary" sx={{ textTransform: "uppercase", letterSpacing: 1 }}>

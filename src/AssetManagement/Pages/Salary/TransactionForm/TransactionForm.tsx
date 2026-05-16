@@ -1,20 +1,23 @@
-import { SelectChangeEvent } from "@mui/material/Select";
 import Grid from "@mui/material/Grid";
 import FormControl from "@mui/material/FormControl";
+import FormLabel from "@mui/material/FormLabel";
 import InputAdornment from "@mui/material/InputAdornment";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import Box from "@mui/material/Box";
 import { useEffect, useState } from "react";
 import { CreateSalaryDTO, Salary } from "../../../../../server/types";
 import { useAssetManagementContext } from "../../../ContextProvider/ContextProvider";
 import { useSalaryMutation } from "../../../../hooks/mutations";
-import { TransactionTypesEnum, TypeEnum } from "../../../../shared/Constants";
+import { TransactionTypesEnum } from "../../../../shared/Constants";
 import {
-  GlassInputLabel,
   GlassMenuItem,
   GlassTextField,
   GlassSelect,
   MenuProps,
 } from "../../../../core/MUI/styles";
 import GlassModalShell from "../../../../core/MUI/GlassModalShell";
+import { SelectChangeEvent } from "@mui/material/Select";
 
 interface SalaryFormProps {
   open: boolean;
@@ -29,13 +32,16 @@ const SalaryForm = ({
   handleClose,
   selectedTransaction,
 }: SalaryFormProps) => {
+  const today = new Date().toISOString().slice(0, 10);
+
   const [transactionData, setTransactionData] = useState<CreateSalaryDTO>({
     transactionType: "",
     amount: 0,
-    date: "",
-    type: "",
+    date: today,
+    type: "income",
     user: "Sasankh",
   });
+  const [recurring, setRecurring] = useState(false);
 
   const { setSnackBarOptions } = useAssetManagementContext();
   const { createTransaction, updateTransaction } = useSalaryMutation();
@@ -54,13 +60,13 @@ const SalaryForm = ({
     }
   };
 
+  const handleTypeToggle = (_: React.MouseEvent<HTMLElement>, val: string | null) => {
+    if (val) setTransactionData((prev) => ({ ...prev, type: val }));
+  };
+
   const handleIncome = async () => {
     if (type === "create") {
-      if (
-        !transactionData.transactionType ||
-        !transactionData.amount ||
-        !transactionData.date
-      ) {
+      if (!transactionData.transactionType || !transactionData.amount || !transactionData.date) {
         alert("Please fill all fields");
         return;
       }
@@ -81,18 +87,19 @@ const SalaryForm = ({
       setTransactionData({
         transactionType: selectedTransaction?.transactionType || "",
         amount: selectedTransaction?.amount || 0,
-        date: selectedTransaction?.date || "",
-        type: selectedTransaction?.type || "",
+        date: selectedTransaction?.date || today,
+        type: selectedTransaction?.type || "income",
         user: selectedTransaction?.user || "Sasankh",
       });
     } else if (type === "create") {
       setTransactionData({
         transactionType: "",
         amount: 0,
-        date: "",
-        type: "",
+        date: today,
+        type: "income",
         user: "Sasankh",
       });
+      setRecurring(false);
     }
   }, [type, selectedTransaction]);
 
@@ -100,82 +107,100 @@ const SalaryForm = ({
     <GlassModalShell
       open={open}
       onClose={handleClose}
-      title={
-        type === "edit"
-          ? "Edit Transaction Details"
-          : "Create New Transaction"
-      }
-      subtitle={
-        type === "edit"
-          ? "Update your transaction details"
-          : "Set up a new transaction"
-      }
-      confirmLabel={
-        type === "edit" ? "Update Transaction" : "Create Transaction"
-      }
+      title={type === "edit" ? "Edit Transaction" : "Create transaction"}
+      subtitle={type === "edit" ? "Update your transaction details" : "Log income or an expense"}
+      confirmLabel={type === "edit" ? "Save Changes" : "Save transaction"}
       onConfirm={handleIncome}
       confirmTestId="handle-salary-button"
+      recurring={recurring}
+      onRecurringChange={setRecurring}
     >
-      <FormControl fullWidth sx={{ mb: 2 }}>
-        <GlassInputLabel id="type-label">Select Salary Type</GlassInputLabel>
-        <GlassSelect
-          labelId="type-label"
-          value={transactionData?.type || ""}
-          onChange={handleSelectChange}
-          label="Type"
-          name="type"
-          MenuProps={MenuProps}
+      {/* Credit / Debit toggle */}
+      <FormControl fullWidth>
+        <FormLabel sx={{ fontSize: 11, color: "rgba(255,255,255,0.6)", mb: 0.75, fontWeight: 500 }}>
+          Type
+        </FormLabel>
+        <ToggleButtonGroup
+          value={transactionData.type}
+          exclusive
+          onChange={handleTypeToggle}
+          size="small"
+          sx={{
+            "& .MuiToggleButton-root": {
+              flex: 1,
+              textTransform: "none",
+              fontSize: 12,
+              fontWeight: 600,
+              color: "rgba(255,255,255,0.6)",
+              borderColor: "rgba(255,255,255,0.14)",
+            },
+            "& .MuiToggleButton-root.Mui-selected[value='income']": {
+              background: "rgba(76,175,80,0.18)",
+              color: "#4caf50",
+              borderColor: "rgba(76,175,80,0.4)",
+            },
+            "& .MuiToggleButton-root.Mui-selected[value='expense']": {
+              background: "rgba(239,83,80,0.18)",
+              color: "#ef5350",
+              borderColor: "rgba(239,83,80,0.4)",
+            },
+          }}
         >
-          {TypeEnum.map((enumTypes) => (
-            <GlassMenuItem value={enumTypes.value} key={enumTypes.value}>
-              {enumTypes.name}
-            </GlassMenuItem>
-          ))}
-        </GlassSelect>
+          <ToggleButton value="income">Credit · income in</ToggleButton>
+          <ToggleButton value="expense">Debit · expense out</ToggleButton>
+        </ToggleButtonGroup>
       </FormControl>
 
       <Grid container spacing={2}>
         <Grid size={6}>
-          <GlassTextField
-            fullWidth
-            label="Amount"
-            placeholder="0"
-            value={transactionData?.amount || ""}
-            onChange={handleTransactionData}
-            name="amount"
-            type="number"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">₹</InputAdornment>
-              ),
-            }}
-          />
+          <FormControl fullWidth>
+            <FormLabel sx={{ fontSize: 11, color: "rgba(255,255,255,0.6)", mb: 0.75, fontWeight: 500 }}>
+              Amount <span style={{ color: "#ef5350" }}>*</span>
+            </FormLabel>
+            <GlassTextField
+              fullWidth
+              placeholder="0"
+              value={transactionData?.amount || ""}
+              onChange={handleTransactionData}
+              name="amount"
+              type="number"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">₹</InputAdornment>
+                ),
+              }}
+            />
+          </FormControl>
         </Grid>
         <Grid size={6}>
-          <GlassTextField
-            fullWidth
-            label="Credited Date"
-            value={transactionData?.date || ""}
-            onChange={handleTransactionData}
-            name="date"
-            type="date"
-            InputLabelProps={{ shrink: true }}
-          />
+          <FormControl fullWidth>
+            <FormLabel sx={{ fontSize: 11, color: "rgba(255,255,255,0.6)", mb: 0.75, fontWeight: 500 }}>
+              Date <span style={{ color: "#ef5350" }}>*</span>
+            </FormLabel>
+            <GlassTextField
+              fullWidth
+              value={transactionData?.date || ""}
+              onChange={handleTransactionData}
+              name="date"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+            />
+          </FormControl>
         </Grid>
       </Grid>
 
-      <FormControl fullWidth sx={{ mb: 2 }}>
-        <GlassInputLabel id="transaction-type-label">
-          Select Transaction Type
-        </GlassInputLabel>
+      <FormControl fullWidth>
+        <FormLabel sx={{ fontSize: 11, color: "rgba(255,255,255,0.6)", mb: 0.75, fontWeight: 500 }}>
+          Category <span style={{ color: "#ef5350" }}>*</span>
+        </FormLabel>
         <GlassSelect
-          labelId="transaction-type-label"
           value={transactionData?.transactionType || ""}
           onChange={handleSelectChange}
-          label="Select Transaction Type"
           name="transactionType"
           MenuProps={MenuProps}
+          displayEmpty
         >
+          <GlassMenuItem value="" disabled>Select category</GlassMenuItem>
           {TransactionTypesEnum.map((enumTypes) => (
             <GlassMenuItem value={enumTypes.name} key={enumTypes.name}>
               {enumTypes.name}
@@ -183,6 +208,19 @@ const SalaryForm = ({
           ))}
         </GlassSelect>
       </FormControl>
+
+      <Box>
+        <FormLabel sx={{ fontSize: 11, color: "rgba(255,255,255,0.6)", mb: 0.75, fontWeight: 500, display: "block" }}>
+          Note <span style={{ color: "rgba(255,255,255,0.38)", fontWeight: 400 }}>— optional</span>
+        </FormLabel>
+        <GlassTextField
+          fullWidth
+          placeholder="e.g. May payslip, bonus, reimbursement…"
+          name="note"
+          multiline
+          rows={2}
+        />
+      </Box>
     </GlassModalShell>
   );
 };

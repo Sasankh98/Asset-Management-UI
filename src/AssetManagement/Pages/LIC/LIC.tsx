@@ -397,6 +397,8 @@ function PolicyDialog({
   );
 }
 
+type ChartHorizon = "10y" | "25y" | "full";
+
 // ── Policy Card ───────────────────────────────────────────────────────────────
 
 function PolicyCard({
@@ -409,8 +411,16 @@ function PolicyCard({
   onDelete: (id: number) => void;
 }) {
   const theme = useTheme();
+  const [horizon, setHorizon] = useState<ChartHorizon>("10y");
   const s = policyStats(policy);
-  const chartData = yearlyChartData(policy);
+  const allChartData = yearlyChartData(policy);
+
+  const chartData = (() => {
+    if (horizon === "full") return allChartData;
+    const startYear = new Date(policy.startDate).getFullYear();
+    const cutoff = horizon === "10y" ? startYear + 10 : startYear + 25;
+    return allChartData.filter((d) => Number(d.yr) <= cutoff);
+  })();
 
   const phaseColor =
     s.phase === "paying" ? "primary" : s.phase === "receiving" ? "success" : "default";
@@ -542,9 +552,24 @@ function PolicyCard({
 
       {/* Cash-flow bar chart */}
       <Box sx={{ mt: 2 }}>
-        <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: 1, textTransform: "uppercase" }}>
-          Cash Flows by Year (₹k)
-        </Typography>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: 1, textTransform: "uppercase" }}>
+            Cash Flows by Year (₹k)
+          </Typography>
+          <Box sx={{ display: "flex", gap: 0.5 }}>
+            {(["10y", "25y", "full"] as ChartHorizon[]).map((h) => (
+              <Chip
+                key={h}
+                label={h === "full" ? "Full term" : h}
+                size="small"
+                variant={horizon === h ? "filled" : "outlined"}
+                color={horizon === h ? "primary" : "default"}
+                onClick={() => setHorizon(h)}
+                sx={{ cursor: "pointer", fontSize: 10, height: 22 }}
+              />
+            ))}
+          </Box>
+        </Box>
         <ResponsiveContainer width="100%" height={120}>
           <BarChart data={chartData} margin={{ top: 5, right: 5, bottom: 0, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} vertical={false} />

@@ -147,10 +147,13 @@ export interface MutualFund {
   updatedAt: string;
   // Portfolio allocation breakdown (set monthly by the fund house, optional)
   equityPct?: number;
+  largeCapPct?: number;
+  midCapPct?: number;
+  smallCapPct?: number;
+  hedgedEquityPct?: number;
   debtPct?: number;
   cashPct?: number;
   realEstatePct?: number;
-  hedgedEquityPct?: number;
   allocationUpdatedAt?: string;
 }
 
@@ -182,10 +185,13 @@ export interface CreateMutualFundsDTO {
   targetAmount: number;
   user: string;
   equityPct?: number;
+  largeCapPct?: number;
+  midCapPct?: number;
+  smallCapPct?: number;
+  hedgedEquityPct?: number;
   debtPct?: number;
   cashPct?: number;
   realEstatePct?: number;
-  hedgedEquityPct?: number;
 }
 
 // ── Loans ─────────────────────────────────────────────────────────────────────

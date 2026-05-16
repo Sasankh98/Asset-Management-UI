@@ -128,8 +128,9 @@ interface Props {
 const EMPTY: CreateMutualFundsDTO = {
   fundName: "", category: "", invested: 0,
   currentValue: 0, units: 0, nav: 0, targetAmount: 0, user: "Sasankh",
-  equityPct: undefined, debtPct: undefined, cashPct: undefined,
-  realEstatePct: undefined, hedgedEquityPct: undefined,
+  equityPct: undefined, largeCapPct: undefined, midCapPct: undefined,
+  smallCapPct: undefined, hedgedEquityPct: undefined,
+  debtPct: undefined, cashPct: undefined, realEstatePct: undefined,
 };
 
 const MutualFundModal = ({ open, type, handleClose, selectedMutualFund }: Props) => {
@@ -167,10 +168,13 @@ const MutualFundModal = ({ open, type, handleClose, selectedMutualFund }: Props)
         targetAmount:    selectedMutualFund.targetProgress  ?? 0,
         user:            "Sasankh",
         equityPct:       selectedMutualFund.equityPct       ?? undefined,
+        largeCapPct:     selectedMutualFund.largeCapPct     ?? undefined,
+        midCapPct:       selectedMutualFund.midCapPct       ?? undefined,
+        smallCapPct:     selectedMutualFund.smallCapPct     ?? undefined,
+        hedgedEquityPct: selectedMutualFund.hedgedEquityPct ?? undefined,
         debtPct:         selectedMutualFund.debtPct         ?? undefined,
         cashPct:         selectedMutualFund.cashPct         ?? undefined,
         realEstatePct:   selectedMutualFund.realEstatePct   ?? undefined,
-        hedgedEquityPct: selectedMutualFund.hedgedEquityPct ?? undefined,
       });
       setInputVal(selectedMutualFund.fundName ?? "");
     } else {
@@ -485,21 +489,32 @@ const MutualFundModal = ({ open, type, handleClose, selectedMutualFund }: Props)
           </Typography>
 
           {(() => {
-            const fields: { key: keyof CreateMutualFundsDTO; label: string; help: string }[] = [
-              { key: "equityPct",       label: "Equity %",        help: "Pure equity (long only)" },
+            const topFields: { key: keyof CreateMutualFundsDTO; label: string; help: string }[] = [
+              { key: "equityPct",       label: "Equity %",        help: "Total equity exposure (pure + hedged)" },
               { key: "hedgedEquityPct", label: "Hedged Equity %", help: "Equity with downside hedges" },
               { key: "debtPct",         label: "Debt %",          help: "Bonds, NCDs, T-bills" },
               { key: "cashPct",         label: "Cash %",          help: "Cash, money market, liquid funds" },
               { key: "realEstatePct",   label: "Real Estate %",   help: "REITs, InvITs, direct RE" },
             ];
-            const total = fields.reduce((s, f) => s + Number(form[f.key] ?? 0), 0);
+            const capFields: { key: keyof CreateMutualFundsDTO; label: string; help: string }[] = [
+              { key: "largeCapPct", label: "Large Cap %", help: "% of fund in large cap equities" },
+              { key: "midCapPct",   label: "Mid Cap %",   help: "% of fund in mid cap equities" },
+              { key: "smallCapPct", label: "Small Cap %", help: "% of fund in small cap equities" },
+            ];
+
+            const total = topFields.reduce((s, f) => s + Number(form[f.key] ?? 0), 0);
             const isGood = Math.abs(total - 100) < 1;
             const hasAny = total > 0;
+
+            const capTotal = capFields.reduce((s, f) => s + Number(form[f.key] ?? 0), 0);
+            const equityTotal = Number(form.equityPct ?? 0) + Number(form.hedgedEquityPct ?? 0);
+            const capOk = capTotal > 0 && Math.abs(capTotal - equityTotal) < 1;
+            const hasCapAny = capTotal > 0;
 
             return (
               <>
                 <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 2 }}>
-                  {fields.slice(0, 3).map(({ key, label, help }) => (
+                  {topFields.slice(0, 3).map(({ key, label, help }) => (
                     <Tooltip title={help} placement="top" key={key}>
                       <TextField
                         label={label}
@@ -513,7 +528,7 @@ const MutualFundModal = ({ open, type, handleClose, selectedMutualFund }: Props)
                   ))}
                 </Box>
                 <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-                  {fields.slice(3).map(({ key, label, help }) => (
+                  {topFields.slice(3).map(({ key, label, help }) => (
                     <Tooltip title={help} placement="top" key={key}>
                       <TextField
                         label={label}
@@ -543,6 +558,51 @@ const MutualFundModal = ({ open, type, handleClose, selectedMutualFund }: Props)
                     >
                       {total.toFixed(1)}% total
                       {!isGood && total <= 100 && ` · ${(100 - total).toFixed(1)}% unallocated`}
+                    </Typography>
+                  </Box>
+                )}
+
+                {/* Equity market-cap sub-breakdown */}
+                <Divider>
+                  <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: 1 }}>
+                    EQUITY BREAKDOWN (OPTIONAL)
+                  </Typography>
+                </Divider>
+
+                <Typography variant="caption" color="text.secondary">
+                  Large + Mid + Small cap should sum to the total equity % above. Used to split the equity allocation chart by market cap.
+                </Typography>
+
+                <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 2 }}>
+                  {capFields.map(({ key, label, help }) => (
+                    <Tooltip title={help} placement="top" key={key}>
+                      <TextField
+                        label={label}
+                        type="number"
+                        value={form[key] ?? ""}
+                        onChange={(e) => set(key, e.target.value === "" ? undefined : Number(e.target.value))}
+                        size="small"
+                        slotProps={{ input: { inputProps: { min: 0, max: 100, step: 0.1 } } }}
+                      />
+                    </Tooltip>
+                  ))}
+                </Box>
+
+                {hasCapAny && (
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                    <LinearProgress
+                      variant="determinate"
+                      value={equityTotal > 0 ? Math.min((capTotal / equityTotal) * 100, 100) : Math.min(capTotal, 100)}
+                      color={capOk ? "success" : capTotal > equityTotal ? "error" : "warning"}
+                      sx={{ flex: 1, height: 6, borderRadius: 3 }}
+                    />
+                    <Typography
+                      variant="caption"
+                      fontWeight={600}
+                      color={capOk ? "success.main" : capTotal > equityTotal ? "error.main" : "warning.main"}
+                      sx={{ whiteSpace: "nowrap" }}
+                    >
+                      {capTotal.toFixed(1)}% of {equityTotal.toFixed(1)}% equity
                     </Typography>
                   </Box>
                 )}

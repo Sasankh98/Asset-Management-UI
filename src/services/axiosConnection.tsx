@@ -26,6 +26,11 @@ function sanitizeInput(input: string): string {
     .replaceAll(/'/g, "\\'");
 }
 
+function handleUnauthorized() {
+  sessionStorage.removeItem("token");
+  window.location.href = "/Asset-Management-UI/";
+}
+
 const logResponseError = (urlPath: string, errorMessage: string) => {
   const sanitizedUrlPath = sanitizeInput(urlPath);
   const sanitizedErrorMessage = sanitizeInput(errorMessage);
@@ -46,6 +51,7 @@ export async function get<T>(
   const config = setConfig(customConfig);
   try {
     const response = await fetch(urlPath, { ...config, method: "GET" });
+    if (response.status === 401) { handleUnauthorized(); return Promise.reject(new Error("Unauthorized")); }
     if (!response.ok) {
       const errorMessage = await response.text();
       logResponseError(urlPath, errorMessage);
@@ -73,6 +79,7 @@ export async function post<T, R>(
       body: JSON.stringify(body),
       method: "POST",
     });
+    if (response.status === 401) { handleUnauthorized(); return Promise.reject(new Error("Unauthorized")); }
     if (!response.ok) {
       const errorMessage = await response.text();
       logResponseError(urlPath, errorMessage);
@@ -100,6 +107,7 @@ export async function patch<T, R>(
       body: JSON.stringify(body),
       method: "PATCH",
     });
+    if (response.status === 401) { handleUnauthorized(); return Promise.reject(new Error("Unauthorized")); }
     if (!response.ok) {
       const errorMessage = await response.text();
       logResponseError(urlPath, errorMessage);
@@ -127,6 +135,7 @@ export async function put<T, R>(
       body: JSON.stringify(body),
       method: "PUT",
     });
+    if (response.status === 401) { handleUnauthorized(); return Promise.reject(new Error("Unauthorized")); }
     if (!response.ok) {
       const errorMessage = await response.text();
       logResponseError(urlPath, errorMessage);
@@ -149,6 +158,7 @@ export async function del<T>(
   const config = setConfig(customConfig);
   try {
     const response = await fetch(urlPath, { ...config, method: "DELETE" });
+    if (response.status === 401) { handleUnauthorized(); return Promise.reject(new Error("Unauthorized")); }
     if (!response.ok) {
       const errorMessage = await response.text();
       logResponseError(urlPath, errorMessage);

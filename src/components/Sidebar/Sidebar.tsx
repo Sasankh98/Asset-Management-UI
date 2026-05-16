@@ -21,6 +21,7 @@ import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import HomeIcon from "@mui/icons-material/Home";
 import PaymentIcon from "@mui/icons-material/Payment";
 import AssessmentIcon from "@mui/icons-material/Assessment";
+import TimelineIcon from "@mui/icons-material/Timeline";
 import SettingsIcon from "@mui/icons-material/Settings";
 import SavingsIcon from "@mui/icons-material/Savings";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -48,18 +49,22 @@ function initials(email: string): string {
 // ── navigation ─────────────────────────────────────────────────────────────────
 
 const NAVIGATION: Navigation = [
-
   {
     segment: "Asset-Management-UI/netWorth",
     title: "Net Worth",
     icon: <AccountBalanceWalletIcon />,
   },
   {
+    segment: "Asset-Management-UI/reports",
+    title: "Reports",
+    icon: <AssessmentIcon />,
+  },
+  {
     kind: "divider",
   },
   {
     kind: "header",
-    title: "Investments",
+    title: "Portfolios",
   },
   {
     segment: "Asset-Management-UI/investments",
@@ -93,11 +98,11 @@ const NAVIGATION: Navigation = [
   },
   {
     kind: "header",
-    title: "Finance",
+    title: "Cash Flow",
   },
   {
     segment: "Asset-Management-UI/salary",
-    title: "Income & Salary",
+    title: "Income & Expenses",
     icon: <MoneyIcon />,
   },
   {
@@ -122,7 +127,7 @@ const NAVIGATION: Navigation = [
   },
   {
     kind: "header",
-    title: "Tools",
+    title: "Planning",
   },
   {
     segment: "Asset-Management-UI/goals",
@@ -130,14 +135,14 @@ const NAVIGATION: Navigation = [
     icon: <FlagCircleIcon />,
   },
   {
-    segment: "Asset-Management-UI/reports",
-    title: "Reports",
-    icon: <AssessmentIcon />,
+    segment: "Asset-Management-UI/calculator",
+    title: "Affordability",
+    icon: <CalculateIcon />,
   },
   {
-    segment: "Asset-Management-UI/calculator",
-    title: "Calculator",
-    icon: <CalculateIcon />,
+    segment: "Asset-Management-UI/projections",
+    title: "Projections",
+    icon: <TimelineIcon />,
   },
   {
     kind: "divider",
@@ -164,12 +169,11 @@ const sidebarTheme = createTheme({
 // ── toolbar actions ────────────────────────────────────────────────────────────
 
 function ToolbarActions() {
-  const navigate = useNavigate();
   const email = getEmailFromToken();
 
   const handleLogout = () => {
     sessionStorage.removeItem("token");
-    navigate("/Asset-Management-UI/");
+    window.location.href = "/Asset-Management-UI/";
   };
 
   return (

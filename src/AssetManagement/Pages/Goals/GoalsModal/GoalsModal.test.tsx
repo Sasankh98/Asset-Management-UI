@@ -1,70 +1,50 @@
-// import { describe, vi, it, beforeEach, afterEach, expect } from "vitest";
-// import { render, cleanup, screen, fireEvent } from "@testing-library/react";
-// import GoalsModal from "./GoalsModal";
-// import { BrowserRouter } from "react-router-dom";
-// import AssetManagementProvider, {
-//   RefreshDataProps,
-// } from "../../../ContextProvider/ContextProvider";
-// import { GoalsDTO } from "../../../../../server/types";
-// import { Dispatch, SetStateAction } from "react";
-// import { ModalTypes } from "../../../../shared/Constants";
-// const mockGoals: GoalsDTO = {
-//   id: 1,
-//   goal: "Marriage",
-//   description: "",
-//   targetAmount: 20000,
-//   savedAmount: 34,
-//   targetDate: "2026-12-31",
-//   value: 400000,
-//   user: "Sasankh",
-//   updatedAt: "2025-07-26T14:40:56.785Z",
-//   createdAt: "2025-07-26T14:40:56.785Z",
-// };
+import { describe, it, expect, afterEach, vi } from "vitest";
+import { render, screen, cleanup } from "@testing-library/react";
+import { BrowserRouter } from "react-router-dom";
+import GoalsForm from "./GoalsModal";
+import { ModalTypes } from "../../../../shared/Constants";
 
-// const mockSetRefreshData = vi.fn() as Dispatch<
-//   SetStateAction<RefreshDataProps>
-// >;
+describe("GoalsForm", () => {
+  afterEach(() => cleanup());
 
-// const props = {
-//   open: true,
-//   modalType: ModalTypes.create,
-//   setRefreshData: mockSetRefreshData,
-//   goals: mockGoals,
-//   handleClose: vi.fn(),
-// };
-// describe("Goals Card Component", () => {
-//   beforeEach(() => {
-//     vi.clearAllMocks();
-//   });
+  const renderGoalsForm = (modalType = ModalTypes.create) =>
+    render(
+      <BrowserRouter>
+        <GoalsForm
+          open={true}
+          modalType={modalType}
+          handleClose={vi.fn()}
+        />
+      </BrowserRouter>
+    );
 
-//   afterEach(() => {
-//     cleanup();
-//   });
+  it("renders goal field", () => {
+    renderGoalsForm();
+    expect(screen.getByRole("textbox", { name: /goal/i })).toBeInTheDocument();
+  });
 
-//   it("rendering create content when modalType is create", async () => {
-//     render(
-//       <BrowserRouter>
-//         <AssetManagementProvider>
-//           <GoalsModal {...props} />
-//         </AssetManagementProvider>
-//       </BrowserRouter>
-//     );
-//     const button = screen.getByTestId("handle-goals-button");
-//     fireEvent.click(button);
+  it("renders target amount field", () => {
+    renderGoalsForm();
+    expect(screen.getByRole("spinbutton", { name: /target amount/i })).toBeInTheDocument();
+  });
 
-//     expect(screen.getByTestId("handle-goals-button"));
-//   });
-//   it("rendering edit content when modalType is edit", async () => {
-//     render(
-//       <BrowserRouter>
-//         <AssetManagementProvider>
-//           <GoalsModal {...props} modalType={ModalTypes.edit} />
-//         </AssetManagementProvider>
-//       </BrowserRouter>
-//     );
-//     const button = screen.getByTestId("handle-goals-button");
-//     fireEvent.click(button);
-
-//     expect(screen.getByTestId("handle-goals-button"));
-//   });
-// });
+  it("renders with edit modal type", () => {
+    const goals = {
+      id: 1, goal: "Car", targetAmount: 500000, savedAmount: 100000,
+      targetDate: "2026-12-31", value: 100000, user: "Sasankh",
+      createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z",
+      description: "",
+    };
+    render(
+      <BrowserRouter>
+        <GoalsForm
+          open={true}
+          modalType={ModalTypes.edit}
+          handleClose={vi.fn()}
+          goals={goals}
+        />
+      </BrowserRouter>
+    );
+    expect(screen.getByDisplayValue("Car")).toBeInTheDocument();
+  });
+});

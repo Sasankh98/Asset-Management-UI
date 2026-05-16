@@ -260,28 +260,73 @@ export default function Loans() {
         <Button variant="contained" startIcon={<AddIcon />} onClick={openAdd}>Add Loan</Button>
       </Box>
 
-      {/* KPI strip */}
-      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2, mb: 3 }}>
-        {[
-          { label: "Total Debt",    value: fmtInr(totalDebt),   color: "error.main" },
-          { label: "Outstanding",   value: fmtInr(outstanding),  color: "warning.main" },
-          { label: "Paid Off",      value: fmtInr(totalPaid),    color: "success.main" },
-          { label: "Monthly EMI",   value: fmtInr(monthlyEmi),   color: "text.primary" },
-        ].map((k) => (
-          <Paper key={k.label} elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: 1, textTransform: "uppercase" }}>
-              {k.label}
-            </Typography>
-            <Typography variant="h6" fontWeight={700} color={k.color} sx={{ mt: 0.5 }}>{k.value}</Typography>
-          </Paper>
-        ))}
-      </Box>
+      {loans.length === 0 ? (
+        /* Empty state — no loans yet */
+        <Paper
+          elevation={0}
+          sx={{
+            p: 5,
+            borderRadius: 2,
+            textAlign: "center",
+            border: "1px dashed",
+            borderColor: "divider",
+            bgcolor: "action.hover",
+          }}
+        >
+          <Box
+            sx={{
+              width: 56,
+              height: 56,
+              borderRadius: "50%",
+              bgcolor: "primary.main",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              mb: 2,
+              opacity: 0.15,
+            }}
+          >
+            <HomeIcon sx={{ fontSize: 28, color: "common.white" }} />
+          </Box>
+          <Typography variant="h6" fontWeight={600} gutterBottom>No loans tracked yet</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 420, mx: "auto", mb: 3, lineHeight: 1.7 }}>
+            Add a home, vehicle, education or personal loan to see EMI schedules, amortization, prepayment scenarios, and total interest impact on your net worth.
+          </Typography>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={openAdd}>
+            Add Loan
+          </Button>
+          <Box sx={{ display: "flex", gap: 1, justifyContent: "center", flexWrap: "wrap", mt: 2.5 }}>
+            {["Home loan", "Vehicle", "Education", "Personal"].map((l) => (
+              <Chip key={l} label={l} size="small" variant="outlined" />
+            ))}
+          </Box>
+        </Paper>
+      ) : (
+        <>
+          {/* KPI strip — only when there are loans */}
+          <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2, mb: 3 }}>
+            {[
+              { label: "Total Debt",    value: fmtInr(totalDebt),   color: "error.main" },
+              { label: "Outstanding",   value: fmtInr(outstanding),  color: "warning.main" },
+              { label: "Paid Off",      value: fmtInr(totalPaid),    color: "success.main" },
+              { label: "Monthly EMI",   value: fmtInr(monthlyEmi),   color: "text.primary" },
+            ].map((k) => (
+              <Paper key={k.label} elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: 1, textTransform: "uppercase" }}>
+                  {k.label}
+                </Typography>
+                <Typography variant="h6" fontWeight={700} color={k.color} sx={{ mt: 0.5 }}>{k.value}</Typography>
+              </Paper>
+            ))}
+          </Box>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        {loans.map((l) => (
-          <LoanCard key={l.id} loan={l} onEdit={() => openEdit(l)} onDelete={() => handleDelete(l.id)} />
-        ))}
-      </Box>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {loans.map((l) => (
+              <LoanCard key={l.id} loan={l} onEdit={() => openEdit(l)} onDelete={() => handleDelete(l.id)} />
+            ))}
+          </Box>
+        </>
+      )}
 
       <LoanDialog
         open={dialogOpen}

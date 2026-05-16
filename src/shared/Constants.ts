@@ -14,6 +14,7 @@ export const DisplayContentEnum = {
   emis: "emis",
   reports: "reports",
   settings: "settings",
+  projections: "projections",
 } as const;
 
 export type DisplayContent =

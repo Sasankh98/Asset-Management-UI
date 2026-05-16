@@ -224,9 +224,19 @@ export default function Reports() {
           Net Worth · {period}
         </Typography>
         {trendData.length < 2 ? (
-          <Typography color="text.secondary" sx={{ py: 4, textAlign: "center" }}>
-            No snapshot data for this period. Record a snapshot below to start tracking.
-          </Typography>
+          <Box sx={{ py: 3, textAlign: "center", border: "1px dashed", borderColor: "divider", borderRadius: 2 }}>
+            <Box sx={{ width: 48, height: 48, borderRadius: "50%", bgcolor: "primary.main", opacity: 0.15, display: "inline-flex", alignItems: "center", justifyContent: "center", mb: 1.5 }}>
+              <BarChartIcon sx={{ color: "primary.main", opacity: 10 }} />
+            </Box>
+            <Typography variant="subtitle2" fontWeight={600} gutterBottom>Start tracking your journey</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 380, mx: "auto", mb: 2, lineHeight: 1.6 }}>
+              Snapshots are point-in-time photos of your net worth. Enable auto-snapshots so this chart fills in automatically each month.
+            </Typography>
+            <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+              <Button size="small" variant="contained" startIcon={<BarChartIcon />}>Take Snapshot Now</Button>
+              <Button size="small" variant="outlined">Enable Auto-Snapshot</Button>
+            </Box>
+          </Box>
         ) : (
         <ResponsiveContainer width="100%" height={200}>
           <LineChart
@@ -270,8 +280,8 @@ export default function Reports() {
           Allocation Shift (₹L)
         </Typography>
         {allocData.length < 2 ? (
-          <Typography color="text.secondary" sx={{ py: 4, textAlign: "center" }}>
-            Not enough snapshots to show allocation shift.
+          <Typography color="text.secondary" sx={{ py: 4, textAlign: "center", fontStyle: "italic" }}>
+            Take at least 2 monthly snapshots to see allocation shift over time.
           </Typography>
         ) : (
         <>

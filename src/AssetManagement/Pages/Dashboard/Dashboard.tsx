@@ -19,9 +19,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
-import TrendingDownIcon from "@mui/icons-material/TrendingDown";
-import SavingsIcon from "@mui/icons-material/Savings";
 import {
   type Stock,
   type MutualFund,
@@ -147,15 +144,27 @@ function buildEquitySubSlices(
 
     let equityVal: number;
     if (hasAlloc) {
-      // Equity exposure = pure equity + hedged equity combined
       equityVal = val * (eq + heq) / 100;
     } else {
       if (MF_TO_ASSET_BUCKET[f.category] !== "Equity") return;
       equityVal = val;
     }
 
-    const sub = MF_TO_EQUITY_SUB[f.category] ?? "Diversified";
-    add(sub, equityVal);
+    // Use explicit market-cap breakdown when provided
+    const lc = Number(f.largeCapPct ?? 0);
+    const mc = Number(f.midCapPct   ?? 0);
+    const sc = Number(f.smallCapPct ?? 0);
+    if (lc + mc + sc > 0) {
+      if (lc > 0) add("Large Cap", val * lc / 100);
+      if (mc > 0) add("Mid Cap",   val * mc / 100);
+      if (sc > 0) add("Small Cap", val * sc / 100);
+      // Remaining equity (hedged or uncategorised) goes to Diversified
+      const tagged = val * (lc + mc + sc) / 100;
+      if (equityVal - tagged > 0.01) add("Diversified", equityVal - tagged);
+    } else {
+      const sub = MF_TO_EQUITY_SUB[f.category] ?? "Diversified";
+      add(sub, equityVal);
+    }
   });
 
   const ORDER: EquitySubBucket[] = [
@@ -313,7 +322,7 @@ const Dashboard: FC = () => {
 
       {/* Hero */}
       <Paper elevation={2} sx={{ p: 3, mb: 2, borderRadius: 2 }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: data ? 2 : 0 }}>
           <Box>
             <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: 1, textTransform: "uppercase" }}>
               Total Net Worth
@@ -321,14 +330,55 @@ const Dashboard: FC = () => {
             <Typography variant="h3" fontWeight={700} sx={{ lineHeight: 1.1, mt: 0.5 }}>
               {data ? fmtInr(Number(data.totalNetWorth)) : "—"}
             </Typography>
+            {data && (
+              <Chip
+                label={`Savings Rate: ${data.savingsRate}%`}
+                size="small"
+                color="success"
+                variant="outlined"
+                sx={{ mt: 1 }}
+              />
+            )}
           </Box>
-          {data && (
-            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5 }}>
-              <Chip label={`Monthly EMI: ${fmtInr(Number(data.totalMonthlyEmi))}`} size="small" />
-              <Chip label={`Savings Rate: ${data.savingsRate}%`} size="small" color="success" variant="outlined" />
-            </Box>
-          )}
         </Box>
+        {/* Assets − Liabilities = Net */}
+        {data && (
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: 2,
+              pt: 2,
+              borderTop: "1px solid",
+              borderColor: "divider",
+            }}
+          >
+            <Box>
+              <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: 1, textTransform: "uppercase" }}>
+                Assets
+              </Typography>
+              <Typography variant="h6" fontWeight={700} sx={{ mt: 0.25, fontFamily: "monospace" }}>
+                {fmtInr(Number(data.totalAssets))}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: 1, textTransform: "uppercase" }}>
+                Liabilities
+              </Typography>
+              <Typography variant="h6" fontWeight={700} color="error.main" sx={{ mt: 0.25, fontFamily: "monospace" }}>
+                −{fmtInr(Number(data.totalLiabilities))}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: 1, textTransform: "uppercase" }}>
+                Net
+              </Typography>
+              <Typography variant="h6" fontWeight={700} color="success.main" sx={{ mt: 0.25, fontFamily: "monospace" }}>
+                {fmtInr(Number(data.totalNetWorth))}
+              </Typography>
+            </Box>
+          </Box>
+        )}
       </Paper>
 
       {/* Asset Allocation donut */}
@@ -371,34 +421,6 @@ const Dashboard: FC = () => {
         )}
       </Paper>
 
-      {/* Summary KPIs */}
-      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2 }}>
-        <Paper elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-            <AccountBalanceIcon sx={{ fontSize: 18, color: "primary.main" }} />
-            <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: 0.8, textTransform: "uppercase" }}>Assets</Typography>
-          </Box>
-          <Typography variant="h5" fontWeight={700}>{data ? fmtInr(Number(data.totalAssets)) : "—"}</Typography>
-        </Paper>
-        <Paper elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-            <TrendingDownIcon sx={{ fontSize: 18, color: "error.main" }} />
-            <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: 0.8, textTransform: "uppercase" }}>Liabilities</Typography>
-          </Box>
-          <Typography variant="h5" fontWeight={700} color="error.main">
-            {data ? fmtInr(Number(data.totalLiabilities)) : "—"}
-          </Typography>
-        </Paper>
-        <Paper elevation={2} sx={{ p: 2.5, borderRadius: 2, borderTop: "3px solid", borderColor: "success.main" }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-            <SavingsIcon sx={{ fontSize: 18, color: "success.main" }} />
-            <Typography variant="caption" sx={{ color: "text.secondary", letterSpacing: 0.8, textTransform: "uppercase" }}>Savings Rate</Typography>
-          </Box>
-          <Typography variant="h5" fontWeight={700} color="success.main">
-            {data ? `${data.savingsRate}%` : "—"}
-          </Typography>
-        </Paper>
-      </Box>
     </Box>
   );
 };

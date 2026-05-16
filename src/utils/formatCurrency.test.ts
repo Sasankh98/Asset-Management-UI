@@ -14,31 +14,28 @@ describe("fmtInr", () => {
     expect(fmtInr(NaN)).toBe("—");
   });
 
-  it("returns Indian locale format for 0", () => {
-    const result = fmtInr(0);
-    expect(result).toContain("₹");
-    expect(result).toContain("0.00");
+  it("returns ₹0 for 0", () => {
+    expect(fmtInr(0)).toBe("₹0");
   });
 
-  it("returns Indian comma format for 50000", () => {
-    const result = fmtInr(50000);
-    expect(result).toBe("₹50,000.00");
+  it("returns no decimal places for amounts < 1L", () => {
+    expect(fmtInr(50000)).toBe("₹50,000");
   });
 
-  it('returns "₹1.50 L" for 150000', () => {
-    expect(fmtInr(150000)).toBe("₹1.50 L");
+  it('returns "₹1.50L" for 150000', () => {
+    expect(fmtInr(150000)).toBe("₹1.50L");
   });
 
-  it('returns "₹1.00 Cr" for 10000000', () => {
-    expect(fmtInr(10000000)).toBe("₹1.00 Cr");
+  it('returns "₹1.00Cr" for 10000000', () => {
+    expect(fmtInr(10000000)).toBe("₹1.00Cr");
   });
 
-  it('returns "-₹2.00 L" for -200000', () => {
-    expect(fmtInr(-200000)).toBe("-₹2.00 L");
+  it('returns "-₹2.00L" for -200000', () => {
+    expect(fmtInr(-200000)).toBe("-₹2.00L");
   });
 
-  it('returns "₹2.50 Cr" for 25000000', () => {
-    expect(fmtInr(25000000)).toBe("₹2.50 Cr");
+  it('returns "₹2.50Cr" for 25000000', () => {
+    expect(fmtInr(25000000)).toBe("₹2.50Cr");
   });
 });
 
