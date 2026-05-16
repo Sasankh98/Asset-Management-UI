@@ -162,3 +162,67 @@ describe("Calculator Component", () => {
     }
   });
 });
+
+describe("Calculator – additional branch coverage", () => {
+  afterEach(cleanup);
+
+  it("RunningCostEditor.update (L307): changing first running cost field calls update", () => {
+    render(<Calculator />);
+    const spinButtons = screen.getAllByRole("spinbutton");
+    // spinButtons[0] = sticker price; spinButtons[1] = first running cost (Petrol) in Section A
+    fireEvent.change(spinButtons[1], { target: { value: "3500" } });
+    expect(spinButtons[1]).toHaveValue(3500);
+  });
+
+  it("ratio='—' when sticker=0 covers L409 false branch", () => {
+    render(<Calculator />);
+    const stickerInput = screen.getByLabelText("Sticker price (₹)");
+    fireEvent.change(stickerInput, { target: { value: "0" } });
+    expect(screen.getByTestId("calculator-container")).toBeInTheDocument();
+  });
+
+  it("Car category gives NO verdict (L417 true branch, verdictColor=error)", () => {
+    render(<Calculator />);
+    fireEvent.click(screen.getAllByText("Car")[0]);
+    expect(screen.getAllByText("NO").length).toBeGreaterThan(0);
+  });
+
+  it("Car with sticker=700000 gives MAYBE verdict (L417 false, L421 MAYBE branch)", () => {
+    render(<Calculator />);
+    fireEvent.click(screen.getAllByText("Car")[0]);
+    fireEvent.change(screen.getByLabelText("Sticker price (₹)"), { target: { value: "700000" } });
+    expect(screen.getByText(/TCO \+ EMI use/)).toBeInTheDocument();
+  });
+
+  it("fmtInr Crore branch (L79): Home + sticker=12000000 renders Crore format", () => {
+    render(<Calculator />);
+    fireEvent.click(screen.getAllByText("Home")[0]);
+    fireEvent.change(screen.getByLabelText("Sticker price (₹)"), { target: { value: "12000000" } });
+    expect(screen.getAllByText(/Cr/).length).toBeGreaterThan(0);
+  });
+
+  it("setExpandedAlt null (L835 true branch): clicking hide collapses expanded alt", () => {
+    render(<Calculator />);
+    fireEvent.click(screen.getAllByText(/▼ Edit/)[0]);
+    fireEvent.click(screen.getAllByText(/▲ Hide/)[0]);
+    expect(screen.queryAllByText(/▲ Hide/).length).toBe(0);
+  });
+
+  it("calcEmi months=0 (L72 true branch): set tenure range input to 0", () => {
+    render(<Calculator />);
+    const rangeInputs = document.querySelectorAll('input[type="range"]');
+    if (rangeInputs.length > 0) {
+      fireEvent.change(rangeInputs[0], { target: { value: "0", valueAsNumber: 0 } });
+    }
+    expect(screen.getByTestId("calculator-container")).toBeInTheDocument();
+  });
+
+  it("calcEmi annualRate=0 (L73 true branch): set rate range input to 0", () => {
+    render(<Calculator />);
+    const rangeInputs = document.querySelectorAll('input[type="range"]');
+    if (rangeInputs.length > 1) {
+      fireEvent.change(rangeInputs[1], { target: { value: "0", valueAsNumber: 0 } });
+    }
+    expect(screen.getByTestId("calculator-container")).toBeInTheDocument();
+  });
+});

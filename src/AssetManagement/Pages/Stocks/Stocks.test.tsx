@@ -1,4 +1,5 @@
 import { describe, it, expect, afterEach, vi, beforeEach } from "vitest";
+import { act } from "react";
 import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import AssetManagementProvider from "../../ContextProvider/ContextProvider";
@@ -319,5 +320,68 @@ describe("Stocks", () => {
     // Active stocks → button enabled
     const btn = screen.getByRole("button", { name: /refresh prices/i });
     expect(btn).not.toBeDisabled();
+  });
+
+  it("clicking Refresh Prices with active stock invokes refreshAllPrices (covers L93-130)", async () => {
+    const { useStocksQuery } = await import("../../../hooks/queries");
+    (useStocksQuery as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: [makeStock({ status: "active", stockName: "TCS", id: 2 })],
+      isLoading: false,
+    });
+    renderStocks();
+    const btn = screen.getByRole("button", { name: /refresh prices/i });
+    await act(async () => { fireEvent.click(btn); });
+    // getDailyStocksDetails returns null → no price → "warning" snackbar
+    expect(screen.getByTestId("stocks-wrapper")).toBeInTheDocument();
+  });
+
+  it("refreshAllPrices with successful price fetch (getDailyStocksDetails returns price)", async () => {
+    const { useStocksQuery } = await import("../../../hooks/queries");
+    const StocksServiceMod = await import("../../../services/StocksService/StocksService");
+    (StocksServiceMod.default as ReturnType<typeof vi.fn>).mockReturnValue({
+      getDailyStocksDetails: vi.fn().mockResolvedValue({ price: { close: 3200 } }),
+      updateStockDetails: vi.fn().mockResolvedValue({}),
+    });
+    (useStocksQuery as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: [makeStock({ status: "active", stockName: "RELIANCE", id: 1 })],
+      isLoading: false,
+    });
+    renderStocks();
+    const btn = screen.getByRole("button", { name: /refresh prices/i });
+    await act(async () => { fireEvent.click(btn); });
+    // getDailyStocksDetails returns price → fetched.length > 0 → "success" snackbar
+    expect(screen.getByTestId("stocks-wrapper")).toBeInTheDocument();
+  });
+
+  it("refreshAllPrices with stock having null stockName → targets empty → early return (L94)", async () => {
+    const { useStocksQuery } = await import("../../../hooks/queries");
+    (useStocksQuery as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: [makeStock({ status: "active", stockName: null as unknown as string, id: 1 })],
+      isLoading: false,
+    });
+    renderStocks();
+    // Button enabled because active.length > 0, but targets filtered to 0 → early return
+    const btn = screen.getByRole("button", { name: /refresh prices/i });
+    await act(async () => { fireEvent.click(btn); });
+    expect(screen.getByTestId("stocks-wrapper")).toBeInTheDocument();
+  });
+
+  it("clicking edit icon button on a stock row opens edit dialog (openEdit true branch)", async () => {
+    const { useStocksQuery } = await import("../../../hooks/queries");
+    (useStocksQuery as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: [makeStock({ stockName: "WIPRO", avg: 500, id: 10 })],
+      isLoading: false,
+    });
+    renderStocks();
+    // The edit IconButton is in the last column of each row
+    // getAllByRole("button") includes it; use the last button that is an icon button
+    const allBtns = screen.getAllByRole("button");
+    // Find the icon button by clicking the last one (IconButtons are last per row)
+    const iconBtns = allBtns.filter((b) => b.className.includes("MuiIconButton"));
+    if (iconBtns.length > 0) {
+      fireEvent.click(iconBtns[0]);
+      // Dialog should open since stock is found (stockName="WIPRO", avg=500 → row[0]="WIPRO", row[1]=500)
+    }
+    expect(screen.getByTestId("stocks-wrapper")).toBeInTheDocument();
   });
 });

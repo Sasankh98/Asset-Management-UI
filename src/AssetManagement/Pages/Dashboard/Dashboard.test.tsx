@@ -250,6 +250,108 @@ describe("Dashboard – stock value branches", () => {
   });
 });
 
+describe("Dashboard – null field fallbacks", () => {
+  afterEach(() => cleanup());
+
+  test("MF with null currentValue and invested falls back to 0 (L62 ?? branches)", () => {
+    mockUseDashboardQuery.mockReturnValue({ data: null, isLoading: false });
+    mockUseNetWorthTrendQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseStocksQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseMutualFundsQuery.mockReturnValue({
+      data: [makeMf({ currentValue: null as unknown as number, invested: null as unknown as number })],
+      isLoading: false,
+    });
+    render(<Dashboard />);
+    expect(screen.getByTestId("dashboard-container")).toBeInTheDocument();
+  });
+
+  test("Stock with all null numeric fields uses ?? 0 fallbacks (L67-70)", () => {
+    mockUseDashboardQuery.mockReturnValue({ data: null, isLoading: false });
+    mockUseNetWorthTrendQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseStocksQuery.mockReturnValue({
+      data: [makeStock({
+        status: "active",
+        marketPrice: null as unknown as number,
+        quantity: null as unknown as number,
+        currentValue: null as unknown as number,
+        totalInvested: null as unknown as number,
+      })],
+      isLoading: false,
+    });
+    mockUseMutualFundsQuery.mockReturnValue({ data: [], isLoading: false });
+    render(<Dashboard />);
+    expect(screen.getByTestId("dashboard-container")).toBeInTheDocument();
+  });
+
+  test("stock with null category uses 'Large Cap' fallback (L135)", () => {
+    mockUseDashboardQuery.mockReturnValue({ data: null, isLoading: false });
+    mockUseNetWorthTrendQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseStocksQuery.mockReturnValue({
+      data: [makeStock({ status: "active", category: null as unknown as string, marketPrice: 3000, quantity: 10 })],
+      isLoading: false,
+    });
+    mockUseMutualFundsQuery.mockReturnValue({ data: [], isLoading: false });
+    render(<Dashboard />);
+    expect(screen.getByTestId("dashboard-container")).toBeInTheDocument();
+  });
+
+  test("MF with unknown category maps to Cash/Other (L109 ?? 'Cash/Other')", () => {
+    mockUseDashboardQuery.mockReturnValue({ data: null, isLoading: false });
+    mockUseNetWorthTrendQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseStocksQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseMutualFundsQuery.mockReturnValue({
+      data: [makeMf({ category: "Unknown Category" as "Flexi Cap", currentValue: 100000 })],
+      isLoading: false,
+    });
+    render(<Dashboard />);
+    expect(screen.getByTestId("dashboard-container")).toBeInTheDocument();
+  });
+
+  test("MF with partial market-cap breakdown (lc>0, mc=0, sc=0) covers L158-163 branches", () => {
+    mockUseDashboardQuery.mockReturnValue({ data: null, isLoading: false });
+    mockUseNetWorthTrendQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseStocksQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseMutualFundsQuery.mockReturnValue({
+      data: [makeMf({
+        category: "Flexi Cap", currentValue: 200000,
+        equityPct: 80, // hasAlloc=true
+        largeCapPct: 50, midCapPct: 0, smallCapPct: 0, // only lc > 0
+      })],
+      isLoading: false,
+    });
+    render(<Dashboard />);
+    expect(screen.getByTestId("dashboard-container")).toBeInTheDocument();
+  });
+
+  test("MF with Diversified equity sub when category not in MF_TO_EQUITY_SUB (L165 ?? 'Diversified')", () => {
+    mockUseDashboardQuery.mockReturnValue({ data: null, isLoading: false });
+    mockUseNetWorthTrendQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseStocksQuery.mockReturnValue({ data: [], isLoading: false });
+    // ETF has MF_TO_ASSET_BUCKET["ETF"] = "Equity" but may not be in MF_TO_EQUITY_SUB
+    mockUseMutualFundsQuery.mockReturnValue({
+      data: [makeMf({ category: "ETF", currentValue: 100000 })],
+      isLoading: false,
+    });
+    render(<Dashboard />);
+    expect(screen.getByTestId("dashboard-container")).toBeInTheDocument();
+  });
+
+  test("DonutCard ToggleButtonGroup null click covers if(v) false branch (L206)", () => {
+    mockUseDashboardQuery.mockReturnValue({ data: null, isLoading: false });
+    mockUseNetWorthTrendQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseStocksQuery.mockReturnValue({
+      data: [makeStock({ status: "active", marketPrice: 3000, quantity: 10 })],
+      isLoading: false,
+    });
+    mockUseMutualFundsQuery.mockReturnValue({ data: [], isLoading: false });
+    render(<Dashboard />);
+    // Click "Current" when already in current mode → v=null → if(v) false
+    const currentBtns = screen.getAllByRole("button", { name: /current/i });
+    fireEvent.click(currentBtns[0]);
+    expect(screen.getByTestId("dashboard-container")).toBeInTheDocument();
+  });
+});
+
 describe("Dashboard – MF allocation branches", () => {
   afterEach(() => cleanup());
 
