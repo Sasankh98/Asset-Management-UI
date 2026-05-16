@@ -19,7 +19,7 @@ import { fmtInr } from "../../../utils/formatCurrency";
 
 function KpiSkeleton() {
   return (
-    <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2, mb: 3 }}>
+    <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }, gap: 2, mb: 3 }}>
       {[...Array(4)].map((_, i) => (
         <Paper key={i} elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
           <Skeleton variant="text" width="55%" height={16} />
@@ -59,7 +59,7 @@ const MutualFunds = () => {
   ];
 
   return (
-    <Box sx={{ p: 2, maxWidth: 1100, mx: "auto" }} data-testid="mutual-funds-wrapper">
+    <Box sx={{ p: { xs: 1.5, sm: 2 }, maxWidth: { xs: "100%", md: 1100 }, mx: "auto" }} data-testid="mutual-funds-wrapper">
       {snackBarOptions.open && <CustomSnackbar />}
 
       <MutualFundModal
@@ -70,7 +70,7 @@ const MutualFunds = () => {
       />
 
       {/* Header */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 1, mb: 3 }}>
         <Box>
           <Typography variant="h5" fontWeight={700}>Mutual Fund Portfolio</Typography>
           <Typography variant="body2" color="text.secondary">
@@ -84,7 +84,7 @@ const MutualFunds = () => {
 
       {/* KPI strip */}
       {loading ? <KpiSkeleton /> : (
-        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2, mb: 3 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }, gap: 2, mb: 3 }}>
           {kpis.map((k) => (
             <Paper key={k.label} elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
               <Typography variant="caption" color="text.secondary" sx={{ textTransform: "uppercase", letterSpacing: 1 }}>
@@ -130,7 +130,7 @@ const MutualFunds = () => {
       {tab === 1 && (
         loading ? (
           <Box sx={{ p: 2 }}>
-            <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2, mb: 3 }}>
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" }, gap: 2, mb: 3 }}>
               {[...Array(3)].map((_, i) => (
                 <Paper key={i} elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
                   <Skeleton variant="text" width="55%" />
@@ -153,7 +153,7 @@ const MutualFunds = () => {
             <Paper elevation={2} sx={{ p: 2.5, borderRadius: 2, mb: 3 }}>
               <Skeleton variant="rectangular" height={60} sx={{ borderRadius: 1 }} />
             </Paper>
-            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 3 }}>
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 3 }}>
               <Paper elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
                 <Skeleton variant="circular" width={190} height={190} sx={{ mx: "auto" }} />
               </Paper>

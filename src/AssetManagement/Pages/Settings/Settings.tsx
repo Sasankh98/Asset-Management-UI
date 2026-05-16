@@ -79,7 +79,7 @@ const Settings: FC = () => {
     : null;
 
   return (
-    <Box sx={{ p: 2, maxWidth: 680, mx: "auto" }} data-testid="settings-container">
+    <Box sx={{ p: { xs: 1.5, sm: 2 }, maxWidth: { xs: "100%", sm: 680 }, mx: "auto" }} data-testid="settings-container">
 
       {/* Profile card */}
       <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 2 }}>

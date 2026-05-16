@@ -43,6 +43,7 @@ const Login = () => {
   };
 
   return (
+    <div className="login-page">
     <div className="login-wrapper" data-testid="login-wrapper">
       {snackBarOptions.open && <CustomSnackbar />}
       <div className="login-header">Asset Management Application</div>
@@ -58,9 +59,11 @@ const Login = () => {
         onClick={handleSubmit}
         disabled={createToken.isPending}
         className="login-btn"
+        fullWidth
       >
         {createToken.isPending ? "Logging in..." : "Login"}
       </Button>
+    </div>
     </div>
   );
 };

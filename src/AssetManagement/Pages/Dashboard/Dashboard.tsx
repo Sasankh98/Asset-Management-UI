@@ -195,7 +195,7 @@ function DonutCard({
 
   return (
     <Paper elevation={2} sx={{ p: 3, mb: 2, borderRadius: 2 }}>
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
+      <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 1, mb: 2 }}>
         <Typography variant="subtitle2" color="text.secondary" sx={{ letterSpacing: 1, textTransform: "uppercase" }}>
           {title}
         </Typography>
@@ -213,8 +213,8 @@ function DonutCard({
       {slices.length === 0 ? (
         <Typography color="text.secondary" sx={{ py: 3, textAlign: "center" }}>{emptyMsg}</Typography>
       ) : (
-        <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap", alignItems: "flex-start" }}>
-          <Box sx={{ width: 200, height: 200, flexShrink: 0 }}>
+        <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap", alignItems: "flex-start", justifyContent: { xs: "center", sm: "flex-start" } }}>
+          <Box sx={{ width: { xs: 160, sm: 200 }, height: { xs: 160, sm: 200 }, flexShrink: 0 }}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -231,8 +231,8 @@ function DonutCard({
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value: number, _name: string, props: { payload?: Slice }) => [
-                    `${fmtInr(value)}  ·  ${total > 0 ? ((value / total) * 100).toFixed(1) : 0}%`,
+                  formatter={(value, _name, props: { payload?: Slice }) => [
+                    `${fmtInr(value as number)}  ·  ${total > 0 ? (((value as number) / total) * 100).toFixed(1) : 0}%`,
                     props.payload?.name ?? "",
                   ]}
                 />
@@ -293,7 +293,7 @@ const Dashboard: FC = () => {
 
   if (loading) {
     return (
-      <Box sx={{ p: 2, maxWidth: 960, mx: "auto" }}>
+      <Box sx={{ p: { xs: 1.5, sm: 2 }, maxWidth: { xs: "100%", md: 960 }, mx: "auto" }}>
         <Paper elevation={2} sx={{ p: 3, mb: 2, borderRadius: 2 }}>
           <Skeleton variant="text" width="40%" height={40} />
           <Skeleton variant="text" width="25%" height={64} sx={{ mt: 1 }} />
@@ -318,7 +318,7 @@ const Dashboard: FC = () => {
   }
 
   return (
-    <Box sx={{ p: 2, maxWidth: 960, mx: "auto" }} data-testid="dashboard-container">
+    <Box sx={{ p: { xs: 1.5, sm: 2 }, maxWidth: { xs: "100%", md: 960 }, mx: "auto" }} data-testid="dashboard-container">
 
       {/* Hero */}
       <Paper elevation={2} sx={{ p: 3, mb: 2, borderRadius: 2 }}>
@@ -346,7 +346,7 @@ const Dashboard: FC = () => {
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
+              gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" },
               gap: 2,
               pt: 2,
               borderTop: "1px solid",
@@ -414,7 +414,7 @@ const Dashboard: FC = () => {
               <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} vertical={false} />
               <XAxis dataKey="month" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v.toFixed(0)}L`} domain={["auto", "auto"]} />
-              <Tooltip formatter={(value: number) => [`₹${value.toFixed(1)}L`, "Net Worth"]} />
+              <Tooltip formatter={(value) => [`₹${(value as number).toFixed(1)}L`, "Net Worth"]} />
               <Line type="monotone" dataKey="value" stroke={theme.palette.success.main} strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} />
             </LineChart>
           </ResponsiveContainer>

@@ -150,7 +150,7 @@ function LoanCard({ loan, onEdit, onDelete }: { loan: Loan; onEdit: () => void; 
       </Box>
 
       {/* KPIs */}
-      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 1, mb: 2 }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: "repeat(4, 1fr)" }, gap: 1, mb: 2 }}>
         <Box>
           <Typography variant="caption" color="text.secondary">OUTSTANDING</Typography>
           <Typography variant="body2" fontWeight={700} color="error.main">{fmtInr(outstanding)}</Typography>
@@ -225,9 +225,9 @@ export default function Loans() {
 
   if (isLoading) {
     return (
-      <Box sx={{ p: 2, maxWidth: 960, mx: "auto" }}>
+      <Box sx={{ p: { xs: 1.5, sm: 2 }, maxWidth: { xs: "100%", md: 960 }, mx: "auto" }}>
         {/* Header */}
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 1, alignItems: "flex-start", mb: 3 }}>
           <Box>
             <Skeleton variant="text" width={120} height={36} />
             <Skeleton variant="text" width={280} height={20} sx={{ mt: 0.5 }} />
@@ -235,7 +235,7 @@ export default function Loans() {
           <Skeleton variant="rounded" width={100} height={36} />
         </Box>
         {/* KPI strip */}
-        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2, mb: 3 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }, gap: 2, mb: 3 }}>
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} variant="rounded" height={80} />
           ))}
@@ -249,8 +249,8 @@ export default function Loans() {
   }
 
   return (
-    <Box sx={{ p: 2, maxWidth: 960, mx: "auto" }} data-testid="loans-container">
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
+    <Box sx={{ p: { xs: 1.5, sm: 2 }, maxWidth: { xs: "100%", md: 960 }, mx: "auto" }} data-testid="loans-container">
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 1, mb: 3 }}>
         <Box>
           <Typography variant="h5" fontWeight={700}>Loans</Typography>
           <Typography variant="body2" color="text.secondary">
@@ -304,7 +304,7 @@ export default function Loans() {
       ) : (
         <>
           {/* KPI strip — only when there are loans */}
-          <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2, mb: 3 }}>
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }, gap: 2, mb: 3 }}>
             {[
               { label: "Total Debt",    value: fmtInr(totalDebt),   color: "error.main" },
               { label: "Outstanding",   value: fmtInr(outstanding),  color: "warning.main" },

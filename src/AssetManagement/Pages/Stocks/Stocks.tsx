@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -54,7 +54,6 @@ function buildRow(s: Stock): TableRow {
 // ── component ─────────────────────────────────────────────────────────────────
 
 export default function Stocks() {
-  const [rows, setRows]                 = useState<TableRow[]>([]);
   const [dialogOpen, setDialogOpen]     = useState(false);
   const [dialogType, setDialogType]     = useState<"create" | "edit">("create");
   const [selectedStock, setSelectedStock] = useState<Stock | undefined>();
@@ -68,10 +67,7 @@ export default function Stocks() {
   const { data: stocks = [], isLoading: loading } = useStocksQuery();
 
   const filtered = filter === "all" ? stocks : stocks.filter((s) => s.status === filter);
-
-  useEffect(() => {
-    setRows(filtered.map(buildRow));
-  }, [filtered]);
+  const rows = useMemo(() => filtered.map(buildRow), [filtered]);
 
   // ── KPIs ────────────────────────────────────────────────────────────────────
 
@@ -149,12 +145,12 @@ export default function Stocks() {
 
   if (loading) {
     return (
-      <Box sx={{ p: 2, maxWidth: 1100, mx: "auto" }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
+      <Box sx={{ p: { xs: 1.5, sm: 2 }, maxWidth: { xs: "100%", md: 1100 }, mx: "auto" }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 1, mb: 3 }}>
           <Box><Skeleton variant="text" width={180} height={36} /><Skeleton variant="text" width={260} height={20} /></Box>
           <Skeleton variant="rounded" width={120} height={36} />
         </Box>
-        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2, mb: 3 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }, gap: 2, mb: 3 }}>
           {[...Array(4)].map((_, i) => (
             <Paper key={i} elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
               <Skeleton variant="text" width="55%" />
@@ -180,7 +176,7 @@ export default function Stocks() {
   }
 
   return (
-    <Box sx={{ p: 2, maxWidth: 1100, mx: "auto" }} data-testid="stocks-wrapper">
+    <Box sx={{ p: { xs: 1.5, sm: 2 }, maxWidth: { xs: "100%", md: 1100 }, mx: "auto" }} data-testid="stocks-wrapper">
       {snackBarOptions.open && <CustomSnackbar />}
 
       <StocksDialog
@@ -191,14 +187,14 @@ export default function Stocks() {
       />
 
       {/* Header */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 1, mb: 3 }}>
         <Box>
           <Typography variant="h5" fontWeight={700}>Stock Portfolio</Typography>
           <Typography variant="body2" color="text.secondary">
             Track your equity investments, returns, and P&amp;L.
           </Typography>
         </Box>
-        <Box sx={{ display: "flex", gap: 1 }}>
+        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
           <Tooltip title={active.length === 0 ? "No active stocks to refresh" : "Fetch latest market prices for all active stocks"}>
             <span>
               <Button
@@ -218,7 +214,7 @@ export default function Stocks() {
       </Box>
 
       {/* KPI strip */}
-      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2, mb: 3 }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }, gap: 2, mb: 3 }}>
         {[
           { label: "Total Invested",   value: fmtInr(totalInvested), color: "text.primary"  },
           { label: "Current Value",    value: fmtInr(totalCurrent),  color: "primary.main"  },

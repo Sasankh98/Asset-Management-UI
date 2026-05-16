@@ -106,8 +106,8 @@ function PaymentCalendar({ emis }: { emis: Emi[] }) {
   const totalOutflow = emis.reduce((s, e) => s + e.emiAmount, 0);
 
   return (
-    <Paper elevation={2} sx={{ p: 3, borderRadius: 2, mb: 3 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
+    <Paper elevation={2} sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2, mb: 3, overflowX: "auto" }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 1, mb: 2 }}>
         <Box>
           <Typography variant="subtitle1" fontWeight={700}>
             {MONTHS[month]} {year} · Payment Calendar
@@ -123,16 +123,16 @@ function PaymentCalendar({ emis }: { emis: Emi[] }) {
       </Box>
 
       {/* Day-of-week headers */}
-      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 0.5, mb: 0.5 }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 0.5, mb: 0.5, minWidth: 280 }}>
         {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d) => (
-          <Typography key={d} variant="caption" color="text.secondary" align="center" fontWeight={600}>
+          <Typography key={d} variant="caption" color="text.secondary" align="center" fontWeight={600} sx={{ fontSize: { xs: "0.6rem", sm: "0.75rem" } }}>
             {d}
           </Typography>
         ))}
       </Box>
 
       {/* Calendar grid */}
-      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 0.5 }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 0.5, minWidth: 280 }}>
         {blanks.map((_, i) => <Box key={`b${i}`} />)}
         {days.map((day) => {
           const dayEmis = byDay.get(day) ?? [];
@@ -142,7 +142,7 @@ function PaymentCalendar({ emis }: { emis: Emi[] }) {
             <Box
               key={day}
               sx={{
-                minHeight: 52,
+                minHeight: { xs: 36, sm: 52 },
                 borderRadius: 1,
                 border: "1px solid",
                 borderColor: isToday ? "primary.main" : hasDue ? "error.main" : "divider",
@@ -404,9 +404,9 @@ export default function EMIs() {
 
   if (isLoading) {
     return (
-      <Box sx={{ p: 2, maxWidth: 960, mx: "auto" }}>
+      <Box sx={{ p: { xs: 1.5, sm: 2 }, maxWidth: { xs: "100%", md: 960 }, mx: "auto" }}>
         {/* Header */}
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 1, alignItems: "flex-start", mb: 3 }}>
           <Box>
             <Skeleton variant="text" width={200} height={36} />
             <Skeleton variant="text" width={320} height={20} sx={{ mt: 0.5 }} />
@@ -414,7 +414,7 @@ export default function EMIs() {
           <Skeleton variant="rounded" width={100} height={36} />
         </Box>
         {/* KPI strip */}
-        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2, mb: 3 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" }, gap: 2, mb: 3 }}>
           {Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} variant="rounded" height={80} />
           ))}
@@ -423,7 +423,7 @@ export default function EMIs() {
         <Skeleton variant="rounded" height={120} sx={{ mb: 2 }} />
         <Skeleton variant="rounded" height={100} sx={{ mb: 3 }} />
         {/* EMI cards grid */}
-        <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} variant="rounded" height={160} />
           ))}
@@ -433,8 +433,8 @@ export default function EMIs() {
   }
 
   return (
-    <Box sx={{ p: 2, maxWidth: 960, mx: "auto" }} data-testid="emis-container">
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
+    <Box sx={{ p: { xs: 1.5, sm: 2 }, maxWidth: { xs: "100%", md: 960 }, mx: "auto" }} data-testid="emis-container">
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 1, mb: 3 }}>
         <Box>
           <Typography variant="h5" fontWeight={700}>EMIs & Installments</Typography>
           <Typography variant="body2" color="text.secondary">
@@ -445,7 +445,7 @@ export default function EMIs() {
       </Box>
 
       {/* KPI strip */}
-      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2, mb: 3 }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" }, gap: 2, mb: 3 }}>
         {[
           { label: "Active EMIs",      value: String(activeEmis.length),  color: "primary.main" },
           { label: "Monthly Outflow",  value: fmtInr(totalMonthlyOut),    color: "error.main" },

@@ -43,11 +43,11 @@ describe("Calculator Component", () => {
   });
 
   it("Section C shows Add Alternative button", () => {
-    expect(screen.getByRole("button", { name: /Add Alternative/i })).toBeInTheDocument();
+    expect(screen.getByText(/Add Alternative/i)).toBeInTheDocument();
   });
 
   it("clicking Add Alternative adds a new card with Custom Option text", () => {
-    const addBtn = screen.getByRole("button", { name: /Add Alternative/i });
+    const addBtn = screen.getByText(/Add Alternative/i);
     fireEvent.click(addBtn);
     const customOptions = screen.getAllByDisplayValue("Custom Option");
     expect(customOptions.length).toBeGreaterThan(0);
@@ -99,7 +99,7 @@ describe("Calculator Component", () => {
   });
 
   it("clicking Add cost adds a row to running costs in Section A", () => {
-    const addCostBtns = screen.getAllByRole("button", { name: /add cost/i });
+    const addCostBtns = screen.getAllByText(/add cost/i);
     const countBefore = screen.getAllByRole("spinbutton").length;
     fireEvent.click(addCostBtns[0]);
     expect(screen.getAllByRole("spinbutton").length).toBeGreaterThan(countBefore);

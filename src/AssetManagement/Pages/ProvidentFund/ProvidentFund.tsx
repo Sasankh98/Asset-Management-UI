@@ -298,7 +298,7 @@ export default function ProvidentFund() {
 
   if (isLoading) {
     return (
-      <Box sx={{ p: 2, maxWidth: 1040, mx: "auto" }}>
+      <Box sx={{ p: { xs: 1.5, sm: 2 }, maxWidth: { xs: "100%", md: 1040 }, mx: "auto" }}>
         {/* Header */}
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
           <Box>
@@ -311,7 +311,7 @@ export default function ProvidentFund() {
           </Box>
         </Box>
         {/* KPI cards */}
-        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2, mb: 3 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }, gap: 2, mb: 3 }}>
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} variant="rounded" height={80} />
           ))}
@@ -368,7 +368,7 @@ export default function ProvidentFund() {
       )}
 
       {/* KPI cards */}
-      <Box sx={{ display: "grid", gridTemplateColumns: `repeat(${vpfPct > 0 ? 5 : 4}, 1fr)`, gap: 2, mb: 3 }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, 1fr)", md: `repeat(${vpfPct > 0 ? 5 : 4}, 1fr)` }, gap: 2, mb: 3 }}>
         {[
           { label: "Current Balance",    value: fmtInr(effectiveBalance),  color: "primary.main", note: actualBalance > 0 ? "passbook" : "calculated" },
           { label: "Employee Contrib.",  value: fmtInr(totalEmpContrib),   color: "text.primary", note: null },
@@ -440,8 +440,8 @@ export default function ProvidentFund() {
               <XAxis dataKey="year" />
               <YAxis tickFormatter={(v: number) => `₹${(v / 1000).toFixed(0)}k`} />
               <ChartTooltip
-                formatter={(v: number, name: string) =>
-                  name === "Rate %" ? [`${v}%`, "EPF Rate"] : [fmtInr(v), name]
+                formatter={(v, name) =>
+                  name === "Rate %" ? [`${v}%`, "EPF Rate"] : [fmtInr(v as number), name as string]
                 }
               />
               <Legend />
@@ -463,7 +463,7 @@ export default function ProvidentFund() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="year" />
               <YAxis tickFormatter={(v: number) => fmtInr(v)} width={80} />
-              <ChartTooltip formatter={(v: number) => fmtInr(v)} />
+              <ChartTooltip formatter={(v) => fmtInr(v as number)} />
               <ReferenceLine
                 y={effectiveBalance}
                 stroke="#1976d2"

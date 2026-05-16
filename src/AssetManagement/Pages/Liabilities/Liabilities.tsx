@@ -67,9 +67,9 @@ const LOANS: Loan[] = [
 
 export default function Liabilities() {
   return (
-    <Box sx={{ p: 2, maxWidth: 960, mx: "auto" }} data-testid="liabilities-container">
+    <Box sx={{ p: { xs: 1.5, sm: 2 }, maxWidth: { xs: "100%", md: 960 }, mx: "auto" }} data-testid="liabilities-container">
       {/* Page header */}
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3 }}>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 1, mb: 3 }}>
         <Box>
           <Typography variant="h5" fontWeight={700}>
             Loans & EMIs
@@ -84,7 +84,7 @@ export default function Liabilities() {
       </Box>
 
       {/* KPI strip */}
-      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2, mb: 3 }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" }, gap: 2, mb: 3 }}>
         <Paper elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
           <Typography
             variant="caption"

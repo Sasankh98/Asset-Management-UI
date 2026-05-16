@@ -46,7 +46,7 @@ const SalaryComponent = () => {
   const expenseCount = transactionData.filter((t) => t.type === "expense").length;
 
   return (
-    <Box sx={{ p: 2, maxWidth: 1100, mx: "auto" }} data-testid="salary-container">
+    <Box sx={{ p: { xs: 1.5, sm: 2 }, maxWidth: { xs: "100%", md: 1100 }, mx: "auto" }} data-testid="salary-container">
       {snackBarOptions.open && <CustomSnackbar />}
 
       <TransactionForm
@@ -57,7 +57,7 @@ const SalaryComponent = () => {
       />
 
       {/* Header */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 1, mb: 3 }}>
         <Box>
           <Typography variant="h5" fontWeight={700}>Income & Expenses</Typography>
           <Typography variant="body2" color="text.secondary">
@@ -71,7 +71,7 @@ const SalaryComponent = () => {
 
       {/* KPI strip */}
       {loading ? (
-        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2, mb: 3 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }, gap: 2, mb: 3 }}>
           {[...Array(4)].map((_, i) => (
             <Paper key={i} elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
               <Skeleton variant="text" width="55%" />
@@ -80,7 +80,7 @@ const SalaryComponent = () => {
           ))}
         </Box>
       ) : (
-        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2, mb: 3 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }, gap: 2, mb: 3 }}>
           {[
             { label: "Income",        value: fmtInr(kpis.totalIncome),   color: "success.main", sub: `${incomeCount} credits` },
             { label: "Expenses",      value: fmtInr(kpis.totalExpenses), color: "error.main",   sub: `${expenseCount} debits` },

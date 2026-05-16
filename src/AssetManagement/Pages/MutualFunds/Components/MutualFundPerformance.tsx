@@ -37,7 +37,7 @@ export default function MutualFundPerformance({ funds, dashboard }: Props) {
   return (
     <Box sx={{ p: 2 }}>
       {/* KPI strip */}
-      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2, mb: 3 }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" }, gap: 2, mb: 3 }}>
         <Paper elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
           <Typography variant="caption" color="text.secondary" sx={{ textTransform: "uppercase", letterSpacing: 1 }}>
             Total Gain / Loss
@@ -96,7 +96,7 @@ export default function MutualFundPerformance({ funds, dashboard }: Props) {
                 tick={{ fontSize: 11 }}
               />
               <YAxis tickFormatter={(v: number) => `₹${(v / 1000).toFixed(0)}k`} />
-              <Tooltip formatter={(v: number) => formatCurrency(v)} />
+              <Tooltip formatter={(v) => formatCurrency(v as number)} />
               <Legend />
               <Bar dataKey="Invested" fill="#90caf9" radius={[4, 4, 0, 0]} />
               <Bar dataKey="Current Value" fill="#1976d2" radius={[4, 4, 0, 0]} />

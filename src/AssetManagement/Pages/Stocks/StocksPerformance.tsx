@@ -61,7 +61,7 @@ export default function StocksPerformance({ stocks }: Props) {
   return (
     <Box sx={{ p: 2 }}>
       {/* KPI strip */}
-      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2, mb: 3 }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" }, gap: 2, mb: 3 }}>
         <Paper elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
           <Typography variant="caption" color="text.secondary" sx={{ textTransform: "uppercase", letterSpacing: 1 }}>
             Total P&amp;L
@@ -93,7 +93,7 @@ export default function StocksPerformance({ stocks }: Props) {
           <Typography variant="body1" fontWeight={700} sx={{ mt: 0.5, wordBreak: "break-word" }}>
             {worst?.stockName ?? "—"}
           </Typography>
-          <Typography variant="body2" color={gainPct(worst ?? active[0]) >= 0 ? "success.main" : "error.main"} fontWeight={600}>
+          <Typography variant="body2" color={worst && gainPct(worst) >= 0 ? "success.main" : "error.main"} fontWeight={600}>
             {worst ? `${gainPct(worst) >= 0 ? "+" : ""}${gainPct(worst).toFixed(1)}%` : ""}
           </Typography>
         </Paper>
@@ -114,7 +114,7 @@ export default function StocksPerformance({ stocks }: Props) {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
               <YAxis tickFormatter={(v: number) => `₹${(v / 1000).toFixed(0)}k`} />
-              <Tooltip formatter={(v: number) => fmtInr(v)} />
+              <Tooltip formatter={(v) => fmtInr(v as number)} />
               <Legend />
               <Bar dataKey="Invested" fill="#90caf9" radius={[4, 4, 0, 0]} />
               <Bar dataKey="Current Value" fill="#1976d2" radius={[4, 4, 0, 0]} />

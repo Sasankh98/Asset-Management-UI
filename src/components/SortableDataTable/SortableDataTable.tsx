@@ -69,7 +69,7 @@ export default function SortableDataTable({
         <Paper
           sx={{ width: "95%", mb: 2, marginLeft: "2.5%", marginTop: "1.5%" }}
         >
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
             <Table aria-label="data table">
               <TableHead>
                 <TableRow>

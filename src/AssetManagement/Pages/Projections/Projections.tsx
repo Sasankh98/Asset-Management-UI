@@ -361,14 +361,14 @@ export default function Projections() {
 
   if (isLoading) {
     return (
-      <Box sx={{ p: 2, maxWidth: 1100, mx: "auto" }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
+      <Box sx={{ p: { xs: 1.5, sm: 2 }, maxWidth: { xs: "100%", md: 1100 }, mx: "auto" }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 1, mb: 3 }}>
           <Skeleton variant="text" width={200} height={36} />
           <Box sx={{ display: "flex", gap: 1 }}>
             {HORIZONS.map((h) => <Skeleton key={h} variant="rounded" width={40} height={30} />)}
           </Box>
         </Box>
-        <Box sx={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr", gap: 2, mb: 3 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1.4fr 1fr 1fr" }, gap: 2, mb: 3 }}>
           <Skeleton variant="rounded" height={90} />
           <Skeleton variant="rounded" height={90} />
           <Skeleton variant="rounded" height={90} />
@@ -382,7 +382,7 @@ export default function Projections() {
   // ── render ────────────────────────────────────────────────────────────────
 
   return (
-    <Box sx={{ p: 2, maxWidth: 1100, mx: "auto" }} data-testid="projections-container">
+    <Box sx={{ p: { xs: 1.5, sm: 2 }, maxWidth: { xs: "100%", md: 1100 }, mx: "auto" }} data-testid="projections-container">
 
       {/* ── Header ── */}
       <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", mb: 3, flexWrap: "wrap", gap: 1 }}>

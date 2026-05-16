@@ -66,7 +66,7 @@ export default function StocksAllocation({ stocks }: Props) {
                     <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(v: number) => fmtInr(v)} />
+                <Tooltip formatter={(v) => fmtInr(v as number)} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>

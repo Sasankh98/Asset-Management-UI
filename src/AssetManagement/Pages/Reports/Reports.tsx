@@ -115,9 +115,9 @@ export default function Reports() {
 
   if (trendQuery.isLoading) {
     return (
-      <Box sx={{ p: 2, maxWidth: 960, mx: "auto" }}>
+      <Box sx={{ p: { xs: 1.5, sm: 2 }, maxWidth: { xs: "100%", md: 960 }, mx: "auto" }}>
         {/* Header */}
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 1, alignItems: "center", mb: 3 }}>
           <Skeleton variant="text" width={160} height={36} />
           <Box sx={{ display: "flex", gap: 1 }}>
             {Array.from({ length: 5 }).map((_, i) => (
@@ -126,7 +126,7 @@ export default function Reports() {
           </Box>
         </Box>
         {/* KPI boxes */}
-        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2, mb: 3 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" }, gap: 2, mb: 3 }}>
           {Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} variant="rounded" height={80} />
           ))}
@@ -141,7 +141,7 @@ export default function Reports() {
   }
 
   return (
-    <Box sx={{ p: 2, maxWidth: 960, mx: "auto" }} data-testid="reports-container">
+    <Box sx={{ p: { xs: 1.5, sm: 2 }, maxWidth: { xs: "100%", md: 960 }, mx: "auto" }} data-testid="reports-container">
       {/* ── Option A: Chart-Heavy ── */}
       <Box
         sx={{
@@ -172,7 +172,7 @@ export default function Reports() {
       </Box>
 
       {/* KPI boxes */}
-      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2, mb: 3 }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" }, gap: 2, mb: 3 }}>
         <Paper elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
           <Typography
             variant="caption"
@@ -352,7 +352,8 @@ export default function Reports() {
             No statements yet. Record monthly snapshots to see your history here.
           </Typography>
         ) : (
-          <>
+          <Box sx={{ overflowX: "auto" }}>
+            <Box sx={{ minWidth: 480 }}>
             <Box sx={{ display: "grid", gridTemplateColumns: "120px repeat(5, 1fr)", px: 2, py: 1, bgcolor: "action.hover", borderBottom: `1px solid ${theme.palette.divider}` }}>
               {["MONTH", "NET WORTH", "MFs", "STOCKS", "PF+LIC", "LIABILITIES"].map((col) => (
                 <Typography key={col} variant="caption" fontFamily="monospace" color="text.secondary" align={col === "MONTH" ? "left" : "right"}>{col}</Typography>
@@ -380,7 +381,8 @@ export default function Reports() {
                 </Box>
               );
             })()}
-          </>
+          </Box>
+          </Box>
         )}
       </Paper>
 

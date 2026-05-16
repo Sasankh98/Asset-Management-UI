@@ -203,11 +203,11 @@ export default function LineGraph({ monthlyData }: LineGraphProps) {
     <Paper
       elevation={4}
       sx={{
-        p: 3,
+        p: { xs: 1.5, sm: 3 },
         borderRadius: 2,
         width: "95%",
         margin: "0 2.5%",
-        height: 500,
+        height: { xs: 320, sm: 420, md: 500 },
         background:
           "linear-gradient(110deg, rgba(255, 255, 255,0.1) 0%, rgba(118, 119, 123, 1) 100%)",
         boxShadow: `
@@ -247,7 +247,7 @@ export default function LineGraph({ monthlyData }: LineGraphProps) {
         <ResponsiveContainer>
           <LineChart
             data={processedData}
-            margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
+            margin={{ top: 10, right: 10, left: 0, bottom: 30 }}
           >
             <defs>
               <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">

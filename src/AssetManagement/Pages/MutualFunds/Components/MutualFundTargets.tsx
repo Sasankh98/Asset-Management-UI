@@ -87,7 +87,7 @@ export default function MutualFundTargets({ funds, dashboard }: Props) {
                     <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(v: number) => formatCurrency(v)} />
+                <Tooltip formatter={(v) => formatCurrency(v as number)} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>

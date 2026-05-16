@@ -646,7 +646,7 @@ function CategorySandbox() {
       </Box>
 
       {/* Live readout */}
-      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2, mt: 3 }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }, gap: 2, mt: 3 }}>
         <Paper elevation={2} sx={{ p: 2, borderRadius: 2, textAlign: "center" }}>
           <Typography variant="caption" color="text.secondary">EMI</Typography>
           <Typography variant="h6" fontWeight={700} sx={{ mt: 0.5 }}>{fmtInr(emi)}</Typography>
@@ -680,7 +680,7 @@ function CategorySandbox() {
             <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} vertical={false} />
             <XAxis dataKey="year" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} tickFormatter={(v) => fmtInr(v)} />
-            <RechartTooltip formatter={(v: number) => fmtInr(v)} />
+            <RechartTooltip formatter={(v) => fmtInr(v as number)} />
             <Legend />
             <Line type="monotone" dataKey="sticker" name="Sticker only" stroke={theme.palette.text.secondary} strokeWidth={2} strokeDasharray="5 4" dot={false} />
             <Line type="monotone" dataKey="tco" name="Real TCO" stroke={theme.palette.error.main} strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} />
@@ -897,7 +897,7 @@ function CompareAlternatives() {
               <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} vertical={false} />
               <XAxis dataKey="year" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} tickFormatter={(v) => fmtInr(v)} />
-              <RechartTooltip formatter={(v: number) => fmtInr(v)} />
+              <RechartTooltip formatter={(v) => fmtInr(v as number)} />
               <Legend />
               {altData.map((alt, i) => (
                 <Line
@@ -923,7 +923,7 @@ function CompareAlternatives() {
 
 export default function Calculator() {
   return (
-    <Box sx={{ p: 2, maxWidth: 960, mx: "auto" }} data-testid="calculator-container">
+    <Box sx={{ p: { xs: 1.5, sm: 2 }, maxWidth: { xs: "100%", md: 960 }, mx: "auto" }} data-testid="calculator-container">
       <Box sx={{ mb: 3 }}>
         <Typography variant="h5" fontWeight={700}>
           Affordability Calculator
