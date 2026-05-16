@@ -4,7 +4,7 @@ import { render, screen, cleanup, fireEvent, waitFor } from "@testing-library/re
 import React from "react";
 import ProvidentFund from "./ProvidentFund";
 
-const mockUseProvidentFundQuery = vi.fn(() => ({ data: null, isLoading: false }));
+const mockUseProvidentFundQuery = vi.fn(() => ({ data: null as unknown, isLoading: false }));
 
 vi.mock("../../../hooks/queries", () => ({
   useProvidentFundQuery: () => mockUseProvidentFundQuery(),
@@ -180,5 +180,107 @@ describe("ProvidentFund Component", () => {
     fireEvent.mouseDown(select);
     fireEvent.click(screen.getByRole("option", { name: /^april$/i }));
     expect(screen.getByRole("button", { name: /^save$/i })).toBeInTheDocument();
+  });
+
+  it("shows loading skeleton when isLoading=true", () => {
+    mockUseProvidentFundQuery.mockReturnValue({ data: null, isLoading: true });
+    const { container } = render(<ProvidentFund />);
+    expect(container.querySelector(".MuiSkeleton-root")).toBeInTheDocument();
+  });
+
+  it("populates from pfConfig when data is loaded (L187 if(pfConfig) true branch)", async () => {
+    mockUseProvidentFundQuery.mockReturnValue({
+      data: {
+        id: 1, monthlyBasic: 75000, empPct: 12, erPct: 12,
+        rate: 8.15, yearsWorked: 8, currentAge: 32, retirementAge: 60,
+        currentBalance: 300000, vpfPct: 5, salaryIncrementPct: 10,
+        joiningMonth: 4, user: "Sasankh",
+        createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z",
+      },
+      isLoading: false,
+    });
+    render(<ProvidentFund />);
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /^save$/i })).toBeInTheDocument();
+    });
+  });
+
+  it("populates from pfConfig with null optional fields (covers ?? fallbacks)", async () => {
+    mockUseProvidentFundQuery.mockReturnValue({
+      data: {
+        id: 1, monthlyBasic: 60000, empPct: 12, erPct: 12,
+        rate: 8.15, yearsWorked: 5, currentAge: 30, retirementAge: 60,
+        currentBalance: null as unknown as number,
+        vpfPct: null as unknown as number,
+        salaryIncrementPct: null as unknown as number,
+        joiningMonth: null as unknown as number,
+        user: "Sasankh",
+        createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z",
+      },
+      isLoading: false,
+    });
+    render(<ProvidentFund />);
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /^save$/i })).toBeInTheDocument();
+    });
+  });
+
+  it("buildHistory returns empty when yearsWorked = 0 (L89 early return)", async () => {
+    mockUseProvidentFundQuery.mockReturnValue({
+      data: {
+        id: 1, monthlyBasic: 60000, empPct: 12, erPct: 12, rate: 8.15,
+        yearsWorked: 0, currentAge: 30, retirementAge: 60,
+        currentBalance: 0, vpfPct: 0, salaryIncrementPct: 10, joiningMonth: 1,
+        user: "Sasankh", createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z",
+      },
+      isLoading: false,
+    });
+    render(<ProvidentFund />);
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /^save$/i })).toBeInTheDocument();
+    });
+  });
+
+  it("covers vpfPct > 0 branch in chartData and KPI strip (VPF spread)", async () => {
+    mockUseProvidentFundQuery.mockReturnValue({
+      data: {
+        id: 1, monthlyBasic: 60000, empPct: 12, erPct: 12, rate: 8.15,
+        yearsWorked: 5, currentAge: 30, retirementAge: 60,
+        currentBalance: 0, vpfPct: 5, salaryIncrementPct: 10, joiningMonth: 1,
+        user: "Sasankh", createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z",
+      },
+      isLoading: false,
+    });
+    render(<ProvidentFund />);
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /^save$/i })).toBeInTheDocument();
+    });
+    // vpfPct > 0 → "VPF Contrib." KPI chip appears
+    expect(screen.getByText("VPF Contrib.")).toBeInTheDocument();
+  });
+
+  it("covers empty string override in setBasicOverride (value='' delete branch)", () => {
+    render(<ProvidentFund />);
+    fireEvent.click(screen.getByRole("button", { name: /^show$/i }));
+    const overrideInputs = screen.getAllByRole("spinbutton");
+    if (overrideInputs.length > 5) {
+      const yearOverrideInputs = overrideInputs.slice(-10);
+      // First set a value, then clear it with empty string
+      fireEvent.change(yearOverrideInputs[0], { target: { value: "55000" } });
+      fireEvent.change(yearOverrideInputs[0], { target: { value: "" } });
+    }
+    expect(screen.getByRole("button", { name: /^hide$/i })).toBeInTheDocument();
+  });
+
+  it("covers empty string override in setVpfOverride (value='' delete branch)", () => {
+    render(<ProvidentFund />);
+    fireEvent.click(screen.getByRole("button", { name: /^show$/i }));
+    const overrideInputs = screen.getAllByRole("spinbutton");
+    if (overrideInputs.length > 6) {
+      const yearOverrideInputs = overrideInputs.slice(-10);
+      fireEvent.change(yearOverrideInputs[1], { target: { value: "2000" } });
+      fireEvent.change(yearOverrideInputs[1], { target: { value: "" } });
+    }
+    expect(screen.getByRole("button", { name: /^hide$/i })).toBeInTheDocument();
   });
 });

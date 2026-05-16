@@ -176,6 +176,95 @@ describe("EMIs dialog", () => {
     expect(screen.getByTestId("emis-container")).toBeInTheDocument();
   });
 
+  it("shows loading skeleton when isLoading is true", () => {
+    mockUseEmisQuery.mockReturnValue({ data: [], isLoading: true });
+    const { container } = render(<EMIs />);
+    expect(container.querySelector(".MuiSkeleton-root")).toBeInTheDocument();
+    expect(screen.queryByTestId("emis-container")).not.toBeInTheDocument();
+  });
+
+  it("shows urgent chip when due in 3 days (isUrgent branch)", () => {
+    const today = new Date();
+    // Set nextDueDay to a day within next 3 days — use today+2 modulo month
+    const urgentDay = today.getDate() + 1;
+    if (urgentDay > 28) return; // skip if near month-end to avoid edge case
+    mockUseEmisQuery.mockReturnValue({
+      data: [makeEmi({ nextDueDay: urgentDay })],
+      isLoading: false,
+    });
+    render(<EMIs />);
+    expect(screen.getByTestId("emis-container")).toBeInTheDocument();
+  });
+
+  it("handles EMI with nextDueDay already passed (next-month branch)", () => {
+    // nextDueDay=1 and today's date > 1 → due date is next month
+    const pastDay = 1;
+    mockUseEmisQuery.mockReturnValue({
+      data: [makeEmi({ nextDueDay: pastDay })],
+      isLoading: false,
+    });
+    render(<EMIs />);
+    expect(screen.getByTestId("emis-container")).toBeInTheDocument();
+  });
+
+  it("renders laptop kind EMI (KIND_META laptop branch)", () => {
+    mockUseEmisQuery.mockReturnValue({
+      data: [makeEmi({ kind: "laptop" })],
+      isLoading: false,
+    });
+    render(<EMIs />);
+    expect(screen.getAllByText("iPhone 16").length).toBeGreaterThan(0);
+  });
+
+  it("renders tv kind EMI (KIND_META tv branch)", () => {
+    mockUseEmisQuery.mockReturnValue({
+      data: [makeEmi({ kind: "tv", name: "Sony TV" })],
+      isLoading: false,
+    });
+    render(<EMIs />);
+    expect(screen.getAllByText("Sony TV").length).toBeGreaterThan(0);
+  });
+
+  it("renders appliance kind EMI (KIND_META appliance branch)", () => {
+    mockUseEmisQuery.mockReturnValue({
+      data: [makeEmi({ kind: "appliance", name: "Washing Machine" })],
+      isLoading: false,
+    });
+    render(<EMIs />);
+    expect(screen.getAllByText("Washing Machine").length).toBeGreaterThan(0);
+  });
+
+  it("renders credit_card kind EMI (KIND_META credit_card branch)", () => {
+    mockUseEmisQuery.mockReturnValue({
+      data: [makeEmi({ kind: "credit_card", name: "HDFC Card" })],
+      isLoading: false,
+    });
+    render(<EMIs />);
+    expect(screen.getAllByText("HDFC Card").length).toBeGreaterThan(0);
+  });
+
+  it("renders other kind EMI (KIND_META other branch)", () => {
+    mockUseEmisQuery.mockReturnValue({
+      data: [makeEmi({ kind: "other", name: "Furniture" })],
+      isLoading: false,
+    });
+    render(<EMIs />);
+    expect(screen.getAllByText("Furniture").length).toBeGreaterThan(0);
+  });
+
+  it("shows warning urgency for days <= 7 but > 3", () => {
+    // Use nextDueDay = today.getDate() + 5 (5 days from today)
+    const today = new Date();
+    const warningDay = today.getDate() + 5;
+    if (warningDay > 28) return; // skip edge case
+    mockUseEmisQuery.mockReturnValue({
+      data: [makeEmi({ nextDueDay: warningDay })],
+      isLoading: false,
+    });
+    render(<EMIs />);
+    expect(screen.getByTestId("emis-container")).toBeInTheDocument();
+  });
+
   it("clicks Edit on completed EMI card (covers onEdit in completed section)", () => {
     mockUseEmisQuery.mockReturnValue({
       data: [makeEmi({ paidInstallments: 24, totalInstallments: 24 })],

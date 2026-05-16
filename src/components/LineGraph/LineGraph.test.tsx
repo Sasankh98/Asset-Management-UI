@@ -39,4 +39,46 @@ describe("LineGraph", () => {
     render(<LineGraph monthlyData={data} />);
     expect(screen.getByText(/monthly income/i)).toBeInTheDocument();
   });
+
+  it("handles transaction from previous month (falls back to default DataPoint)", () => {
+    const prevMonthDate = new Date();
+    prevMonthDate.setMonth(prevMonthDate.getMonth() - 1);
+    const prevDate = prevMonthDate.toISOString().slice(0, 10);
+    const data = [
+      { date: prevDate, amount: 80000, type: "income" },
+      { date: prevDate, amount: 5000, type: "expense" },
+    ];
+    render(<LineGraph monthlyData={data} />);
+    expect(screen.getByText(/monthly income/i)).toBeInTheDocument();
+  });
+
+  it("handles multiple expenses on same day (cumulative update)", () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const data = [
+      { date: today, amount: 100000, type: "income" },
+      { date: today, amount: 10000, type: "expense" },
+      { date: today, amount: 5000, type: "expense" },
+    ];
+    render(<LineGraph monthlyData={data} />);
+    expect(screen.getByText(/monthly income/i)).toBeInTheDocument();
+  });
+
+  it("renders with only expense data (no income)", () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const data = [{ date: today, amount: 5000, type: "expense" }];
+    render(<LineGraph monthlyData={data} />);
+    expect(screen.getByText(/monthly income/i)).toBeInTheDocument();
+  });
+
+  it("renders with many days of income data", () => {
+    const dates = [];
+    for (let i = 1; i <= 5; i++) {
+      const d = new Date();
+      d.setDate(i);
+      dates.push(d.toISOString().slice(0, 10));
+    }
+    const data = dates.map((date) => ({ date, amount: 10000, type: "income" }));
+    render(<LineGraph monthlyData={data} />);
+    expect(screen.getByText(/monthly income/i)).toBeInTheDocument();
+  });
 });

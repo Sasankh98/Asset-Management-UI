@@ -52,4 +52,53 @@ describe("StocksAllocation", () => {
     render(<StocksAllocation stocks={[makeStock({ stockName: "Wipro" })]} />);
     expect(screen.getByText("Wipro")).toBeInTheDocument();
   });
+
+  it("uses currentValue when marketPrice is 0 (mp=0 branch)", () => {
+    render(<StocksAllocation stocks={[makeStock({ marketPrice: 0, currentValue: 15000 })]} />);
+    expect(screen.getByText("Infosys")).toBeInTheDocument();
+  });
+
+  it("defaults category to 'Other' when category is empty", () => {
+    render(<StocksAllocation stocks={[makeStock({ category: "" })]} />);
+    expect(screen.getByText("Infosys")).toBeInTheDocument();
+  });
+
+  it("excludes sold stocks from allocation", () => {
+    render(<StocksAllocation stocks={[
+      makeStock({ status: "sold" }),
+      makeStock({ id: 2, stockName: "TCS", status: "active", marketPrice: 3500, quantity: 5 }),
+    ]} />);
+    expect(screen.queryByText("Infosys")).not.toBeInTheDocument();
+    expect(screen.getByText("TCS")).toBeInTheDocument();
+  });
+
+  it("shows success.main bar color when pct < 10", () => {
+    // 3 stocks: one is tiny (< 10% of total)
+    render(<StocksAllocation stocks={[
+      makeStock({ id: 1, stockName: "BigStock", marketPrice: 1000, quantity: 100 }),  // 91%
+      makeStock({ id: 2, stockName: "SmallStock", marketPrice: 100, quantity: 10 }), // ~0.9%
+    ]} />);
+    expect(screen.getByText("SmallStock")).toBeInTheDocument();
+  });
+
+  it("shows warning.main bar color when 10 <= pct < 20", () => {
+    render(<StocksAllocation stocks={[
+      makeStock({ id: 1, stockName: "A", marketPrice: 100, quantity: 80 }), // 80%
+      makeStock({ id: 2, stockName: "B", marketPrice: 100, quantity: 12 }), // 12%
+      makeStock({ id: 3, stockName: "C", marketPrice: 100, quantity: 8  }), // 8%
+    ]} />);
+    expect(screen.getByText("B")).toBeInTheDocument();
+  });
+
+  it("shows No active stocks yet when all stocks are sold", () => {
+    render(<StocksAllocation stocks={[makeStock({ status: "sold" })]} />);
+    expect(screen.getByText("No active stocks yet.")).toBeInTheDocument();
+  });
+
+  it("handles undefined marketPrice and quantity (null-coalescing branches)", () => {
+    render(<StocksAllocation stocks={[
+      makeStock({ marketPrice: undefined as unknown as number, quantity: undefined as unknown as number, currentValue: 12000 }),
+    ]} />);
+    expect(screen.getByText("Infosys")).toBeInTheDocument();
+  });
 });

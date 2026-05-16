@@ -5,6 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import AssetManagementProvider from "../../../ContextProvider/ContextProvider";
 import { GoalsDTO } from "../../../../../server/types";
 import { Dispatch, SetStateAction } from "react";
+import { ImageIcons } from "../../../../shared/Constants";
 
 const mockGoals: GoalsDTO = {
   id: 1,
@@ -61,5 +62,65 @@ describe("Goals Card Component", () => {
     );
 
     expect(screen.getByTestId("loading-true"));
+  });
+
+  const renderCard = (goal: Partial<GoalsDTO> = {}) =>
+    render(
+      <BrowserRouter>
+        <AssetManagementProvider>
+          <GoalsCard
+            {...props}
+            goal={{ ...mockGoals, ...goal }}
+          />
+        </AssetManagementProvider>
+      </BrowserRouter>
+    );
+
+  it("renders Golden Retriever goal (switch case 0)", () => {
+    renderCard({ goal: ImageIcons.goldenRetriever });
+    expect(screen.getByText(ImageIcons.goldenRetriever)).toBeInTheDocument();
+  });
+
+  it("renders Bike goal (switch case 1)", () => {
+    renderCard({ goal: ImageIcons.bike });
+    expect(screen.getByText(ImageIcons.bike)).toBeInTheDocument();
+  });
+
+  it("renders Tattoo goal (switch case 2)", () => {
+    renderCard({ goal: ImageIcons.tattoo });
+    expect(screen.getByText(ImageIcons.tattoo)).toBeInTheDocument();
+  });
+
+  it("renders default goal emoji for unknown goal name", () => {
+    renderCard({ goal: "Some Unknown Goal" });
+    expect(screen.getByText("Some Unknown Goal")).toBeInTheDocument();
+  });
+
+  it("pct is 0 when targetAmount is 0", () => {
+    renderCard({ targetAmount: 0, savedAmount: 0 });
+    expect(screen.getByText("0%")).toBeInTheDocument();
+  });
+
+  it("monthly is null when targetDate is in the past (months <= 0)", () => {
+    // targetDate in the past → months = 0 → monthly = null → "Need monthly" row absent
+    renderCard({ targetDate: "2020-01-01", savedAmount: 500 });
+    expect(screen.queryByText("Need monthly")).not.toBeInTheDocument();
+  });
+
+  it("shows Set up SIP chip when savedAmount is 0 (onTrack=false)", () => {
+    renderCard({ savedAmount: 0 });
+    expect(screen.getByText("Set up SIP")).toBeInTheDocument();
+  });
+
+  it("shows On track chip when monthly>0 and savedAmount>0", () => {
+    // future targetDate + savedAmount > 0 → onTrack=true
+    renderCard({ savedAmount: 5000, targetDate: "2030-01-01" });
+    expect(screen.getByText("On track")).toBeInTheDocument();
+  });
+
+  it("calls handleDeleteGoal when delete button clicked", async () => {
+    renderCard();
+    fireEvent.click(screen.getByTestId("delete-button"));
+    expect(props.handleDeleteGoal).toHaveBeenCalledWith(mockGoals.id);
   });
 });

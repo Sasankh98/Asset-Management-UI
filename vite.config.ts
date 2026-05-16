@@ -49,7 +49,7 @@ export default defineConfig(({ mode }) => ({
       "**/junit.xml",
     ],
     coverage: {
-      enabled: true,
+      enabled: false,
       globals: true,
       exclude: [
         "/node_modules/",

@@ -156,4 +156,42 @@ describe("TransactionForm", () => {
     );
     expect(screen.queryByDisplayValue("50000")).not.toBeInTheDocument();
   });
+
+  it("edit mode with undefined fields uses fallback values", () => {
+    const sparse: Salary = {
+      id: 2,
+      transactionType: "",         // falsy → "" fallback
+      amount: 0,                   // falsy → 0 fallback
+      date: "",                    // falsy → today fallback
+      type: "",                    // falsy → "income" fallback
+      user: "",                    // falsy → "Sasankh" fallback
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-01T00:00:00Z",
+    };
+    renderForm({ type: "edit", selectedTransaction: sparse });
+    expect(screen.getByText("Edit Transaction")).toBeInTheDocument();
+  });
+
+  it("handleTypeToggle with null val does not update state", () => {
+    renderForm({ type: "create" });
+    // Click already-selected toggle (MUI sends null for deselect of exclusive group)
+    const creditBtn = screen.getByText(/Credit/i);
+    fireEvent.click(creditBtn); // re-click selected → val=null, no state change
+    expect(screen.getByText(/Credit/i)).toBeInTheDocument();
+  });
+
+  it("calls alert when create submitted with missing amount", async () => {
+    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+    renderForm({ type: "create" });
+    // amount stays 0 (falsy) and transactionType is empty
+    fireEvent.click(screen.getByTestId("handle-salary-button"));
+    await new Promise((r) => setTimeout(r, 0));
+    expect(alertSpy).toHaveBeenCalledWith("Please fill all fields");
+    alertSpy.mockRestore();
+  });
+
+  it("open=false does not render modal content", () => {
+    renderForm({ open: false, type: "create" });
+    expect(screen.queryByText("Create transaction")).not.toBeInTheDocument();
+  });
 });

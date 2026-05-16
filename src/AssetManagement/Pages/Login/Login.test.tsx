@@ -1,4 +1,5 @@
 import { beforeEach, describe, test, vi, expect, afterEach } from "vitest";
+import { act } from "react";
 import { render, screen, fireEvent, cleanup, waitFor } from "@testing-library/react";
 import Login from "./Login";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
@@ -449,6 +450,115 @@ describe("Login Component", () => {
       expect(
         screen.getByRole("button", { name: /continue with google/i })
       ).toBeInTheDocument();
+    });
+  });
+
+  // ─── OTP edge-case branches ────────────────────────────────────────────────
+
+  describe("OTP edge-case branches", () => {
+    function goToOtp() {
+      renderLogin();
+      fireEvent.click(screen.getByRole("tab", { name: /phone/i }));
+      fireEvent.change(screen.getByLabelText("Mobile number"), {
+        target: { value: "9876543210" },
+      });
+      fireEvent.click(screen.getByRole("button", { name: /send code/i }));
+    }
+
+    test("Backspace when all digits are empty does nothing (last === -1 branch)", () => {
+      goToOtp();
+      const otpInput = document.querySelector(".lp-otp-real-input") as HTMLInputElement;
+      // All slots empty → Backspace should be a no-op
+      fireEvent.keyDown(otpInput, { key: "Backspace" });
+      // Verify button should still be disabled (nothing filled)
+      expect(screen.getByRole("button", { name: /verify/i })).toBeDisabled();
+    });
+
+    test("digit key when all slots are filled does nothing (next === -1 branch)", () => {
+      goToOtp();
+      const otpInput = document.querySelector(".lp-otp-real-input") as HTMLInputElement;
+      // Fill all 6 slots
+      ["1", "2", "3", "4", "5", "6"].forEach((d) =>
+        fireEvent.keyDown(otpInput, { key: d })
+      );
+      // Now all slots full → extra digit should be ignored
+      fireEvent.keyDown(otpInput, { key: "9" });
+      // Verify button should still be enabled
+      expect(screen.getByRole("button", { name: /verify/i })).not.toBeDisabled();
+    });
+
+    test("clicking Resend code when timer=0 resets timer (setTimer(28) branch)", () => {
+      vi.useFakeTimers();
+      try {
+        goToOtp();
+        // Advance one second at a time so React flushes state between each tick
+        for (let i = 0; i < 28; i++) {
+          act(() => { vi.advanceTimersByTime(1000); });
+        }
+        // Timer is now 0 → span text changes to "Resend code"
+        const resendSpan = screen.getByText("Resend code");
+        act(() => { fireEvent.click(resendSpan); });
+        // setTimer(28) was called → countdown restarts
+        expect(screen.getByText(/resend in/i)).toBeInTheDocument();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+  });
+
+  // ─── Password strength labels ──────────────────────────────────────────────
+
+  describe("Password strength labels", () => {
+    beforeEach(() => {
+      renderLogin();
+      fireEvent.click(screen.getByRole("tab", { name: /create account/i }));
+    });
+
+    test("shows 'Too short' for strength=1 (mixed case only, length<8)", () => {
+      const pwdInput = document.getElementById("lp-r-pwd") as HTMLInputElement;
+      // Mixed case (A+lower) → strength criterion 2 passes, length<8 fails → strength=1
+      fireEvent.change(pwdInput, { target: { value: "Abcde" } });
+      expect(screen.getByText("Too short")).toBeInTheDocument();
+    });
+
+    test("shows 'Weak' for strength=2 (mixed case + digit, length<8)", () => {
+      const pwdInput = document.getElementById("lp-r-pwd") as HTMLInputElement;
+      // Mixed case + digit → strength=2
+      fireEvent.change(pwdInput, { target: { value: "Abcde1" } });
+      expect(screen.getByText("Weak")).toBeInTheDocument();
+    });
+
+    test("shows 'Okay' for strength=3 (length>=8 + mixed case + digit)", () => {
+      const pwdInput = document.getElementById("lp-r-pwd") as HTMLInputElement;
+      // length>=8 + mixed case + digit, no special → strength=3
+      fireEvent.change(pwdInput, { target: { value: "Abcdefg1" } });
+      expect(screen.getByText("Okay")).toBeInTheDocument();
+    });
+  });
+
+  // ─── Register phone method canSubmit ───────────────────────────────────────
+
+  describe("Register phone method", () => {
+    test("Create account enabled with 10-digit phone + name + strong pwd + agree (phone branch)", () => {
+      renderLogin();
+      fireEvent.click(screen.getByRole("tab", { name: /create account/i }));
+      // Switch to phone method
+      fireEvent.click(screen.getByRole("tab", { name: /phone/i }));
+      // Fill name
+      fireEvent.change(screen.getByLabelText("Your name"), {
+        target: { value: "Vikram" },
+      });
+      // Fill 10-digit phone
+      fireEvent.change(screen.getByLabelText("Mobile number"), {
+        target: { value: "9876543210" },
+      });
+      // Fill strong password (strength >= 2: mixed case + digit)
+      const pwdInput = document.getElementById("lp-r-pwd") as HTMLInputElement;
+      fireEvent.change(pwdInput, { target: { value: "Abcde1" } });
+      // agree is true by default → canSubmit should be true
+      expect(
+        screen.getByRole("button", { name: /create account/i })
+      ).not.toBeDisabled();
     });
   });
 });
