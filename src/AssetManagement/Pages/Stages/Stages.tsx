@@ -138,17 +138,20 @@ interface SimInputs {
   salary0: number;
   expense0: number;
   corpus0: number;
+  goldValue: number;
   inflation: number;
   corpusRate: number;
 }
 
 const RETIRE_AT = 60;
+const GOLD_RATE_PER_GRAM = 7050;
 
 const SYSTEM_DEFAULTS: SimInputs = {
   age0: 28,
   salary0: 924000,
   expense0: 600000,
   corpus0: 1432000,
+  goldValue: 0,
   inflation: 0.06,
   corpusRate: 0.10,
 };
@@ -164,6 +167,7 @@ function InputBar({
   set: (patch: Partial<SimInputs>) => void;
   onReset: () => void;
 }) {
+  const goldGrams = (s.goldValue ?? 0) > 0 ? (s.goldValue ?? 0) / GOLD_RATE_PER_GRAM : 0;
   return (
     <Paper
       elevation={1}
@@ -172,7 +176,7 @@ function InputBar({
         mt: 1.5,
         borderRadius: 2,
         display: "grid",
-        gridTemplateColumns: { xs: "1fr 1fr", sm: "repeat(3, 1fr)", md: "repeat(5, 1fr) auto" },
+        gridTemplateColumns: { xs: "1fr 1fr", sm: "repeat(3, 1fr)", md: "repeat(6, 1fr) auto" },
         gap: 2,
         alignItems: "end",
       }}
@@ -228,6 +232,34 @@ function InputBar({
           inputProps={{ step: 10000 }}
         />
       </FormControl>
+
+      {/* Physical gold */}
+      <Box sx={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+        <FormControl size="small" fullWidth>
+          <InputLabel sx={{ color: "#ffd76a", "&.Mui-focused": { color: "#f0c14b" } }}>
+            + Physical gold
+          </InputLabel>
+          <OutlinedInput
+            label="+ Physical gold"
+            type="number"
+            value={s.goldValue ?? 0}
+            onChange={(e) => set({ goldValue: Math.max(0, +e.target.value) })}
+            startAdornment={
+              <InputAdornment position="start" sx={{ "& .MuiTypography-root": { color: "#ffd76a" } }}>₹</InputAdornment>
+            }
+            inputProps={{ step: 10000, min: 0 }}
+            sx={{
+              background: "linear-gradient(160deg, rgba(240,193,75,0.12), transparent 80%)",
+              "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(240,193,75,0.42)" },
+              "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(240,193,75,0.65)" },
+              "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#f0c14b" },
+            }}
+          />
+        </FormControl>
+        <Typography sx={{ fontSize: 10, fontFamily: "monospace", lineHeight: 1, color: goldGrams > 0 ? "rgba(240,193,75,0.7)" : "text.disabled" }}>
+          {goldGrams > 0 ? `≈ ${goldGrams.toFixed(0)}g @ ₹${GOLD_RATE_PER_GRAM.toLocaleString("en-IN")}/g` : "coins · jewelry · bars"}
+        </Typography>
+      </Box>
 
       {/* Inflation + corpus return sliders */}
       <Box>
@@ -300,10 +332,12 @@ function HeroCards({
   s,
   sim,
   retireAt,
+  goldValue = 0,
 }: {
   s: SimInputs;
   sim: SimRow[];
   retireAt: number;
+  goldValue?: number;
 }) {
   const yearsToRetire = retireAt - s.age0;
   const aggressive = targetCorpus(s.expense0, s.inflation, yearsToRetire, 25);
@@ -456,6 +490,12 @@ function HeroCards({
               </Typography>
             </Box>
           ))}
+          {goldValue > 0 && (
+            <Box sx={{ display: "flex", justifyContent: "space-between", opacity: 0.85 }}>
+              <Typography variant="caption" sx={{ color: "#ffd76a", fontSize: 11 }}>incl. physical gold</Typography>
+              <Typography variant="caption" fontFamily="monospace" sx={{ color: "#ffd76a", fontSize: 11 }}>+{fmtInr(goldValue)}</Typography>
+            </Box>
+          )}
         </Box>
       </Paper>
     </Box>
@@ -1079,11 +1119,13 @@ export default function Stages() {
       .filter((t) => t.type === "expense")
       .reduce((s, t) => s + Number(t.amount ?? 0), 0) || SYSTEM_DEFAULTS.expense0;
     const age0 = pfQuery.data?.currentAge ?? SYSTEM_DEFAULTS.age0;
+    const goldValue = Number(pfQuery.data?.physicalGoldValue ?? 0);
     return {
       age0: Math.min(Math.max(age0, 20), 55),
       salary0: salary0 > 0 ? salary0 : SYSTEM_DEFAULTS.salary0,
       expense0: expense0 > 0 ? expense0 : SYSTEM_DEFAULTS.expense0,
       corpus0: corpus0 > 0 ? corpus0 : SYSTEM_DEFAULTS.corpus0,
+      goldValue: goldValue >= 0 ? goldValue : 0,
       inflation: SYSTEM_DEFAULTS.inflation,
       corpusRate: SYSTEM_DEFAULTS.corpusRate,
     };
@@ -1094,20 +1136,26 @@ export default function Stages() {
   const set = (patch: Partial<SimInputs>) => setS((p) => ({ ...(p ?? liveDefaults), ...patch }));
   const reset = () => setS(null);
 
+  // Merge physical gold into tracked corpus so all downstream components see one number
+  const totalCorpus = effectiveInputs.corpus0 + (effectiveInputs.goldValue ?? 0);
+  const sEff: SimInputs = totalCorpus !== effectiveInputs.corpus0
+    ? { ...effectiveInputs, corpus0: totalCorpus }
+    : effectiveInputs;
+
   const sim = useMemo(
     () =>
       simulate({
-        age0: effectiveInputs.age0,
-        salary0: effectiveInputs.salary0,
-        corpus0: effectiveInputs.corpus0,
-        corpusRate: effectiveInputs.corpusRate,
+        age0: sEff.age0,
+        salary0: sEff.salary0,
+        corpus0: sEff.corpus0,
+        corpusRate: sEff.corpusRate,
         retireAt: RETIRE_AT,
       }),
-    [effectiveInputs],
+    [sEff],
   );
 
-  const yearsToRetire = RETIRE_AT - effectiveInputs.age0;
-  const aggressive = targetCorpus(effectiveInputs.expense0, effectiveInputs.inflation, yearsToRetire, 25);
+  const yearsToRetire = RETIRE_AT - sEff.age0;
+  const aggressive = targetCorpus(sEff.expense0, sEff.inflation, yearsToRetire, 25);
   const projected = sim[sim.length - 1].corpus;
   const belowTarget = projected < aggressive;
 
@@ -1166,9 +1214,9 @@ export default function Stages() {
       </Box>
 
       <InputBar s={effectiveInputs} set={set} onReset={reset} />
-      <HeroCards s={effectiveInputs} sim={sim} retireAt={RETIRE_AT} />
-      <TrajectoryChart sim={sim} s={effectiveInputs} retireAt={RETIRE_AT} />
-      <StagesTimeline sim={sim} s={effectiveInputs} retireAt={RETIRE_AT} />
+      <HeroCards s={sEff} sim={sim} retireAt={RETIRE_AT} goldValue={effectiveInputs.goldValue ?? 0} />
+      <TrajectoryChart sim={sim} s={sEff} retireAt={RETIRE_AT} />
+      <StagesTimeline sim={sim} s={sEff} retireAt={RETIRE_AT} />
 
       <Box
         sx={{
@@ -1178,7 +1226,7 @@ export default function Stages() {
           mt: 1.5,
         }}
       >
-        <BudgetDonut s={effectiveInputs} />
+        <BudgetDonut s={sEff} />
         <ConnectGrid />
       </Box>
 

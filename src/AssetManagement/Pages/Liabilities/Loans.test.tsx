@@ -47,6 +47,18 @@ describe("Loans (empty state)", () => {
     render(<Loans />);
     expect(screen.getAllByRole("button", { name: /add loan/i }).length).toBeGreaterThan(0);
   });
+
+  it("null rawLoans covers rawLoans ?? [] right branch (L202 binary-expr)", () => {
+    mockUseLoansQuery.mockReturnValue({ data: null as unknown as Loan[], isLoading: false });
+    render(<Loans />);
+    expect(screen.getByText("Loans")).toBeInTheDocument();
+  });
+
+  it("isLoading=true shows loading skeleton (L226 if true branch)", () => {
+    mockUseLoansQuery.mockReturnValue({ data: [], isLoading: true });
+    const { container } = render(<Loans />);
+    expect(container.querySelector(".MuiSkeleton-root")).toBeInTheDocument();
+  });
 });
 
 describe("Loans (with data)", () => {

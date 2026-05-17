@@ -4,6 +4,14 @@ import { BrowserRouter } from "react-router-dom";
 import AssetManagementProvider from "../../ContextProvider/ContextProvider";
 import MutualFunds from "./MutualFunds";
 
+const mockUseMutualFundsQuery = vi.fn(() => ({ data: [] as unknown, isLoading: false }));
+const mockUseMutualFundsDashboardQuery = vi.fn(() => ({ data: null as unknown, isLoading: false }));
+
+vi.mock("../../../hooks/queries", () => ({
+  useMutualFundsQuery: () => mockUseMutualFundsQuery(),
+  useMutualFundsDashboardQuery: () => mockUseMutualFundsDashboardQuery(),
+}));
+
 function renderMF() {
   return render(
     <BrowserRouter>
@@ -76,5 +84,57 @@ describe("AssetManagement Component", () => {
   it("renders description subtitle", () => {
     renderMF();
     expect(screen.getByText(/Track and manage your mutual fund investments/)).toBeInTheDocument();
+  });
+});
+
+describe("MutualFunds – additional branch coverage", () => {
+  afterEach(cleanup);
+
+  it("non-array mutualFundsQuery.data falls back to [] (L44 false branch)", () => {
+    mockUseMutualFundsQuery.mockReturnValueOnce({ data: null, isLoading: false });
+    mockUseMutualFundsDashboardQuery.mockReturnValueOnce({ data: null, isLoading: false });
+    renderMF();
+    expect(screen.getByTestId("mutual-funds-wrapper")).toBeInTheDocument();
+  });
+
+  it("negative gainLoss covers error color (L55 false branch)", () => {
+    mockUseMutualFundsQuery.mockReturnValueOnce({ data: [], isLoading: false });
+    mockUseMutualFundsDashboardQuery.mockReturnValueOnce({
+      data: { totalGainLoss: -5000, totalGainLossPercent: -10, totalInvested: 50000, totalCurrentValue: 45000, totalTargetProgress: 40, totalTargetAmount: 100000 },
+      isLoading: false,
+    });
+    renderMF();
+    expect(screen.getByTestId("mutual-funds-wrapper")).toBeInTheDocument();
+  });
+
+  it("loading=true shows KpiSkeleton (L86 true branch)", () => {
+    mockUseMutualFundsQuery.mockReturnValueOnce({ data: [], isLoading: true });
+    mockUseMutualFundsDashboardQuery.mockReturnValueOnce({ data: null, isLoading: true });
+    renderMF();
+    expect(screen.getByTestId("mutual-funds-wrapper")).toBeInTheDocument();
+  });
+
+  it("exactly 1 fund shows '1 fund' without plural s (L116 false branch)", () => {
+    const oneFund = { id: 1, fundName: "PPFAS Flexi Cap", category: "Flexi Cap", invested: 10000, currentValue: 11000, units: 50, nav: 220, gain_loss: 1000, targetProgress: 50, user: "test", createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-01T00:00:00Z" };
+    mockUseMutualFundsQuery.mockReturnValueOnce({ data: [oneFund], isLoading: false });
+    mockUseMutualFundsDashboardQuery.mockReturnValueOnce({ data: null, isLoading: false });
+    renderMF();
+    expect(screen.getByText("1 fund")).toBeInTheDocument();
+  });
+
+  it("loading=true on Performance tab shows skeleton (L131 true branch)", () => {
+    mockUseMutualFundsQuery.mockReturnValue({ data: [], isLoading: true });
+    mockUseMutualFundsDashboardQuery.mockReturnValue({ data: null, isLoading: true });
+    renderMF();
+    fireEvent.click(screen.getByText("Performance"));
+    expect(screen.getByTestId("mutual-funds-wrapper")).toBeInTheDocument();
+  });
+
+  it("loading=true on Target & Allocation tab shows skeleton (L151 true branch)", () => {
+    mockUseMutualFundsQuery.mockReturnValue({ data: [], isLoading: true });
+    mockUseMutualFundsDashboardQuery.mockReturnValue({ data: null, isLoading: true });
+    renderMF();
+    fireEvent.click(screen.getByText("Target & Allocation"));
+    expect(screen.getByTestId("mutual-funds-wrapper")).toBeInTheDocument();
   });
 });

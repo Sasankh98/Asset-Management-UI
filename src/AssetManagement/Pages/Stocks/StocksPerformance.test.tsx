@@ -159,4 +159,21 @@ describe("StocksPerformance", () => {
     render(<StocksPerformance stocks={stocks} />);
     expect(screen.getAllByText("Infosys").length).toBeGreaterThan(0);
   });
+
+  it("null netProfitLoss covers s.netProfitLoss ?? 0 right branch (L27 binary-expr)", () => {
+    const stocks = [makeStock({
+      marketPrice: 0,
+      netProfitLoss: null as unknown as number,
+    })];
+    render(<StocksPerformance stocks={stocks} />);
+    expect(screen.getAllByText("Infosys").length).toBeGreaterThan(0);
+  });
+
+  it("null totalInvested covers s.totalInvested ?? 0 right branch (L31 binary-expr)", () => {
+    const stocks = [makeStock({
+      totalInvested: null as unknown as number,
+    })];
+    render(<StocksPerformance stocks={stocks} />);
+    expect(screen.getAllByText("Infosys").length).toBeGreaterThan(0);
+  });
 });

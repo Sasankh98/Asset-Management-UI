@@ -43,7 +43,7 @@ interface CustomTooltipProps {
   label?: string;
 }
 
-function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
+export function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   const theme = useTheme();
 
   if (!active || !payload?.length) return null;

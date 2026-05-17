@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { render, screen, cleanup, fireEvent } from "@testing-library/react";
+import { render, screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import Settings from "./Settings";
 import { type UserProfile } from "../../../hooks/queries/useSettingsQuery";
@@ -119,5 +119,27 @@ describe("Settings copy email", () => {
     const copyBtn = screen.getByRole("button", { name: /copy email/i });
     fireEvent.click(copyBtn);
     expect(writeText).toHaveBeenCalledWith("copy@example.com");
+  });
+});
+
+describe("Settings – additional branch coverage", () => {
+  afterEach(() => cleanup());
+
+  it("isLoading=true shows loading skeleton (L92 true branch)", () => {
+    mockUseSettingsQuery.mockReturnValue({ data: null, isLoading: true });
+    const { container } = render(<BrowserRouter><Settings /></BrowserRouter>);
+    expect(container.querySelector(".MuiSkeleton-root")).toBeInTheDocument();
+  });
+
+  it("valid matching passwords >= 6 chars covers L49 false branch and L188 true (pwSaving)", async () => {
+    mockUseSettingsQuery.mockReturnValue({ data: null, isLoading: false });
+    render(<BrowserRouter><Settings /></BrowserRouter>);
+    fireEvent.change(screen.getByLabelText(/current password/i), { target: { value: "currentPass" } });
+    fireEvent.change(screen.getByLabelText(/^new password$/i), { target: { value: "newPass123" } });
+    fireEvent.change(screen.getByLabelText(/confirm new password/i), { target: { value: "newPass123" } });
+    fireEvent.click(screen.getByRole("button", { name: /update password/i }));
+    await waitFor(() => {
+      expect(screen.getByTestId("settings-container")).toBeInTheDocument();
+    });
   });
 });

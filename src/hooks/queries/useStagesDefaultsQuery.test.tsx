@@ -137,4 +137,35 @@ describe("useStagesDefaultsQuery", () => {
 
     expect(result.current.data?.age0).toBe(28);
   });
+
+  it("totalAssets=null covers dash.value.totalAssets ?? 0 right branch (B3 L33)", async () => {
+    mockGetDashboard.mockResolvedValue({ totalAssets: null });
+    mockGetSalaryDetails.mockResolvedValue({ data: [] });
+    mockGetConfig.mockResolvedValue({ currentAge: 30 });
+
+    const { result } = renderHook(() => useStagesDefaultsQuery(), { wrapper: makeWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    // totalAssets ?? 0 → 0, corpus0 > 0 is false → fallback
+    expect(result.current.data?.corpus0).toBe(1432000);
+  });
+
+  it("null amount on income/expense covers t.amount ?? 0 right branches (B8 L48, B9 L51)", async () => {
+    const recentDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    mockGetDashboard.mockResolvedValue({ totalAssets: 500000 });
+    mockGetSalaryDetails.mockResolvedValue({
+      data: [
+        { date: recentDate, type: "income", amount: null },
+        { date: recentDate, type: "expense", amount: null },
+      ],
+    });
+    mockGetConfig.mockResolvedValue({ currentAge: 30 });
+
+    const { result } = renderHook(() => useStagesDefaultsQuery(), { wrapper: makeWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    // null amount ?? 0 → 0 for both income and expense → fallbacks used
+    expect(result.current.data?.salary0).toBe(924000);
+    expect(result.current.data?.expense0).toBe(600000);
+  });
 });

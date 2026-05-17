@@ -1,4 +1,5 @@
 import { describe, it, expect, afterEach, vi, beforeEach } from "vitest";
+import { act } from "react";
 import { render, screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import AssetManagementProvider from "../../../ContextProvider/ContextProvider";
@@ -193,5 +194,39 @@ describe("TransactionForm", () => {
   it("open=false does not render modal content", () => {
     renderForm({ open: false, type: "create" });
     expect(screen.queryByText("Create transaction")).not.toBeInTheDocument();
+  });
+
+  it("handleSelectChange: picking Category option updates state (B0 if(name) true branch)", async () => {
+    renderForm({ type: "create" });
+    // MUI Select: fire mouseDown on the placeholder text to open the listbox
+    const placeholder = screen.getByText("Select category");
+    fireEvent.mouseDown(placeholder);
+    const option = await screen.findByRole("option", { name: "Salary" });
+    fireEvent.click(option);
+    expect(screen.getByText("Create transaction")).toBeInTheDocument();
+  });
+
+  it("valid create with all fields: covers B3 false (type===create) and B4 all-false (validation passes)", async () => {
+    const handleClose = vi.fn();
+    renderForm({ type: "create", handleClose });
+
+    // Set amount (truthy)
+    const amountInput = screen.getByPlaceholderText("0");
+    fireEvent.change(amountInput, { target: { name: "amount", value: "50000" } });
+
+    // Set category via Select — mouseDown on the placeholder opens the listbox
+    const placeholder = screen.getByText("Select category");
+    fireEvent.mouseDown(placeholder);
+    const option = await screen.findByRole("option", { name: "Salary" });
+    fireEvent.click(option);
+
+    // date is already pre-filled with today, click save
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("handle-salary-button"));
+    });
+
+    await waitFor(() => {
+      expect(mockCreateTransaction.mutateAsync).toHaveBeenCalled();
+    });
   });
 });

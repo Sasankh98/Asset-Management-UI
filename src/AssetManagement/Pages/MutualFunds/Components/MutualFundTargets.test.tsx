@@ -112,4 +112,9 @@ describe("MutualFundTargets", () => {
     expect(screen.getByText("Fund B")).toBeInTheDocument();
     expect(screen.getByText("Fund C")).toBeInTheDocument();
   });
+
+  it("null targetProgress covers f.targetProgress ?? 0 right branch (L109 binary-expr)", () => {
+    render(<MutualFundTargets funds={[makeFund({ targetProgress: null as unknown as number })]} />);
+    expect(screen.getByText("Fund Target Progress")).toBeInTheDocument();
+  });
 });

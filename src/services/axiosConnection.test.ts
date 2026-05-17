@@ -144,3 +144,32 @@ describe("del", () => {
     await expect(del("http://example.com/api")).rejects.toThrow("network down");
   });
 });
+
+describe("401 Unauthorized branches", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("get rejects with Unauthorized on 401 (L54 if true branch)", async () => {
+    mockFetch.mockResolvedValue(makeResponse(null, 401, false));
+    await expect(get("http://example.com/api")).rejects.toThrow("Unauthorized");
+  });
+
+  it("post rejects with Unauthorized on 401 (L82 if true branch)", async () => {
+    mockFetch.mockResolvedValue(makeResponse(null, 401, false));
+    await expect(post("http://example.com/api", {})).rejects.toThrow("Unauthorized");
+  });
+
+  it("patch rejects with Unauthorized on 401 (L110 if true branch)", async () => {
+    mockFetch.mockResolvedValue(makeResponse(null, 401, false));
+    await expect(patch("http://example.com/api", {})).rejects.toThrow("Unauthorized");
+  });
+
+  it("put rejects with Unauthorized on 401 (L138 if true branch)", async () => {
+    mockFetch.mockResolvedValue(makeResponse(null, 401, false));
+    await expect(put("http://example.com/api", {})).rejects.toThrow("Unauthorized");
+  });
+
+  it("del rejects with Unauthorized on 401 (L161 if true branch)", async () => {
+    mockFetch.mockResolvedValue(makeResponse(null, 401, false));
+    await expect(del("http://example.com/api")).rejects.toThrow("Unauthorized");
+  });
+});

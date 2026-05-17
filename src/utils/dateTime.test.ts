@@ -12,7 +12,6 @@ describe("getTimeStamp", () => {
 describe("dateFormat", () => {
   it("returns correct dateOnly format DD Mon YYYY for a known ISO date", () => {
     const { dateOnly } = dateFormat("2024-03-15T10:30:00.000Z");
-    // dateOnly should look like "15 Mar 2024"
     expect(dateOnly).toMatch(/^\d{2} [A-Za-z]{3} \d{4}$/);
     expect(dateOnly).toContain("Mar");
     expect(dateOnly).toContain("2024");
@@ -27,6 +26,15 @@ describe("dateFormat", () => {
     const result = dateFormat("2023-01-01T00:00:00.000Z");
     expect(result).toHaveProperty("dateTime");
     expect(result).toHaveProperty("dateOnly");
+  });
+
+  it("covers hours % 12 === 0 right branch (|| 12) for local noon (12 PM)", () => {
+    // Construct a date at local noon so getHours() = 12 → 12 % 12 = 0 → right branch returns 12
+    const localNoon = new Date();
+    localNoon.setHours(12, 0, 0, 0);
+    const { dateTime } = dateFormat(localNoon.toISOString());
+    expect(dateTime).toContain("12:");
+    expect(dateTime).toMatch(/PM/);
   });
 });
 

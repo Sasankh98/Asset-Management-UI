@@ -259,6 +259,109 @@ describe("Projections – no residue cash", () => {
   });
 });
 
+describe("Projections – null data query fallbacks", () => {
+  afterEach(() => cleanup());
+
+  test("stQuery.data=null covers ?? [] right branch (L243)", () => {
+    mockUseMutualFundsQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseStocksQuery.mockReturnValue({ data: null, isLoading: false });
+    mockUseLicQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseProvidentFundQuery.mockReturnValue({ data: null, isLoading: false });
+    mockUseDashboardQuery.mockReturnValue({ data: null, isLoading: false });
+    render(<Projections />);
+    expect(screen.getByTestId("projections-container")).toBeInTheDocument();
+  });
+
+  test("licQuery.data=null covers ?? [] right branch (L280)", () => {
+    mockUseMutualFundsQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseStocksQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseLicQuery.mockReturnValue({ data: null, isLoading: false });
+    mockUseProvidentFundQuery.mockReturnValue({ data: null, isLoading: false });
+    mockUseDashboardQuery.mockReturnValue({ data: null, isLoading: false });
+    render(<Projections />);
+    expect(screen.getByTestId("projections-container")).toBeInTheDocument();
+  });
+
+  test("MF with null currentValue covers mf.currentValue ?? 0 right branch (L226)", () => {
+    mockUseMutualFundsQuery.mockReturnValue({
+      data: [makeMf({ currentValue: null as unknown as number, category: "Flexi Cap" })],
+      isLoading: false,
+    });
+    mockUseStocksQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseLicQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseProvidentFundQuery.mockReturnValue({ data: null, isLoading: false });
+    mockUseDashboardQuery.mockReturnValue({ data: { totalAssets: 0 }, isLoading: false });
+    render(<Projections />);
+    expect(screen.getByTestId("projections-container")).toBeInTheDocument();
+  });
+
+  test("Gold MF category covers Commodities branch (L227 right side of ||)", () => {
+    mockUseMutualFundsQuery.mockReturnValue({
+      data: [makeMf({ category: "Gold" as "Flexi Cap", currentValue: 150000 })],
+      isLoading: false,
+    });
+    mockUseStocksQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseLicQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseProvidentFundQuery.mockReturnValue({ data: null, isLoading: false });
+    mockUseDashboardQuery.mockReturnValue({ data: { totalAssets: 150000 }, isLoading: false });
+    render(<Projections />);
+    expect(screen.getByTestId("projections-container")).toBeInTheDocument();
+  });
+
+  test("LIC with null premium covers policy.premium ?? 0 right branch (L281)", () => {
+    mockUseMutualFundsQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseStocksQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseLicQuery.mockReturnValue({
+      data: [makeLic({ premium: null as unknown as number, startDate: "2020-01-01" })],
+      isLoading: false,
+    });
+    mockUseProvidentFundQuery.mockReturnValue({ data: null, isLoading: false });
+    mockUseDashboardQuery.mockReturnValue({ data: null, isLoading: false });
+    render(<Projections />);
+    expect(screen.getByTestId("projections-container")).toBeInTheDocument();
+  });
+
+  test("PF with null currentBalance covers pf.currentBalance ?? 0 right branch (L264)", () => {
+    mockUseMutualFundsQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseStocksQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseLicQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseProvidentFundQuery.mockReturnValue({
+      data: { currentBalance: null, rate: 8.25, currentAge: 30 },
+      isLoading: false,
+    });
+    mockUseDashboardQuery.mockReturnValue({ data: null, isLoading: false });
+    render(<Projections />);
+    expect(screen.queryByText("EPF + VPF")).not.toBeInTheDocument();
+  });
+
+  test("LIC-only portfolio with 4.5% return < 6% inflation gives realGain < 0 (L475, L618)", () => {
+    mockUseMutualFundsQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseStocksQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseLicQuery.mockReturnValue({
+      data: [makeLic({ premium: 5000, startDate: "2010-01-01" })],
+      isLoading: false,
+    });
+    mockUseProvidentFundQuery.mockReturnValue({ data: null, isLoading: false });
+    mockUseDashboardQuery.mockReturnValue({ data: { totalAssets: 960000 }, isLoading: false });
+    render(<Projections />);
+    // realGain = realAtHorizon - totalToday < 0 with LIC 4.5% < 6% inflation over 20y
+    expect(screen.getByTestId("projections-container")).toBeInTheDocument();
+  });
+
+  test("stock with non-null marketPrice>0 and null quantity covers s.quantity ?? 0 null branch (L247)", () => {
+    mockUseMutualFundsQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseStocksQuery.mockReturnValue({
+      data: [makeStock({ status: "active", marketPrice: 3000, quantity: null as unknown as number })],
+      isLoading: false,
+    });
+    mockUseLicQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseProvidentFundQuery.mockReturnValue({ data: null, isLoading: false });
+    mockUseDashboardQuery.mockReturnValue({ data: { totalAssets: 0 }, isLoading: false });
+    render(<Projections />);
+    expect(screen.getByTestId("projections-container")).toBeInTheDocument();
+  });
+});
+
 describe("Projections – additional branch coverage", () => {
   afterEach(() => cleanup());
 

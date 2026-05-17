@@ -110,6 +110,18 @@ describe("Salary – KPI calculations", () => {
     renderSalary();
     expect(screen.getByText("40%")).toBeInTheDocument();
   });
+
+  test("null income amount covers t.amount ?? 0 right branch (L36 binary-expr)", () => {
+    mockUseSalaryQuery.mockReturnValue({
+      data: [
+        { date: TODAY, type: "income", amount: null },
+        { date: TODAY, type: "expense", amount: null },
+      ],
+      isLoading: false,
+    });
+    renderSalary();
+    expect(screen.getByTestId("salary-container")).toBeInTheDocument();
+  });
 });
 
 describe("Salary – tabs", () => {

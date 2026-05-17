@@ -101,4 +101,18 @@ describe("StocksAllocation", () => {
     ]} />);
     expect(screen.getByText("Infosys")).toBeInTheDocument();
   });
+
+  it("stock with marketPrice=0 and currentValue=null covers s.currentValue ?? 0 right branch (L25)", () => {
+    render(<StocksAllocation stocks={[
+      makeStock({ marketPrice: 0, currentValue: null as unknown as number }),
+    ]} />);
+    expect(screen.getByText("Infosys")).toBeInTheDocument();
+  });
+
+  it("totalCurrent=0 covers pct=0 branch when stockCurrent returns 0 (L89 false)", () => {
+    render(<StocksAllocation stocks={[
+      makeStock({ marketPrice: 0, currentValue: 0 }),
+    ]} />);
+    expect(screen.getByText("Infosys")).toBeInTheDocument();
+  });
 });

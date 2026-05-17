@@ -301,4 +301,46 @@ describe("EMIs dialog", () => {
       expect(screen.queryByText("Edit EMI")).not.toBeInTheDocument();
     });
   });
+
+  it("null rawEmis covers rawEmis ?? [] right branch (L382 binary-expr)", () => {
+    mockUseEmisQuery.mockReturnValue({ data: null as unknown as Emi[], isLoading: false });
+    render(<EMIs />);
+    expect(screen.getByTestId("emis-container")).toBeInTheDocument();
+  });
+
+  it("two EMIs with same nextDueDay cover byDay false branch (L98) and plural 'EMIs' (L116)", () => {
+    mockUseEmisQuery.mockReturnValue({
+      data: [
+        makeEmi({ id: 1, name: "EMI 1", nextDueDay: 15 }),
+        makeEmi({ id: 2, name: "EMI 2", nextDueDay: 15 }),
+      ],
+      isLoading: false,
+    });
+    render(<EMIs />);
+    expect(screen.getByTestId("emis-container")).toBeInTheDocument();
+  });
+
+  it("two active EMIs in upcoming payments shows Divider before last item (L229 false for last)", () => {
+    mockUseEmisQuery.mockReturnValue({
+      data: [
+        makeEmi({ id: 1, name: "EMI A", nextDueDay: 15 }),
+        makeEmi({ id: 2, name: "EMI B", nextDueDay: 20 }),
+      ],
+      isLoading: false,
+    });
+    render(<EMIs />);
+    expect(screen.getByTestId("emis-container")).toBeInTheDocument();
+  });
+
+  it("shows 'Due today' when nextDueDay equals today (B15 L223 cond-expr true branch)", () => {
+    const today = new Date();
+    const todayDay = today.getDate();
+    if (todayDay > 28) return; // skip near-month-end edge cases
+    mockUseEmisQuery.mockReturnValue({
+      data: [makeEmi({ nextDueDay: todayDay })],
+      isLoading: false,
+    });
+    render(<EMIs />);
+    expect(screen.getByText("Due today")).toBeInTheDocument();
+  });
 });

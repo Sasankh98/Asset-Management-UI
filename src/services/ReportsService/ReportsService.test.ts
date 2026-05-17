@@ -56,6 +56,19 @@ describe("Reports Service", () => {
       mockedGet.mockRejectedValue(mockError);
       await expect(service.getNetWorthTrend()).rejects.toThrow("Failed to fetch net worth trend");
     });
+
+    it("with period param appends query string (B0 L7 cond-expr true branch)", async () => {
+      mockedGet.mockResolvedValue({ status: "success", data: [mockNetWorthSnapshot] });
+      const result = await service.getNetWorthTrend("1m");
+      expect(result).toEqual([mockNetWorthSnapshot]);
+      expect(httpService.get).toHaveBeenCalledWith(`${baseURL}/reports/netWorth?period=1m`);
+    });
+
+    it("null data falls back to [] (B1 L11 binary-expr right branch)", async () => {
+      mockedGet.mockResolvedValue({ status: "success", data: null });
+      const result = await service.getNetWorthTrend();
+      expect(result).toEqual([]);
+    });
   });
   describe("getAllocationHistory", () => {
     it("calls GET /reports/allocation and returns the allocation array on success", async () => {
@@ -70,6 +83,12 @@ describe("Reports Service", () => {
       mockedGet.mockRejectedValue(mockError);
       await expect(service.getAllocationHistory()).rejects.toThrow("Failed to fetch allocation history");
     });
+
+    it("null data falls back to [] (B2 L17 binary-expr right branch)", async () => {
+      mockedGet.mockResolvedValue({ status: "success", data: null });
+      const result = await service.getAllocationHistory();
+      expect(result).toEqual([]);
+    });
   });
   describe("getStatements", () => {
     it("calls GET /reports/statements and returns the statements array on success", async () => {
@@ -83,6 +102,12 @@ describe("Reports Service", () => {
       const mockError = new Error("Failed to fetch statements");
       mockedGet.mockRejectedValue(mockError);
       await expect(service.getStatements()).rejects.toThrow("Failed to fetch statements");
+    });
+
+    it("null data falls back to [] (B4 L23 binary-expr right branch)", async () => {
+      mockedGet.mockResolvedValue({ status: "success", data: null });
+      const result = await service.getStatements();
+      expect(result).toEqual([]);
     });
   });
 

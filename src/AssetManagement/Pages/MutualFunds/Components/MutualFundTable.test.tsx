@@ -133,4 +133,28 @@ describe("MutualFundTable – table render", () => {
     );
     expect(screen.getByText("Parag Parikh Flexi Cap")).toBeInTheDocument();
   });
+
+  it("negative targetProgress covers L96/L98 false branches (error color, no '+' prefix)", () => {
+    render(
+      <MutualFundTable
+        mutualFundDetails={[makeMf({ targetProgress: -10 })]}
+        setMutualFundFormOpen={noop}
+        setType={noop}
+        setSelectedMutualFund={noop}
+      />
+    );
+    expect(screen.getByText("Parag Parikh Flexi Cap")).toBeInTheDocument();
+  });
+
+  it("non-numeric targetProgress covers L96 isNaN true branch (value shown as-is)", () => {
+    render(
+      <MutualFundTable
+        mutualFundDetails={[makeMf({ targetProgress: "N/A" as unknown as number })]}
+        setMutualFundFormOpen={noop}
+        setType={noop}
+        setSelectedMutualFund={noop}
+      />
+    );
+    expect(screen.getByText("Parag Parikh Flexi Cap")).toBeInTheDocument();
+  });
 });

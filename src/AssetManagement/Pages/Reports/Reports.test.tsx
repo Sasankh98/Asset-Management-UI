@@ -113,3 +113,51 @@ describe("Reports (with snapshot data)", () => {
     expect(screen.getByText("NET WORTH")).toBeInTheDocument();
   });
 });
+
+describe("Reports – additional branch coverage", () => {
+  afterEach(cleanup);
+
+  it("isLoading=true shows skeleton (L116 true branch)", () => {
+    mockUseNetWorthTrendQuery.mockReturnValueOnce({ data: [], isLoading: true });
+    mockUseAllocationQuery.mockReturnValueOnce({ data: [], isLoading: false });
+    mockUseStatementsQuery.mockReturnValueOnce({ data: [], isLoading: false });
+    render(<Reports />);
+    // Loading branch renders Skeleton, no "Performance" heading
+    const skeletons = document.querySelectorAll(".MuiSkeleton-root");
+    expect(skeletons.length).toBeGreaterThan(0);
+  });
+
+  it("null trend data covers ?? [] right branch (L109)", () => {
+    mockUseNetWorthTrendQuery.mockReturnValueOnce({ data: null as unknown as NetWorthSnapshot[], isLoading: false });
+    mockUseAllocationQuery.mockReturnValueOnce({ data: null as unknown as NetWorthSnapshot[], isLoading: false });
+    mockUseStatementsQuery.mockReturnValueOnce({ data: null as unknown as NetWorthSnapshot[], isLoading: false });
+    render(<Reports />);
+    expect(screen.getByText("Performance")).toBeInTheDocument();
+  });
+
+  it("declining net worth covers diff<0 branches (L378/L379 false)", () => {
+    const statements = [
+      makeSnapshot({ id: 1, snapshotDate: "2024-01-01", totalNetWorth: 5000000 }),
+      makeSnapshot({ id: 2, snapshotDate: "2024-02-01", totalNetWorth: 4000000 }),
+    ];
+    mockUseNetWorthTrendQuery.mockReturnValueOnce({ data: [], isLoading: false });
+    mockUseAllocationQuery.mockReturnValueOnce({ data: [], isLoading: false });
+    mockUseStatementsQuery.mockReturnValueOnce({ data: statements, isLoading: false });
+    render(<Reports />);
+    // diff = 4000000 - 5000000 = -1000000 < 0 → "error.main", no "+" prefix
+    expect(screen.getByText("2-MONTH CHANGE")).toBeInTheDocument();
+  });
+
+  it("first statement totalNetWorth=0 covers pct='0' branch (L374 false)", () => {
+    const statements = [
+      makeSnapshot({ id: 1, snapshotDate: "2024-01-01", totalNetWorth: 0 }),
+      makeSnapshot({ id: 2, snapshotDate: "2024-02-01", totalNetWorth: 1000000 }),
+    ];
+    mockUseNetWorthTrendQuery.mockReturnValueOnce({ data: [], isLoading: false });
+    mockUseAllocationQuery.mockReturnValueOnce({ data: [], isLoading: false });
+    mockUseStatementsQuery.mockReturnValueOnce({ data: statements, isLoading: false });
+    render(<Reports />);
+    // first=0 → falsy → pct="0"
+    expect(screen.getByText("2-MONTH CHANGE")).toBeInTheDocument();
+  });
+});

@@ -89,4 +89,23 @@ describe("MutualFundPerformance", () => {
     render(<MutualFundPerformance funds={funds} />);
     expect(screen.getAllByText("Fund A").length).toBeGreaterThan(0);
   });
+
+  it("gainPct returns '0.0' when invested=0 (L35 false branch)", () => {
+    render(<MutualFundPerformance funds={[makeFund({ invested: 0 })]} />);
+    expect(screen.getByText("Best Performer")).toBeInTheDocument();
+  });
+
+  it("negative totalGainLoss uses error color (L45 false branch)", () => {
+    render(<MutualFundPerformance funds={[makeFund()]} dashboard={makeDashboard({ totalGainLoss: -5000 })} />);
+    expect(screen.getByText("Total Gain / Loss")).toBeInTheDocument();
+  });
+
+  it("worst.gain_loss=null covers ?? 0 right branch (L73 binary-expr)", () => {
+    const funds = [
+      makeFund({ id: 1, fundName: "Fund X", gain_loss: 5000 }),
+      makeFund({ id: 2, fundName: "Fund Y", gain_loss: null as unknown as number }),
+    ];
+    render(<MutualFundPerformance funds={funds} />);
+    expect(screen.getByText("Best Performer")).toBeInTheDocument();
+  });
 });

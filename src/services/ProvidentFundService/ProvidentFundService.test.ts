@@ -18,6 +18,7 @@ const mockPfConfig: PfConfig = {
   vpfPct: 0,
   salaryIncrementPct: 10,
   joiningMonth: 1,
+  physicalGoldValue: 0,
   user: "Sasankh",
   createdAt: "2025-01-01T00:00:00.000Z",
   updatedAt: "2025-01-01T00:00:00.000Z",

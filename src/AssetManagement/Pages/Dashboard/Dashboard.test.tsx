@@ -424,3 +424,43 @@ describe("Dashboard – MF allocation branches", () => {
     expect(screen.getByTestId("dashboard-container")).toBeInTheDocument();
   });
 });
+
+describe("Dashboard – equity sub-slice branch coverage", () => {
+  afterEach(() => cleanup());
+
+  const setup = (mfs: ReturnType<typeof makeMf>[]) => {
+    mockUseDashboardQuery.mockReturnValue({ data: null, isLoading: false });
+    mockUseNetWorthTrendQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseStocksQuery.mockReturnValue({ data: [], isLoading: false });
+    mockUseMutualFundsQuery.mockReturnValue({ data: mfs, isLoading: false });
+  };
+
+  test("lc=0 with mc+sc>0 covers L158 false branch and L159-160 true branches", () => {
+    setup([makeMf({
+      category: "Flexi Cap", currentValue: 200000,
+      equityPct: 80,
+      largeCapPct: 0, midCapPct: 30, smallCapPct: 20,
+    })]);
+    render(<Dashboard />);
+    expect(screen.getByTestId("dashboard-container")).toBeInTheDocument();
+  });
+
+  test("equityVal=tagged (lc=equityPct) covers L163 false branch (no Diversified remainder)", () => {
+    setup([makeMf({
+      category: "Flexi Cap", currentValue: 200000,
+      equityPct: 80,
+      largeCapPct: 80, midCapPct: 0, smallCapPct: 0,
+    })]);
+    render(<Dashboard />);
+    expect(screen.getByTestId("dashboard-container")).toBeInTheDocument();
+  });
+
+  test("Gold MF with equityPct set (hasAlloc=true) covers L165 ?? 'Diversified' right branch", () => {
+    setup([makeMf({
+      category: "Gold" as "Flexi Cap", currentValue: 100000,
+      equityPct: 50,
+    })]);
+    render(<Dashboard />);
+    expect(screen.getByTestId("dashboard-container")).toBeInTheDocument();
+  });
+});

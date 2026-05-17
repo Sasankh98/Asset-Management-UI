@@ -302,6 +302,7 @@ export interface PfConfig {
   vpfPct: number;
   salaryIncrementPct: number;
   joiningMonth: number;
+  physicalGoldValue: number;
   user: string;
   createdAt: string;
   updatedAt: string;
@@ -319,6 +320,7 @@ export interface CreatePfConfigDTO {
   vpfPct: number;
   salaryIncrementPct: number;
   joiningMonth: number;
+  physicalGoldValue?: number;
   user: string;
 }
 

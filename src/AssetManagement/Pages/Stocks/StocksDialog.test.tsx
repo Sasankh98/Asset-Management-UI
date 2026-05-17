@@ -335,4 +335,29 @@ describe("StocksDialog", () => {
     // Verify no crash
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
+
+  it("SIP with sipEnd set covers end truthy branch in countInstallments (L65)", () => {
+    renderDialog();
+    fireEvent.click(screen.getByRole("button", { name: /sip/i }));
+    fireEvent.change(screen.getByLabelText(/start date/i), { target: { value: "2020-01-01" } });
+    fireEvent.change(screen.getByLabelText(/end date/i), { target: { value: "2023-12-31" } });
+    // end="2023-12-31" is truthy → new Date(end) branch covered (L65)
+    expect(screen.getByText(/installments/i)).toBeInTheDocument();
+  });
+
+  it("P&L preview with avg=0 covers pct=0 branch (L497 false branch)", () => {
+    // Use edit mode with a sold stock having avg=0 so P&L shows and avg>0 is false
+    const soldStockZeroAvg = {
+      id: 9, stockName: "ZOMATO", avg: 0, quantity: 10,
+      totalInvested: 0, buyDate: "2022-01-01", status: "sold",
+      category: "Mid Cap", currentValue: 0, marketPrice: 0,
+      sellPrice: 200, totalReturns: 2000, profitLoss: 2000, dividends: 0,
+      buyTax: 0, sellTax: 0, netreturn: 2000, netProfitLoss: 2000,
+      netProfitLossPercent: 0, sellDate: "2023-01-01", user: "Sasankh",
+      createdAt: "2022-01-01T00:00:00Z", updatedAt: "2023-01-01T00:00:00Z",
+    };
+    renderDialog({ type: "edit", selectedStock: soldStockZeroAvg });
+    // form.avg=0, form.sellPrice=200, form.quantity=10 → P&L shows, avg>0 is false → pct=0
+    expect(screen.getByText(/estimated p&l/i)).toBeInTheDocument();
+  });
 });
