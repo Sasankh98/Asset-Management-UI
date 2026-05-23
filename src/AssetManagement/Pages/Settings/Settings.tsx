@@ -100,11 +100,16 @@ const Settings = () => {
         ) : (
           <Box sx={{ display: "flex", alignItems: "center", gap: 2.5 }}>
             <Avatar sx={{ width: 64, height: 64, bgcolor: "primary.main", fontSize: 22, fontWeight: 700 }}>
-              {profile ? initials(profile.email) : "?"}
+              {profile ? initials(profile.name || profile.email) : "?"}
             </Avatar>
             <Box sx={{ flex: 1 }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              {profile?.name && (
                 <Typography variant="body1" fontWeight={600}>
+                  {profile.name}
+                </Typography>
+              )}
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Typography variant="body2" color={profile?.name ? "text.secondary" : "text.primary"} fontWeight={profile?.name ? 400 : 600}>
                   {profile?.email ?? "Unknown"}
                 </Typography>
                 <Tooltip title={copied ? "Copied!" : "Copy email"}>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLoansQuery } from "../../../hooks/queries";
 import { useLoansMutation } from "../../../hooks/mutations";
+import { useCurrentUser } from "../../../hooks/useCurrentUser";
 import type { Loan as ApiLoan } from "../../../../server/types";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
@@ -57,7 +58,6 @@ const EMPTY_LOAN: Omit<Loan, "id"> = {
   emi: 0, dueDate: "", tenureLeft: "", interestRate: 0,
 };
 
-const USER = "Sasankh";
 
 // ── Loan Dialog ───────────────────────────────────────────────────────────────
 
@@ -198,6 +198,7 @@ export default function Loans() {
 
   const { data: rawLoans, isLoading } = useLoansQuery();
   const { createLoan, updateLoan, deleteLoan } = useLoansMutation();
+  const { name: currentUserName } = useCurrentUser();
 
   const loans: Loan[] = (rawLoans ?? []).map(coerce);
 
@@ -214,7 +215,7 @@ export default function Loans() {
   };
 
   const handleSave = async (form: Omit<Loan, "id">) => {
-    const payload = { ...form, user: USER };
+    const payload = { ...form, user: currentUserName };
     if (editTarget) {
       await updateLoan.mutateAsync({ id: editTarget.id, data: payload as never });
     } else {

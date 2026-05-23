@@ -8,6 +8,7 @@ import type React from "react";
 import { CreateGoalsDTO, GoalsDTO } from "../../../../../server/types";
 import { ModalTypes } from "../../../../shared/Constants";
 import { GlassTextField } from "../../../../core/MUI/styles";
+import { useCurrentUser } from "../../../../hooks/useCurrentUser";
 
 export interface GoalsFormRef {
   getFormData: () => CreateGoalsDTO;
@@ -22,13 +23,14 @@ interface GoalsFormProps {
 }
 
 const GoalsForm = ({ modalType, goals, ref }: GoalsFormProps) => {
+    const { name: currentUserName } = useCurrentUser();
     const [goalsData, setGoalsData] = useState<CreateGoalsDTO>({
       goal: "",
       targetAmount: 0,
       savedAmount: 0,
       targetDate: "",
       value: 0,
-      user: "Sasankh",
+      user: "",
     });
 
     const handleGoalsData = (
@@ -50,7 +52,7 @@ const GoalsForm = ({ modalType, goals, ref }: GoalsFormProps) => {
           savedAmount: goals?.savedAmount || 0,
           targetDate: goals?.targetDate || "",
           value: goals?.value || 0,
-          user: goals?.user || "Sasankh",
+          user: goals?.user || currentUserName,
         });
       } else if (modalType === ModalTypes.create) {
         setGoalsData({
@@ -59,10 +61,10 @@ const GoalsForm = ({ modalType, goals, ref }: GoalsFormProps) => {
           savedAmount: 0,
           targetDate: "",
           value: 0,
-          user: "Sasankh",
+          user: currentUserName,
         });
       }
-    }, [modalType, goals]);
+    }, [modalType, goals, currentUserName]);
 
     return (
       <>

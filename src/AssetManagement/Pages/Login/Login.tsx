@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import "./login.css";
 import { useNavigate } from "react-router-dom";
 import { DisplayContentEnum } from "../../../shared/Constants";
-import { UserLoginDTO } from "../../../../server/types";
+import { UserLoginDTO, UserRegisterDTO } from "../../../../server/types";
 import { useLoginMutation } from "../../../hooks/mutations/useLoginMutation";
+import { useRegisterMutation } from "../../../hooks/mutations/useRegisterMutation";
 import { useAssetManagementContext } from "../../ContextProvider/ContextProvider";
 
 // ─── Brand mark ───────────────────────────────────────────────────────────────
@@ -321,7 +322,17 @@ function SignInForm({
 }
 
 // ─── Register form ────────────────────────────────────────────────────────────
-function RegisterForm({ method }: { method: string }) {
+function RegisterForm({
+  method,
+  isPending,
+  errorMsg,
+  onRegister,
+}: {
+  method: string;
+  isPending: boolean;
+  errorMsg: string;
+  onRegister: (name: string, email: string, password: string) => void;
+}) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -346,7 +357,13 @@ function RegisterForm({ method }: { method: string }) {
     (method === "email" ? email.includes("@") : phone.replace(/\D/g, "").length === 10);
 
   return (
-    <form onSubmit={(e) => e.preventDefault()}>
+    <form onSubmit={(e) => { e.preventDefault(); if (canSubmit) onRegister(name, email, pwd); }}>
+      {errorMsg && (
+        <div className="lp-error-msg">
+          <span className="mi">error_outline</span>
+          {errorMsg}
+        </div>
+      )}
       <div className="lp-notice">
         <span className="mi">verified_user</span>
         <div>Free forever for personal use. No credit card. Delete your data anytime — we keep zero backups.</div>
@@ -415,8 +432,8 @@ function RegisterForm({ method }: { method: string }) {
         </span>
       </label>
 
-      <button className="lp-btn lp-btn-primary" disabled={!canSubmit}>
-        Create account <span className="mi">arrow_forward</span>
+      <button data-testid="create-account-btn" className="lp-btn lp-btn-primary" disabled={!canSubmit || isPending}>
+        {isPending ? "Creating account…" : "Create account"} <span className="mi">arrow_forward</span>
       </button>
     </form>
   );
@@ -431,6 +448,9 @@ function AuthPanel({
   isPending,
   errorMsg,
   onEmailSubmit,
+  registerPending,
+  registerErrorMsg,
+  onRegister,
 }: {
   mode: string;
   setMode: (m: string) => void;
@@ -439,6 +459,9 @@ function AuthPanel({
   isPending: boolean;
   errorMsg: string;
   onEmailSubmit: (email: string, password: string) => void;
+  registerPending: boolean;
+  registerErrorMsg: string;
+  onRegister: (name: string, email: string, password: string) => void;
 }) {
   const isSignIn = mode === "signin";
   return (
@@ -475,7 +498,7 @@ function AuthPanel({
 
         {isSignIn
           ? <SignInForm method={method} isPending={isPending} errorMsg={errorMsg} onEmailSubmit={onEmailSubmit} />
-          : <RegisterForm method={method} />}
+          : <RegisterForm method={method} isPending={registerPending} errorMsg={registerErrorMsg} onRegister={onRegister} />}
 
         <div className="lp-or">or continue with</div>
         <button className="lp-btn lp-btn-google">
@@ -496,12 +519,14 @@ function AuthPanel({
 // ─── Root ──────────────────────────────────────────────────────────────────────
 const Login = () => {
   const { createToken } = useLoginMutation();
+  const { registerUser } = useRegisterMutation();
   const { showSnackbar } = useAssetManagementContext();
   const navigate = useNavigate();
 
   const [mode, setMode] = useState("signin");
   const [method, setMethod] = useState("email");
   const [errorMsg, setErrorMsg] = useState("");
+  const [registerErrorMsg, setRegisterErrorMsg] = useState("");
 
   const handleEmailSubmit = async (email: string, password: string) => {
     setErrorMsg("");
@@ -519,6 +544,27 @@ const Login = () => {
     }
   };
 
+  const handleRegister = async (name: string, email: string, password: string) => {
+    setRegisterErrorMsg("");
+    try {
+      const registerData: UserRegisterDTO = { name, email, password };
+      const response = await registerUser.mutateAsync({ data: registerData });
+      if (response?.status === "success") {
+        if (response.token) {
+          sessionStorage.setItem("token", response.token);
+          navigate(`${DisplayContentEnum.dashboard}`);
+        } else {
+          showSnackbar("Account created! Please sign in.", "success");
+          setMode("signin");
+        }
+      }
+    } catch {
+      const msg = "Registration failed. Please try again.";
+      setRegisterErrorMsg(msg);
+      showSnackbar(msg, "error");
+    }
+  };
+
   return (
     <div className="lp-page">
       <BrandPanel />
@@ -530,6 +576,9 @@ const Login = () => {
         isPending={createToken.isPending}
         errorMsg={errorMsg}
         onEmailSubmit={handleEmailSubmit}
+        registerPending={registerUser.isPending}
+        registerErrorMsg={registerErrorMsg}
+        onRegister={handleRegister}
       />
     </div>
   );

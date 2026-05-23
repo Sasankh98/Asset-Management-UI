@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useLicQuery } from "../../../hooks/queries";
 import { useLicMutation } from "../../../hooks/mutations";
+import { useCurrentUser } from "../../../hooks/useCurrentUser";
 import type { LicPolicy as ApiLicPolicy } from "../../../../server/types";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
@@ -246,7 +247,6 @@ const EMPTY_POLICY: Omit<LicPolicy, "id"> = {
   maturityBonus: 1500000,
 };
 
-const USER = "Sasankh";
 
 // ── Add / Edit Dialog ─────────────────────────────────────────────────────────
 
@@ -697,6 +697,7 @@ export default function LIC() {
 
   const { data: rawPolicies, isLoading } = useLicQuery();
   const { createPolicy, updatePolicy, deletePolicy } = useLicMutation();
+  const { name: currentUserName } = useCurrentUser();
 
   const policies: LicPolicy[] = (rawPolicies ?? []).map(coerce);
 
@@ -715,7 +716,7 @@ export default function LIC() {
   };
 
   const handleSave = async (form: Omit<LicPolicy, "id">) => {
-    const payload = { ...form, user: USER };
+    const payload = { ...form, user: currentUserName };
     if (editTarget) {
       await updatePolicy.mutateAsync({ id: editTarget.id, data: payload as never });
     } else {

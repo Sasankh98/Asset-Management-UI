@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useEmisQuery } from "../../../hooks/queries";
 import { useEmisMutation } from "../../../hooks/mutations";
+import { useCurrentUser } from "../../../hooks/useCurrentUser";
 import type { Emi as ApiEmi } from "../../../../server/types";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
@@ -82,7 +83,6 @@ const EMPTY_EMI: Omit<Emi, "id"> = {
   startDate: new Date().toISOString().slice(0, 10),
 };
 
-const USER = "Sasankh";
 
 // ── Calendar view ─────────────────────────────────────────────────────────────
 
@@ -378,6 +378,7 @@ export default function EMIs() {
 
   const { data: rawEmis, isLoading } = useEmisQuery();
   const { createEmi, updateEmi, deleteEmi } = useEmisMutation();
+  const { name: currentUserName } = useCurrentUser();
 
   const emis: Emi[] = (rawEmis ?? []).map(coerce);
   const activeEmis = emis.filter((e) => e.paidInstallments < e.totalInstallments);
@@ -393,7 +394,7 @@ export default function EMIs() {
   };
 
   const handleSave = async (form: Omit<Emi, "id">) => {
-    const payload = { ...form, user: USER };
+    const payload = { ...form, user: currentUserName };
     if (editTarget) {
       await updateEmi.mutateAsync({ id: editTarget.id, data: payload as never });
     } else {

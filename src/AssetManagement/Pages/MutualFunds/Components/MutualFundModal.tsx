@@ -19,6 +19,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { type CreateMutualFundsDTO, type MutualFund } from "../../../../../server/types";
 import { useAssetManagementContext } from "../../../ContextProvider/ContextProvider";
 import { useMutualFundsMutation } from "../../../../hooks/mutations";
+import { useCurrentUser } from "../../../../hooks/useCurrentUser";
 import { MutualFundTypes } from "../../../../shared/Constants";
 
 // ── MFAPI helpers ────────────────────────────────────────────────────────────
@@ -127,7 +128,7 @@ interface Props {
 
 const EMPTY: CreateMutualFundsDTO = {
   fundName: "", category: "", invested: 0,
-  currentValue: 0, units: 0, nav: 0, targetAmount: 0, user: "Sasankh",
+  currentValue: 0, units: 0, nav: 0, targetAmount: 0, user: "",
   equityPct: undefined, largeCapPct: undefined, midCapPct: undefined,
   smallCapPct: undefined, hedgedEquityPct: undefined,
   debtPct: undefined, cashPct: undefined, realEstatePct: undefined,
@@ -155,6 +156,7 @@ const MutualFundModal = ({ open, type, handleClose, selectedMutualFund }: Props)
 
   const { setSnackBarOptions } = useAssetManagementContext();
   const { createFund, updateFund } = useMutualFundsMutation();
+  const { name: currentUserName } = useCurrentUser();
 
   useEffect(() => {
     if (type === "edit" && selectedMutualFund) {
@@ -166,7 +168,7 @@ const MutualFundModal = ({ open, type, handleClose, selectedMutualFund }: Props)
         units:           selectedMutualFund.units           ?? 0,
         nav:             selectedMutualFund.nav             ?? 0,
         targetAmount:    selectedMutualFund.targetProgress  ?? 0,
-        user:            "Sasankh",
+        user:            currentUserName,
         equityPct:       selectedMutualFund.equityPct       ?? undefined,
         largeCapPct:     selectedMutualFund.largeCapPct     ?? undefined,
         midCapPct:       selectedMutualFund.midCapPct       ?? undefined,
@@ -260,11 +262,12 @@ const MutualFundModal = ({ open, type, handleClose, selectedMutualFund }: Props)
     }
     setSaving(true);
     try {
+      const payload = { ...form, user: currentUserName };
       if (type === "create") {
-        await createFund.mutateAsync(form);
+        await createFund.mutateAsync(payload);
         setSnackBarOptions({ open: true, message: "Mutual fund added successfully", severity: "success" });
       } else {
-        await updateFund.mutateAsync({ id: selectedMutualFund?.id, data: form });
+        await updateFund.mutateAsync({ id: selectedMutualFund?.id, data: payload });
         setSnackBarOptions({ open: true, message: "Mutual fund updated successfully", severity: "success" });
       }
       handleClose();

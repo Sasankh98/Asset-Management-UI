@@ -3,6 +3,7 @@ import { queryKeys } from "../../react-query";
 import { httpService, baseURL } from "../../services/axiosConnection";
 
 export interface UserProfile {
+  name?: string;
   email: string;
   id?: number;
   createdAt?: string;

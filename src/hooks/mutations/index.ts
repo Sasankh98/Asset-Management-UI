@@ -1,5 +1,6 @@
 export * from './useGoalsMutation';
 export * from './useLoginMutation';
+export * from './useRegisterMutation';
 export * from './useStocksMutation';
 export * from './useMutualFundsMutation';
 export * from './useSalaryMutation';

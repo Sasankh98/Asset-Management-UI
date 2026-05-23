@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { CreateSalaryDTO, Salary } from "../../../../../server/types";
 import { useAssetManagementContext } from "../../../ContextProvider/ContextProvider";
 import { useSalaryMutation } from "../../../../hooks/mutations";
+import { useCurrentUser } from "../../../../hooks/useCurrentUser";
 import { TransactionTypesEnum } from "../../../../shared/Constants";
 import {
   GlassMenuItem,
@@ -39,12 +40,13 @@ const SalaryForm = ({
     amount: 0,
     date: today,
     type: "income",
-    user: "Sasankh",
+    user: "",
   });
   const [recurring, setRecurring] = useState(false);
 
   const { setSnackBarOptions } = useAssetManagementContext();
   const { createTransaction, updateTransaction } = useSalaryMutation();
+  const { name: currentUserName } = useCurrentUser();
 
   const handleTransactionData = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -89,7 +91,7 @@ const SalaryForm = ({
         amount: selectedTransaction?.amount || 0,
         date: selectedTransaction?.date || today,
         type: selectedTransaction?.type || "income",
-        user: selectedTransaction?.user || "Sasankh",
+        user: selectedTransaction?.user || currentUserName,
       });
     } else if (type === "create") {
       setTransactionData({
@@ -97,11 +99,11 @@ const SalaryForm = ({
         amount: 0,
         date: today,
         type: "income",
-        user: "Sasankh",
+        user: currentUserName,
       });
       setRecurring(false);
     }
-  }, [type, selectedTransaction]);
+  }, [type, selectedTransaction, currentUserName]);
 
   return (
     <GlassModalShell

@@ -16,6 +16,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { type Stock } from "../../../../server/types";
 import { useAssetManagementContext } from "../../ContextProvider/ContextProvider";
 import { useStocksMutation } from "../../../hooks/mutations";
+import { useCurrentUser } from "../../../hooks/useCurrentUser";
 import { StockCategories } from "../../../shared/Constants";
 
 const AV_KEY = import.meta.env.VITE_ALPHA_VANTAGE_KEY as string | undefined;
@@ -107,6 +108,7 @@ export default function StocksDialog({ open, type, selectedStock, handleClose }:
 
   const { showSnackbar } = useAssetManagementContext();
   const { createStock, updateStock } = useStocksMutation();
+  const { name: currentUserName } = useCurrentUser();
 
   // Reset / populate form when dialog opens
   useEffect(() => {
@@ -188,7 +190,7 @@ export default function StocksDialog({ open, type, selectedStock, handleClose }:
         status:      form.status,
         category:    form.category,
         marketPrice: form.marketPrice || undefined,
-        user:        "Sasankh",
+        user:        currentUserName,
       };
       if (type === "create") {
         await createStock.mutateAsync(base);

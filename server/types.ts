@@ -11,6 +11,12 @@ export interface UserLoginDTO {
   password: string;
 }
 
+export interface UserRegisterDTO {
+  name: string;
+  email: string;
+  password: string;
+}
+
 interface user {
   email: string;
 }

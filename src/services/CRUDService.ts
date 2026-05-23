@@ -10,6 +10,7 @@ import {
   StocksDTO,
   UserInfoDTO,
   UserLoginDTO,
+  UserRegisterDTO,
 } from "../../server/types";
 import { httpService, baseURL } from "./axiosConnection";
 
@@ -76,6 +77,9 @@ export function createCRUDService<T, CreateT = T>(endpoint: string) {
 
 export const loginService = createCRUDService<UserInfoDTO, UserLoginDTO>(
   "/login"
+);
+export const registerService = createCRUDService<UserInfoDTO, UserRegisterDTO>(
+  "/register"
 );
 export const goalsService = createCRUDService<GoalsDTO, CreateGoalsDTO>(
   "/goals"

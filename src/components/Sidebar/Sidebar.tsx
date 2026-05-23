@@ -29,23 +29,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 
 import { AppProvider, type Navigation } from "@toolpad/core/AppProvider";
 import { DashboardLayout } from "@toolpad/core/DashboardLayout";
-
-// ── helpers ────────────────────────────────────────────────────────────────────
-
-function getEmailFromToken(): string {
-  try {
-    const token = sessionStorage.getItem("token");
-    if (!token) return "";
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return payload.email ?? payload.sub ?? "";
-  } catch {
-    return "";
-  }
-}
-
-function initials(email: string): string {
-  return email.slice(0, 2).toUpperCase();
-}
+import { useCurrentUser } from "../../hooks/useCurrentUser";
 
 // ── navigation ─────────────────────────────────────────────────────────────────
 
@@ -175,7 +159,7 @@ const sidebarTheme = createTheme({
 // ── toolbar actions ────────────────────────────────────────────────────────────
 
 function ToolbarActions() {
-  const email = getEmailFromToken();
+  const { name, email, initials } = useCurrentUser();
 
   const handleLogout = () => {
     sessionStorage.removeItem("token");
@@ -188,12 +172,12 @@ function ToolbarActions() {
         <Chip
           avatar={
             <Avatar sx={{ bgcolor: "primary.main", fontSize: 11, fontWeight: 700 }}>
-              {initials(email)}
+              {initials}
             </Avatar>
           }
           label={
             <Typography variant="caption" sx={{ fontWeight: 500 }}>
-              {email}
+              {name}
             </Typography>
           }
           variant="outlined"
@@ -220,11 +204,11 @@ export default function MiniDrawer({
   const navigate = useNavigate();
   const location = useLocation();
 
-  const email = getEmailFromToken();
+  const { name, email } = useCurrentUser();
 
   const session = {
     user: {
-      name: email.split("@")[0] ?? "User",
+      name,
       email,
       image: "",
     },

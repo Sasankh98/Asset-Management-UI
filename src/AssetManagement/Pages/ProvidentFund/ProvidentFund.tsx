@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useProvidentFundQuery } from "../../../hooks/queries";
 import { useProvidentFundMutation } from "../../../hooks/mutations";
+import { useCurrentUser } from "../../../hooks/useCurrentUser";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -159,7 +160,6 @@ function projectCorpus(
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const EPF_RATE = 8.25;
-const USER = "Sasankh";
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -182,6 +182,7 @@ export default function ProvidentFund() {
 
   const { data: pfConfig, isLoading } = useProvidentFundQuery();
   const { upsertConfig } = useProvidentFundMutation();
+  const { name: currentUserName } = useCurrentUser();
 
   useEffect(() => {
     if (pfConfig) {
@@ -248,10 +249,10 @@ export default function ProvidentFund() {
       salaryIncrementPct, yearsWorked, joiningMonth,
       currentAge, retirementAge,
       currentBalance: actualBalance,
-      user: USER,
+      user: currentUserName,
     });
   }, [upsertConfig, monthlyBasic, empPct, erPct, rate, vpfPct, salaryIncrementPct,
-      yearsWorked, joiningMonth, currentAge, retirementAge, actualBalance]);
+      yearsWorked, joiningMonth, currentAge, retirementAge, actualBalance, currentUserName]);
 
   // ── Calculations ─────────────────────────────────────────────────────────────
 

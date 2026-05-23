@@ -18,6 +18,7 @@ import StocksService from "../../../services/StocksService/StocksService";
 import SortableDataTable from "../../../components/SortableDataTable/SortableDataTable";
 import { type TableRow } from "../../../hooks/useTableSort";
 import { useAssetManagementContext } from "../../ContextProvider/ContextProvider";
+import { useCurrentUser } from "../../../hooks/useCurrentUser";
 import CustomSnackbar from "../../../components/SnackBar/Snackbar";
 import StocksDialog from "./StocksDialog";
 import { fmtInr } from "../../../utils/formatCurrency";
@@ -62,6 +63,7 @@ export default function Stocks() {
   const [refreshingPrices, setRefreshingPrices] = useState(false);
 
   const { snackBarOptions, showSnackbar } = useAssetManagementContext();
+  const { name: currentUserName } = useCurrentUser();
   const queryClient = useQueryClient();
 
   const { data: stocks = [], isLoading: loading } = useStocksQuery();
@@ -118,7 +120,7 @@ export default function Stocks() {
             status:      stock.status,
             category:    stock.category ?? "Large Cap",
             marketPrice: price,
-            user:        "Sasankh",
+            user:        currentUserName,
           })
         )
       );
